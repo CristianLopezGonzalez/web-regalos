@@ -22,6 +22,23 @@
   min-height: 0;
   aspect-ratio: 16 / 10;
 }
+/*
+  Phones: text is pinned from the top and the window from the bottom, so the hero must be at
+  least as tall as both stacked, or the arch rises over the button (iPhone Safari with its bars).
+  brand = 72px top + 3 title lines (13.4vw each) + subtitle 36px + button 68px; gap 20px;
+  art = min(88vw, 460px) × 640/600.
+*/
+@media (max-width: 759px) {
+  .hv:not(.hv--framed) {
+    min-height: max(640px, calc(100svh - 64px), calc(196px + 40.2vw + min(93.87vw, 490.67px)));
+  }
+}
+/* Wide but short screens (1366×768 laptops): text grows with width, the window with height. */
+@media (min-width: 760px) {
+  .hv:not(.hv--framed) {
+    min-height: max(640px, calc(100svh - 64px), calc(49.5vw + 30px));
+  }
+}
 .hv-stage {
   position: absolute;
   inset: 0;
