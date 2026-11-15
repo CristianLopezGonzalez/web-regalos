@@ -1,0 +1,468 @@
+/*
+  HERO — The Midnight Window (concept 03, approved). Choreography: docs/MOTION-DESIGN.md §3.
+  Theatrical staging: lights (spot, glow) do the storytelling; the night flood is the one
+  big move (clip-path, compositor-friendly in Chromium/Safari, single element).
+  Resting style = final frame (night).
+*/
+.hv {
+  --hv-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --hv-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --hv-float: cubic-bezier(0.37, 0, 0.63, 1);
+  --hv-cx: 50%;
+  --hv-cy: 76%;
+  display: block;
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+  min-height: max(640px, calc(100svh - 64px));
+  background: var(--color-cream);
+  color: var(--color-ivory);
+}
+.hv.hv--framed {
+  min-height: 0;
+  aspect-ratio: 16 / 10;
+}
+.hv-stage {
+  position: absolute;
+  inset: 0;
+}
+.hv-flood {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 60% at var(--hv-cx) var(--hv-cy), #5a1a28 0%, var(--color-night) 70%);
+  clip-path: circle(150% at var(--hv-cx) var(--hv-cy));
+}
+
+/* ---------- phone first ---------- */
+.hv-line {
+  position: absolute;
+  top: 28px;
+  left: 6cqi;
+  right: 6cqi;
+  margin: 0;
+  text-align: center;
+  font: italic 400 15px/1.4 var(--font-serif);
+  color: var(--color-parchment);
+}
+.hv-brand {
+  position: absolute;
+  top: 72px;
+  left: 6cqi;
+  right: 6cqi;
+  text-align: center;
+}
+.hv-title {
+  margin: 0;
+  font: 400 13.4cqi/1 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ivory);
+}
+.hv-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+  vertical-align: top;
+}
+.hv-w {
+  display: inline-block;
+}
+.hv-w2 {
+  margin-inline: 0.12em;
+}
+.hv-sub {
+  margin: 12px 0 0;
+  font: italic 400 17px/1.4 var(--font-serif);
+  color: var(--color-parchment);
+}
+.hv-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  min-height: 50px;
+  padding: 0 30px;
+  border: 1px solid var(--color-gold);
+  color: var(--color-ivory);
+  font: 500 13px/1 var(--font-sans);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    transform 160ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hv-cta:hover {
+    background: var(--color-ivory);
+    color: var(--color-burgundy);
+  }
+}
+.hv-cta:active {
+  transform: scale(0.98);
+}
+.hv-art {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(88cqi, 460px);
+  translate: -50% 0;
+  aspect-ratio: 600 / 640;
+}
+.hv-art svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hv-skip,
+.hv-replay {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(51 36 33 / 0.55);
+  color: var(--color-ivory);
+  font: 500 12px/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+/* Replay shares the skip pill: legible over the plinth on phones, quiet on desktop. */
+@media (hover: hover) and (pointer: fine) {
+  .hv-replay:hover {
+    background: rgb(51 36 33 / 0.8);
+  }
+}
+
+@container (min-width: 760px) {
+  .hv {
+    --hv-cy: 79%;
+  }
+  .hv-line {
+    top: 5.5%;
+    font-size: clamp(15px, 1.35cqi, 19px);
+  }
+  .hv-brand {
+    top: 11%;
+    left: 4cqi;
+    right: 4cqi;
+  }
+  .hv-title {
+    font-size: 6.1cqi;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .hv-sub {
+    margin-top: 1.4cqi;
+    font-size: clamp(16px, 1.5cqi, 21px);
+  }
+  .hv-cta {
+    margin-top: 1.8cqi;
+  }
+  .hv-art {
+    width: auto;
+    height: 64%;
+  }
+  .hv-skip,
+  .hv-replay {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+
+/* ---------- SVG transforms ---------- */
+.hv svg g,
+.hv svg rect,
+.hv svg ellipse,
+.hv svg polygon {
+  transform-box: view-box;
+}
+.hv-box,
+.hv-hop,
+.hv-body {
+  transform-origin: 300px 566px;
+}
+.hv-lid,
+.hv-lid-bob {
+  transform-origin: 300px 428px;
+}
+.hv-tail {
+  transform-origin: 300px 410px;
+}
+.hv-glow {
+  transform-origin: 300px 438px;
+}
+.hv-spot {
+  transform-origin: 300px 40px;
+}
+.hv-plinth {
+  transform-origin: 300px 640px;
+}
+.hv .hv-star {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ---------- FINAL FRAME (night) ---------- */
+.hv-arch {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.hv-arch-2 {
+  opacity: 0.55;
+}
+.hv-lid {
+  transform: translate(-22px, -118px) rotate(-14deg);
+}
+.hv-tail-l {
+  transform: rotate(10deg);
+}
+.hv-tail-r {
+  transform: rotate(-10deg);
+}
+.hv-star {
+  transform: translate(var(--x), var(--y)) scale(var(--s));
+}
+.hv-spark {
+  opacity: 0;
+  transform: rotate(var(--a)) translateY(calc(var(--len) * -1));
+}
+
+/* ---------- SEQUENCE ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* Scene 01 — the window lights up */
+  .hv-line {
+    animation:
+      hv-rise 800ms var(--hv-ease) 200ms both,
+      hv-ink 1300ms var(--hv-inout) 3600ms both;
+  }
+  .hv-arch {
+    animation: hv-draw 1500ms var(--hv-inout) 300ms both;
+  }
+  .hv-plinth {
+    animation: hv-plinth 800ms var(--hv-ease) 650ms both;
+  }
+  .hv-box {
+    animation: hv-drop 850ms var(--hv-ease) 950ms both;
+  }
+  .hv-spot {
+    animation: hv-spot 1800ms var(--hv-inout) 1100ms both;
+  }
+  .hv-pool {
+    animation: hv-fade 1200ms var(--hv-inout) 1300ms both;
+  }
+
+  /* Scene 02 — anticipation: two hops */
+  .hv-hop {
+    animation: hv-hops 1000ms var(--hv-inout) 1900ms both;
+  }
+  .hv-tail-l {
+    animation: hv-tail 600ms var(--hv-ease) 2300ms both;
+  }
+  .hv-tail-r {
+    animation: hv-tail 600ms var(--hv-ease) 2300ms both;
+  }
+
+  /* Scene 03 — the reveal */
+  .hv-lid {
+    animation: hv-lid 1000ms var(--hv-ease) 2900ms both;
+  }
+  .hv-glow {
+    animation: hv-glow 800ms var(--hv-ease) 3000ms both;
+  }
+  .hv-spark {
+    animation: hv-spark 650ms cubic-bezier(0.15, 0.8, 0.3, 1) var(--dl) both;
+  }
+  .hv-star {
+    animation: hv-star var(--d) var(--hv-float) var(--dl) both;
+  }
+
+  /* Scene 04 — night falls, the name appears */
+  .hv-flood {
+    animation: hv-flood 1300ms var(--hv-inout) 3600ms both;
+  }
+  .hv-window {
+    animation: hv-fade 1300ms var(--hv-inout) 3600ms both;
+  }
+  .hv-w1 {
+    animation: hv-word 950ms var(--hv-ease) 4250ms both;
+  }
+  .hv-w2 {
+    animation: hv-word 950ms var(--hv-ease) 4360ms both;
+  }
+  .hv-w3 {
+    animation: hv-word 950ms var(--hv-ease) 4470ms both;
+  }
+  .hv-sub {
+    animation: hv-rise 700ms var(--hv-ease) 4900ms both;
+  }
+  .hv-cta {
+    animation: hv-rise 700ms var(--hv-ease) 5100ms both;
+  }
+
+  /* ambient, finite */
+  .hv-lid-bob {
+    animation: hv-bob 3200ms ease-in-out 3900ms 3 both;
+  }
+}
+
+/* Already played this session: show the final frame at once (frequency rule, Emil). */
+.hv--rest .hv-stage *,
+.hv--rest .hv-stage {
+  animation: none !important;
+}
+.hv--rest .hv-stage {
+  animation: hv-fade 400ms ease-out both !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-stage {
+    animation: hv-fade 500ms ease-out both;
+  }
+}
+
+@keyframes hv-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes hv-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes hv-ink {
+  from {
+    color: var(--color-ink-soft);
+  }
+}
+@keyframes hv-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes hv-plinth {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes hv-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-70px);
+  }
+  30% {
+    opacity: 1;
+  }
+  72% {
+    transform: translateY(2px) scale(1.01, 0.985);
+  }
+}
+@keyframes hv-spot {
+  0% {
+    opacity: 0;
+  }
+  45%,
+  72% {
+    opacity: 0.55;
+  }
+}
+@keyframes hv-hops {
+  0%,
+  26%,
+  62%,
+  100% {
+    transform: none;
+  }
+  12% {
+    transform: translateY(-10px);
+  }
+  30% {
+    transform: scale(1.02, 0.975);
+  }
+  44% {
+    transform: translateY(-18px) rotate(-1deg);
+  }
+  68% {
+    transform: scale(1.025, 0.97);
+  }
+  84% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes hv-tail {
+  from {
+    transform: none;
+  }
+}
+@keyframes hv-lid {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: translate(-4px, -40px) rotate(-3deg);
+  }
+}
+@keyframes hv-glow {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+@keyframes hv-spark {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(0) scaleY(0.4);
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+}
+@keyframes hv-star {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  15% {
+    opacity: 1;
+  }
+  45% {
+    transform: translate(calc(var(--x) * 0.45 + var(--wx)), calc(var(--y) * 0.45)) scale(calc(var(--s) * 0.8));
+  }
+  75% {
+    transform: translate(calc(var(--x) * 0.85 - var(--wx)), calc(var(--y) * 0.85)) scale(var(--s));
+  }
+}
+@keyframes hv-flood {
+  from {
+    clip-path: circle(0% at var(--hv-cx) var(--hv-cy));
+  }
+}
+@keyframes hv-word {
+  from {
+    transform: translateY(110%);
+  }
+}
+@keyframes hv-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}

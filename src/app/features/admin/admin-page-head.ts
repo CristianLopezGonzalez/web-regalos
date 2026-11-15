@@ -1,0 +1,54 @@
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+/** Title + one-line purpose + optional actions, shared by every back-office page. */
+@Component({
+  selector: 'app-admin-page-head',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'block' },
+  template: `
+    <header class="aph">
+      <div>
+        <h1>{{ heading() }}</h1>
+        @if (lede()) {
+          <p>{{ lede() }}</p>
+        }
+      </div>
+      <div class="aph-actions"><ng-content /></div>
+    </header>
+  `,
+  styles: `
+    .aph {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px 32px;
+      margin-bottom: clamp(36px, 5vw, 56px);
+    }
+    h1 {
+      margin: 0;
+      font: 400 clamp(40px, 5.6vw, 76px) / 0.95 var(--font-display);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-burgundy);
+    }
+    p {
+      margin: 14px 0 0;
+      max-width: 38rem;
+      font: italic 400 17px/1.5 var(--font-serif);
+      color: var(--color-ink-soft);
+    }
+    .aph-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .aph-actions:empty {
+      display: none;
+    }
+  `,
+})
+export class AdminPageHead {
+  readonly heading = input.required<string>();
+  readonly lede = input<string | null>(null);
+}
