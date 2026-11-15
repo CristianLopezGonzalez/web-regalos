@@ -1,0 +1,98 @@
+.wl {
+  padding-block: clamp(56px, 8vw, 112px) clamp(96px, 12vw, 160px);
+}
+.wl-lists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+.wl-list {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 52px;
+  padding: 14px 22px;
+  border: 1px solid var(--color-gold);
+  color: var(--color-burgundy);
+  text-decoration: none;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+/* Caslon, not Italiana: the display face's hairlines vanish at this size (worse on burgundy). */
+.wl-list-name {
+  font: 400 clamp(16px, 1.6vw, 19px) / 1.1 var(--font-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.wl-list-you {
+  font: italic 400 15px/1 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+.wl-list-count {
+  font: 500 13px/1 var(--font-sans);
+  letter-spacing: 0.1em;
+  color: var(--color-ink-soft);
+}
+.wl-list.on {
+  background: var(--color-burgundy);
+  border-color: var(--color-burgundy);
+  color: var(--color-ivory);
+}
+.wl-list.on .wl-list-you,
+.wl-list.on .wl-list-count {
+  color: var(--color-brass);
+}
+@media (hover: hover) and (pointer: fine) {
+  .wl-list:not(.on):hover {
+    background: var(--color-cream-deep);
+  }
+}
+.wl-head {
+  margin-bottom: clamp(32px, 5vw, 56px);
+  text-align: center;
+}
+h1 {
+  margin: 0;
+  font: 400 clamp(48px, 8vw, 112px) / 0.95 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-burgundy);
+}
+.wl-sub {
+  margin: 18px 0 0;
+  font: italic 400 18px/1.4 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+.wl-filter-skel {
+  height: 53px;
+}
+.wl-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 12px;
+  margin: 28px 0 clamp(56px, 7vw, 88px);
+}
+.wl-search {
+  grid-column: 1 / -1;
+}
+@media (min-width: 720px) {
+  .wl-tools {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.3fr);
+    align-items: end;
+  }
+  .wl-search {
+    grid-column: auto;
+  }
+}
+.wl-empty p,
+.wl-error p {
+  margin: 0 0 20px;
+  font: italic 400 20px/1.5 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+.wl-error {
+  padding: 64px 0;
+  text-align: center;
+}

@@ -1,0 +1,15 @@
+<div class="to" role="status" aria-live="polite">
+  @for (t of toasts.items(); track t.id) {
+    <div
+      class="to-item"
+      [class.to-error]="t.tone === 'error'"
+      animate.enter="to-in"
+      animate.leave="to-out"
+    >
+      <span class="to-text">{{ t.text }}</span>
+      <button type="button" class="to-x" (click)="toasts.dismiss(t.id)" aria-label="Cerrar aviso">
+        ×
+      </button>
+    </div>
+  }
+</div>

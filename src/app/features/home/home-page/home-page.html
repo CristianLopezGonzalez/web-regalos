@@ -1,0 +1,102 @@
+<app-hero [ctaLink]="'/wishlist'" [ctaFragment]="session.signedIn() ? null : 'descubre'" />
+
+<section id="descubre" class="intro" aria-labelledby="intro-h">
+  <div class="wrap intro-in">
+    <h2 id="intro-h">Nada de esto es obligatorio. Todo es una pequeña ilusión.</h2>
+    @if (session.signedIn()) {
+      <p>
+        Estas son las cosas que nos encantaría desenvolver este año. Elige una lista: en cada
+        escaparate verás el precio y dónde encontrarlo.
+      </p>
+      <ul class="lists" role="list">
+        @for (l of catalogue.lists() ?? []; track l.id) {
+          <li>
+            <a class="list-card" routerLink="/wishlist" [queryParams]="{ para: l.id }">
+              <span class="list-eyebrow">{{
+                l.id === catalogue.meId() ? 'Tu lista' : 'La lista de'
+              }}</span>
+              <span class="list-name">{{ l.name }}</span>
+              <span class="list-count tabular">{{ catalogue.giftsFor(l.id).length }} deseos</span>
+            </a>
+          </li>
+        } @empty {
+          @if (!catalogue.loaded()) {
+            <li class="list-card skeleton" aria-hidden="true"></li>
+            <li class="list-card skeleton" aria-hidden="true"></li>
+          }
+        }
+      </ul>
+      <p class="plaque-note">
+        Reserva un regalo antes de comprarlo, así nadie lo compra dos veces. Tu nombre queda oculto,
+        y nadie ve lo que le han reservado de su propia lista.
+      </p>
+    } @else {
+      <p>
+        Es una lista privada para la familia. Entra con tu cuenta para ver los regalos; si es tu
+        primera vez, abre el enlace de invitación que te he enviado.
+      </p>
+      <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 mt-5">
+        <a class="btn btn-primary" routerLink="/login">Entrar</a>
+      </div>
+    }
+  </div>
+</section>
+
+@if (session.signedIn()) {
+  <section id="categorias" class="dir" aria-labelledby="dir-h">
+    <div class="wrap">
+      <div class="board">
+        <h2 id="dir-h">Directorio</h2>
+        <p class="board-sub">
+          @if (catalogue.loaded()) {
+            {{ catalogue.stats().total }} deseos repartidos en
+            {{ catalogue.categories()!.length }} departamentos
+          } @else {
+            Abriendo las puertas…
+          }
+        </p>
+        <ol class="dir-list" role="list">
+          @for (c of catalogue.categories() ?? []; track c.id; let i = $index) {
+            <li>
+              <a routerLink="/wishlist" [queryParams]="{ categoria: c.slug }">
+                <span class="floor tabular" aria-hidden="true">{{ floor(i) }}</span>
+                <span class="dept">{{ c.name }}</span>
+                <span class="leader" aria-hidden="true"></span>
+                <span class="count tabular"
+                  ><span class="sr-only">, </span>{{ catalogue.countIn(c.id)
+                  }}<span class="sr-only"> regalos</span></span
+                >
+              </a>
+            </li>
+          } @empty {
+            @if (!catalogue.loaded()) {
+              @for (s of [0, 1, 2, 3, 4, 5]; track s) {
+                <li class="dir-skel" aria-hidden="true"></li>
+              }
+            }
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="windows" aria-labelledby="win-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 id="win-h">En el escaparate</h2>
+        <a class="textlink" routerLink="/wishlist">Ver toda la wishlist</a>
+      </div>
+      <app-gift-grid
+        [gifts]="favorites()"
+        [categories]="catalogue.categories()"
+        [mine]="catalogue.mine()"
+        [eagerCount]="0"
+        [skeletonCount]="4"
+      >
+        <p empty class="empty">
+          Todavía no hay favoritos en el escaparate. <a routerLink="/wishlist">Ver la wishlist</a>
+        </p>
+      </app-gift-grid>
+    </div>
+  </section>
+}

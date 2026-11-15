@@ -1,0 +1,79 @@
+<app-admin-page-head
+  heading="Mis regalos"
+  lede="Los deseos de tu lista. Pulsa uno para editarlo. Lo que te reserven es sorpresa: aquí no aparece."
+>
+  <a class="btn btn-primary btn-sm" routerLink="/admin/gifts/new">Añadir regalo</a>
+</app-admin-page-head>
+
+@if (!catalogue.loaded()) {
+  <div class="grid gap-3" aria-busy="true" aria-label="Cargando regalos">
+    @for (i of [0, 1, 2, 3, 4]; track i) {
+      <div class="skeleton h-24"></div>
+    }
+  </div>
+} @else if (rows().length) {
+  <table class="ga">
+    <caption class="sr-only">
+      Regalos de tu lista
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col"><span class="sr-only">Foto</span></th>
+        <th scope="col">Regalo</th>
+        <th scope="col">Prioridad</th>
+        <th scope="col" class="num">Precio</th>
+        <th scope="col"><span class="sr-only">Acciones</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (r of rows(); track r.gift.id) {
+        <tr>
+          <td class="ga-thumb">
+            <app-product-image [image]="r.gift.image" [alt]="r.gift.name" sizes="64px" />
+          </td>
+          <td class="ga-main">
+            <a [routerLink]="['/admin/gifts', r.gift.id]" class="ga-name">{{ r.gift.name }}</a>
+            <span class="ga-cat">
+              {{ r.category ?? 'Sin categoría' }}
+              @if (r.gift.isFavorite) {
+                <span class="diamond" aria-hidden="true"></span> Favorito
+              }
+            </span>
+          </td>
+          <td class="ga-pri">{{ priority[r.gift.priority] }}</td>
+          <td class="num"><app-price [value]="r.gift.price" [currency]="r.gift.currency" /></td>
+          <td class="ga-del">
+            <button type="button" class="btn btn-ghost" (click)="toDelete.set(r.gift)">
+              Borrar<span class="sr-only"> {{ r.gift.name }}</span>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <div class="ga-empty">
+    <p>Tu lista está vacía. Empieza por el regalo que más ilusión te haga.</p>
+    <a class="btn btn-primary" routerLink="/admin/gifts/new">Añadir el primer regalo</a>
+  </div>
+}
+
+<app-modal
+  heading="¿Borrar este regalo?"
+  [open]="!!toDelete()"
+  (openChange)="!$event && toDelete.set(null)"
+  [busy]="busy()"
+>
+  <p class="m-0">
+    <strong>{{ toDelete()?.name }}</strong> desaparecerá de tu lista. Si alguien lo había reservado,
+    dejará de tenerlo. No se puede deshacer.
+  </p>
+  <ng-container actions>
+    <button type="button" class="btn btn-ghost" (click)="toDelete.set(null)" [disabled]="busy()">
+      No, mantener
+    </button>
+    <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">
+      {{ busy() ? 'Borrando…' : 'Borrar' }}
+    </button>
+  </ng-container>
+</app-modal>

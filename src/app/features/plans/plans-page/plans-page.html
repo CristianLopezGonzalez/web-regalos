@@ -1,0 +1,130 @@
+<div class="wrap pl">
+  <header class="pl-head">
+    <div class="pl-intro">
+      <p class="pl-private">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+          <rect
+            x="3"
+            y="7"
+            width="10"
+            height="7"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+          />
+          <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.3" />
+        </svg>
+        Solo {{ otherName() }} y tú
+      </p>
+      <h1>Nuestros regalos</h1>
+      <p class="pl-lede">
+        Lo que vamos a regalar a la familia este año. Nadie más lo ve: ni ellos, ni nadie con cuenta
+        en la wishlist.
+      </p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="adding.set(true)">Añadir persona</button>
+  </header>
+
+  @if (store.error()) {
+    <div class="pl-error" role="alert">
+      <p>{{ errorText() }}</p>
+      <button type="button" class="btn btn-outline btn-sm" (click)="store.load(true)">
+        Reintentar
+      </button>
+    </div>
+  } @else if (!store.loaded()) {
+    <div class="pl-skel skeleton" aria-busy="true" aria-label="Cargando nuestros regalos"></div>
+  } @else {
+    <dl class="pl-stats">
+      <div>
+        <dt>Personas</dt>
+        <dd class="tabular">{{ store.stats().people }}</dd>
+        <p>familia y amigos</p>
+      </div>
+      <div>
+        <dt>Ideas</dt>
+        <dd class="tabular">{{ store.stats().ideas }}</dd>
+        <p>entre los dos</p>
+      </div>
+      <div>
+        <dt>Comprados</dt>
+        <dd class="tabular">{{ store.stats().bought }}</dd>
+        <p>
+          de {{ store.stats().ideas }} · {{ store.stats().wrapped }}
+          {{ store.stats().wrapped === 1 ? 'ya envuelto' : 'ya envueltos' }}
+        </p>
+      </div>
+      <div>
+        <dt>Gastado</dt>
+        <dd class="tabular">{{ money(store.stats().spent) }}</dd>
+        <p>
+          @if (store.stats().budgets > 0) {
+            de {{ money(store.stats().budgets) }} previstos
+          } @else {
+            en lo ya comprado
+          }
+        </p>
+      </div>
+    </dl>
+
+    <section class="pl-accounts" aria-labelledby="pl-accounts-h">
+      <div class="pl-accounts-main">
+        <h2 id="pl-accounts-h">Las cuentas</h2>
+        <p class="pl-settle" aria-live="polite">{{ store.settlementText() }}</p>
+        <p class="pl-accounts-note">
+          Lo que cada uno pone en los regalos, menos lo que ha pagado en las tiendas. Se recalcula
+          solo.
+        </p>
+      </div>
+      <div class="pl-accounts-col">
+        <p class="pl-accounts-label">Tú pones</p>
+        <p class="pl-accounts-amount tabular">{{ money(myPuts()) }}</p>
+        <p class="pl-accounts-paid">Has pagado {{ money(myPaid()) }} en tiendas</p>
+      </div>
+      <div class="pl-accounts-col">
+        <p class="pl-accounts-label">{{ otherName() }} pone</p>
+        <p class="pl-accounts-amount tabular">{{ money(otherPuts()) }}</p>
+        <p class="pl-accounts-paid">Ha pagado {{ money(otherPaid()) }} en tiendas</p>
+      </div>
+    </section>
+
+    <h2 class="pl-h2">La familia</h2>
+    <ul class="pl-people" role="list">
+      @for (c of cards(); track c.person.id) {
+        <li>
+          <a class="pl-card" [routerLink]="['/plans', c.person.id]">
+            <span class="pl-card-who">
+              <span class="pl-avatar" aria-hidden="true">{{ c.initial }}</span>
+              <span class="pl-card-names">
+                <span class="pl-card-name">{{ c.person.name }}</span>
+                <span class="pl-card-sum">{{ c.summary }}</span>
+              </span>
+            </span>
+            <span class="pl-card-progress">
+              <span class="pl-bar" aria-hidden="true"
+                ><span class="pl-bar-fill" [style.width]="c.progress"></span
+              ></span>
+              <span class="pl-card-line">
+                <span>{{ c.bought }}<span class="sr-only">, </span></span
+                ><span class="tabular">{{ c.money }}</span>
+              </span>
+              @if (c.split) {
+                <span class="pl-card-line">{{ c.split }}</span>
+              }
+            </span>
+            <span class="pl-card-next">{{ c.next }}</span>
+          </a>
+        </li>
+      }
+      <li>
+        <button type="button" class="pl-add" (click)="adding.set(true)">
+          <span class="pl-add-plus" aria-hidden="true">+</span>
+          <span class="pl-add-label">Añadir persona</span>
+          <span class="pl-add-hint">Tenga o no cuenta en la app</span>
+        </button>
+      </li>
+    </ul>
+  }
+</div>
+
+<app-plan-person-dialog [(open)]="adding" (saved)="onAdded($event)" />

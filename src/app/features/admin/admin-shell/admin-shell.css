@@ -1,0 +1,12 @@
+.ash {
+  display: grid;
+  gap: 40px;
+  padding-block: clamp(32px, 5vw, 72px) clamp(96px, 12vw, 160px);
+}
+@media (min-width: 1024px) {
+  .ash {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: clamp(48px, 6vw, 96px);
+    align-items: start;
+  }
+}

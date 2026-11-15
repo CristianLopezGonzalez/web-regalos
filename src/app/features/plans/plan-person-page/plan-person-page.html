@@ -1,0 +1,198 @@
+<div class="wrap pp">
+  <a class="pp-back" routerLink="/plans"><span aria-hidden="true">←</span> Nuestros regalos</a>
+
+  @if (store.error()) {
+    <p class="form-alert" role="alert">
+      No se pudieron cargar vuestros regalos.
+      <button type="button" class="btn btn-ghost" (click)="store.load(true)">Reintentar</button>
+    </p>
+  } @else if (!store.loaded()) {
+    <div class="skeleton h-96" aria-busy="true" aria-label="Cargando"></div>
+  } @else if (person(); as p) {
+    <header class="pp-head">
+      <div class="pp-who">
+        <span class="pp-avatar" aria-hidden="true">{{ initial() }}</span>
+        <div class="pp-names">
+          <h1>{{ p.name }}</h1>
+          <p class="pp-summary">{{ summaryLine() }}</p>
+        </div>
+      </div>
+      <div class="pp-actions">
+        <button type="button" class="btn btn-outline btn-sm" (click)="editing.set(true)">
+          Editar persona
+        </button>
+        <a class="btn btn-primary btn-sm" [routerLink]="['/plans', p.id, 'new']">Añadir regalo</a>
+      </div>
+    </header>
+
+    <div class="pp-money">
+      <div class="pp-budget">
+        <span class="pp-bar" aria-hidden="true"
+          ><span class="pp-bar-fill" [style.width]="money().progress"></span
+        ></span>
+        <p>{{ budgetLine() }}</p>
+      </div>
+      <div class="pp-puts">
+        <p class="pp-puts-label">Pones tú</p>
+        <p class="pp-puts-amount tabular">{{ eur(money().mine) }}</p>
+      </div>
+      <div class="pp-puts">
+        <p class="pp-puts-label">Pone {{ otherName() }}</p>
+        <p class="pp-puts-amount tabular">{{ eur(money().theirs) }}</p>
+      </div>
+    </div>
+
+    <nav class="pp-tabs" aria-label="Filtrar por estado">
+      <ul role="list">
+        @for (t of tabs(); track t.label) {
+          <li>
+            <a
+              [routerLink]="[]"
+              [queryParams]="{ estado: t.param }"
+              queryParamsHandling="merge"
+              [class.on]="filter() === t.filter"
+              [attr.aria-current]="filter() === t.filter ? 'page' : null"
+              >{{ t.label }} <span class="pp-tab-count tabular">{{ t.count }}</span></a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
+
+    @if (visible().length) {
+      <div class="pp-cols" aria-hidden="true">
+        <span></span><span>Regalo</span><span>Quién pone</span><span class="num">Precio</span
+        ><span>Estado</span><span></span>
+      </div>
+      <ul class="pp-list" role="list">
+        @for (g of visible(); track g.id) {
+          <li class="pp-row">
+            <app-product-image class="pp-thumb" [image]="g.image" [alt]="g.name" sizes="96px" />
+            <div class="pp-main">
+              <a class="pp-name" [routerLink]="['/plans', p.id, g.id]">{{ g.name }}</a>
+              @if (g.note) {
+                <span class="pp-note">{{ g.note }}</span>
+              }
+              @if (g.purchaseUrl) {
+                <a
+                  class="pp-shop"
+                  [href]="g.purchaseUrl"
+                  target="_blank"
+                  rel="noopener noreferrer external"
+                  >Ver en la tienda <span aria-hidden="true">↗</span
+                  ><span class="sr-only">(se abre en otra pestaña)</span></a
+                >
+              }
+            </div>
+            <div class="pp-split">
+              <span class="pp-split-line">
+                <span>{{ otherName() }}<span class="sr-only">: </span></span>
+                <span class="tabular">{{ share(g, 'other') }}</span>
+              </span>
+              <span class="pp-split-line">
+                <span>Tú<span class="sr-only">: </span></span>
+                <span class="tabular">{{ share(g, 'me') }}</span>
+              </span>
+              <span class="pp-paid">{{ paidLine(g) }}</span>
+            </div>
+            <app-price class="pp-price" [value]="g.price" [currency]="g.currency" />
+            <label class="pp-status">
+              <span class="sr-only">Estado de {{ g.name }}</span>
+              <select
+                [class]="'input pp-status-' + g.status"
+                [value]="g.status"
+                (change)="changeStatus(g, $any($event.target).value)"
+              >
+                @for (s of statuses; track s) {
+                  <option [value]="s" [selected]="s === g.status">{{ statusLabel[s] }}</option>
+                }
+              </select>
+            </label>
+            <div class="pp-row-actions">
+              <a class="btn btn-ghost" [routerLink]="['/plans', p.id, g.id]"
+                >Editar<span class="sr-only"> {{ g.name }}</span></a
+              >
+              <button type="button" class="btn btn-ghost pp-delete" (click)="toDelete.set(g)">
+                Borrar<span class="sr-only"> {{ g.name }}</span>
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="pp-empty">
+        @if (gifts().length) {
+          <p>No hay ningún regalo con este estado.</p>
+          <a class="btn btn-outline btn-sm" [routerLink]="[]" [queryParams]="{ estado: null }"
+            >Ver todos</a
+          >
+        } @else {
+          <p>Todavía no habéis pensado nada para {{ p.name }}.</p>
+          <a class="btn btn-primary btn-sm" [routerLink]="['/plans', p.id, 'new']"
+            >Añadir la primera idea</a
+          >
+        }
+      </div>
+    }
+
+    <p class="pp-foot">
+      Estos regalos no tocan las reservas de la wishlist: son vuestros planes. Aunque
+      {{ p.name }} tuviera cuenta, nunca vería esta página.
+    </p>
+    <button type="button" class="btn btn-ghost pp-delete" (click)="confirmDeletePerson.set(true)">
+      Quitar a {{ p.name }} de la lista
+    </button>
+
+    <app-plan-person-dialog [(open)]="editing" [person]="p" />
+
+    <app-modal
+      [heading]="'¿Quitar a ' + p.name + '?'"
+      [(open)]="confirmDeletePerson"
+      [busy]="busy()"
+    >
+      <p class="m-0">
+        Se borrarán también sus {{ gifts().length }} regalos planeados, con sus fotos y su reparto.
+        No se puede deshacer.
+      </p>
+      <ng-container actions>
+        <button
+          type="button"
+          class="btn btn-ghost"
+          (click)="confirmDeletePerson.set(false)"
+          [disabled]="busy()"
+        >
+          No, mantener
+        </button>
+        <button type="button" class="btn btn-danger" (click)="removePerson()" [disabled]="busy()">
+          {{ busy() ? 'Quitando…' : 'Quitar' }}
+        </button>
+      </ng-container>
+    </app-modal>
+  } @else {
+    <div class="pp-empty">
+      <h1>No encontrado</h1>
+      <p>Esta persona ya no está en vuestra lista.</p>
+      <a class="btn btn-primary btn-sm" routerLink="/plans">Volver a nuestros regalos</a>
+    </div>
+  }
+</div>
+
+<app-modal
+  heading="¿Borrar este regalo?"
+  [open]="!!toDelete()"
+  (openChange)="!$event && toDelete.set(null)"
+  [busy]="busy()"
+>
+  <p class="m-0">
+    <strong>{{ toDelete()?.name }}</strong> desaparecerá de vuestros planes, con su reparto. No se
+    puede deshacer.
+  </p>
+  <ng-container actions>
+    <button type="button" class="btn btn-ghost" (click)="toDelete.set(null)" [disabled]="busy()">
+      No, mantener
+    </button>
+    <button type="button" class="btn btn-danger" (click)="removeGift()" [disabled]="busy()">
+      {{ busy() ? 'Borrando…' : 'Borrar' }}
+    </button>
+  </ng-container>
+</app-modal>

@@ -1,0 +1,139 @@
+@if (session.profile(); as p) {
+  <div class="wrap pf">
+    <header class="pf-head">
+      <h1>Perfil</h1>
+      <p class="pf-sub">
+        {{
+          p.role === 'owner'
+            ? 'Administras la wishlist'
+            : p.hasList
+              ? 'Con tu propia lista'
+              : 'Familia'
+        }}
+        · desde el {{ since() }}
+      </p>
+    </header>
+
+    <div class="pf-grid">
+      <section aria-labelledby="acc-h" class="pf-card">
+        <h2 id="acc-h">Tu cuenta</h2>
+        <form class="grid gap-6" [formRoot]="nameForm">
+          <app-labeled-field
+            label="Nombre"
+            forId="pf-name"
+            [hint]="
+              p.hasList
+                ? 'Así se llama tu lista para los demás.'
+                : 'Así te ve quien administra la wishlist. Nunca junto a tus reservas.'
+            "
+          >
+            <input
+              id="pf-name"
+              class="input"
+              [formField]="nameForm.displayName"
+              autocomplete="given-name"
+            />
+          </app-labeled-field>
+          <div class="field">
+            <span class="field-label">Email</span>
+            <p class="m-0 text-[17px]">{{ p.email }}</p>
+          </div>
+          <div class="flex flex-wrap gap-4 items-center">
+            <button
+              type="submit"
+              class="btn btn-outline btn-sm"
+              [disabled]="
+                nameForm().submitting() || nameForm.displayName().value().trim() === p.displayName
+              "
+            >
+              {{ nameForm().submitting() ? 'Guardando…' : 'Guardar nombre' }}
+            </button>
+            <button type="button" class="btn btn-ghost" (click)="signOut()">Cerrar sesión</button>
+          </div>
+        </form>
+        <app-install-app class="pf-install" />
+        @if (api.isDemo) {
+          <div class="pf-demo">
+            <p class="field-hint">Modo demo: los datos viven en este navegador.</p>
+            <button type="button" class="btn btn-ghost" (click)="resetDemo()">
+              Restablecer la demo
+            </button>
+          </div>
+        }
+      </section>
+
+      @if (p) {
+        <section aria-labelledby="mine-h">
+          <h2 id="mine-h">Mis reservas</h2>
+          <p class="pf-note">Solo tú ves esta lista. Los demás ven «Reservado», sin nombre.</p>
+          @if (!catalogue.loaded()) {
+            <div class="skeleton h-28" aria-hidden="true"></div>
+          } @else if (mine().length) {
+            <ul class="pf-list" role="list">
+              @for (g of mine(); track g.id) {
+                <li class="pf-item">
+                  <a
+                    class="pf-thumb"
+                    [routerLink]="['/wishlist', g.id]"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  >
+                    <app-product-image [image]="g.image" [alt]="g.name" sizes="88px" />
+                  </a>
+                  <div class="min-w-0">
+                    <a class="pf-name" [routerLink]="['/wishlist', g.id]">{{ g.name }}</a>
+                    <app-price class="block mt-1" [value]="g.price" [currency]="g.currency" />
+                    @if (g.purchaseUrl) {
+                      <a
+                        class="pf-shop"
+                        [href]="g.purchaseUrl"
+                        target="_blank"
+                        rel="noopener noreferrer external"
+                        >Ver en la tienda ↗<span class="sr-only">
+                          (se abre en otra pestaña)</span
+                        ></a
+                      >
+                    }
+                  </div>
+                  <button type="button" class="btn btn-ghost pf-cancel" (click)="toCancel.set(g)">
+                    Cancelar<span class="sr-only"> la reserva de {{ g.name }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <div class="pf-empty">
+              <p>Todavía no has reservado nada.</p>
+              <a class="btn btn-primary btn-sm" routerLink="/wishlist">Ver la wishlist</a>
+            </div>
+          }
+        </section>
+      } @else {
+        <section aria-labelledby="own-h">
+          <h2 id="own-h">Tu lista</h2>
+          <p class="pf-note">Gestiona regalos, categorías e invitaciones desde la trastienda.</p>
+          <a class="btn btn-primary btn-sm" routerLink="/admin">Ir a la trastienda</a>
+        </section>
+      }
+    </div>
+  </div>
+
+  <app-modal
+    heading="¿Cancelar la reserva?"
+    [open]="!!toCancel()"
+    (openChange)="!$event && toCancel.set(null)"
+    [busy]="busy()"
+  >
+    <p class="m-0">
+      {{ toCancel()?.name }} volverá a estar disponible para el resto de la familia.
+    </p>
+    <ng-container actions>
+      <button type="button" class="btn btn-ghost" (click)="toCancel.set(null)" [disabled]="busy()">
+        Mantener
+      </button>
+      <button type="button" class="btn btn-danger" (click)="cancel()" [disabled]="busy()">
+        {{ busy() ? 'Cancelando…' : 'Cancelar reserva' }}
+      </button>
+    </ng-container>
+  </app-modal>
+}

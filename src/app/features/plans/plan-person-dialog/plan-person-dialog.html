@@ -1,0 +1,52 @@
+<app-modal
+  [heading]="person() ? 'Editar a ' + person()!.name : 'Añadir persona'"
+  [(open)]="open"
+  [busy]="form().submitting()"
+>
+  <form id="plan-person-form" class="grid gap-6" [formRoot]="form">
+    <app-labeled-field
+      label="Nombre"
+      forId="pp-name"
+      hint="Como la llamáis en casa: Mamá, Abuela, Tío Javier… Tenga o no cuenta en la app."
+    >
+      <input id="pp-name" class="input" [formField]="form.name" autocomplete="off" />
+    </app-labeled-field>
+    <app-labeled-field
+      label="Presupuesto"
+      forId="pp-budget"
+      [optional]="true"
+      hint="Lo que queréis gastar en total en sus regalos, en euros."
+    >
+      <input
+        id="pp-budget"
+        class="input tabular"
+        type="number"
+        inputmode="decimal"
+        step="1"
+        [formField]="form.budget"
+      />
+    </app-labeled-field>
+    @if (failure()) {
+      <p class="form-alert" role="alert">{{ failure() }}</p>
+    }
+  </form>
+  <ng-container actions>
+    <button
+      type="button"
+      class="btn btn-ghost"
+      (click)="open.set(false)"
+      [disabled]="form().submitting()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      form="plan-person-form"
+      class="btn btn-primary"
+      [disabled]="form().submitting()"
+      [attr.aria-busy]="form().submitting()"
+    >
+      {{ form().submitting() ? 'Guardando…' : person() ? 'Guardar' : 'Añadir' }}
+    </button>
+  </ng-container>
+</app-modal>

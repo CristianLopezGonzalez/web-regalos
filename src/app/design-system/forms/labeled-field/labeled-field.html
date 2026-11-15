@@ -1,0 +1,12 @@
+<label class="field-label" [attr.for]="forId()">
+  {{ label() }}
+  @if (optional()) {
+    <span class="opt">(opcional)</span>
+  }
+</label>
+<ng-content />
+@if (message()) {
+  <p class="field-error" [id]="msgId()">{{ message() }}</p>
+} @else if (hint()) {
+  <p class="field-hint" [id]="msgId()">{{ hint() }}</p>
+}

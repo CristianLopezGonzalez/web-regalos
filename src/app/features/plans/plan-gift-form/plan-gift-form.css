@@ -1,0 +1,171 @@
+.pgf {
+  display: grid;
+  gap: 48px;
+}
+@media (min-width: 900px) {
+  .pgf {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 64px;
+    align-items: start;
+  }
+}
+.pgf-photo {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.pgf-opt {
+  margin-left: 6px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-weight: 400;
+  color: var(--color-ink-soft);
+}
+.pgf-preview {
+  width: min(100%, 280px);
+  aspect-ratio: 3 / 4;
+  outline: 1px solid var(--color-gold);
+  outline-offset: 6px;
+  margin: 6px 6px 8px;
+}
+.pgf-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.pgf-photo-actions label {
+  cursor: pointer;
+}
+.pgf-photo-actions label:focus-within {
+  outline: 2px solid var(--color-cherry);
+  outline-offset: 3px;
+}
+.pgf-fields {
+  display: grid;
+  gap: 28px;
+  max-width: 640px;
+}
+
+/* ---------- "¿Cuánto pone cada uno?" ---------- */
+.pgf-split {
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--color-gold);
+  background: var(--color-cream);
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.pgf-split legend {
+  padding: 0 8px;
+  font: 500 12px/1.2 var(--font-sans);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-burgundy);
+}
+.pgf-amounts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.pgf-amount {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font: 400 22px/1 var(--font-serif);
+  color: var(--color-burgundy);
+}
+.pgf-money {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: var(--color-ink-soft);
+}
+.pgf-money .input {
+  flex: 1;
+  min-width: 0;
+}
+.pgf-sum {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font: 400 14px/1.4 var(--font-sans);
+  color: #2f5d3a;
+}
+.pgf-sum--bad {
+  color: var(--color-cherry);
+}
+
+/* ---------- segmented choices (real radios, so keyboard and screen readers just work) ---------- */
+.pgf-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.pgf-seg {
+  display: grid;
+  border: 1px solid var(--color-gold);
+  background: var(--color-ivory);
+}
+.pgf-seg--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pgf-seg--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.pgf-seg label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 6px 8px;
+  text-align: center;
+  font: 400 14px/1.2 var(--font-sans);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+.pgf-seg label + label {
+  border-left: 1px solid var(--color-gold);
+}
+.pgf-seg input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.pgf-seg label.on {
+  background: var(--color-burgundy);
+  color: var(--color-ivory);
+}
+.pgf-seg label:focus-within {
+  outline: 2px solid var(--color-cherry);
+  outline-offset: 2px;
+  z-index: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .pgf-seg label:not(.on):hover {
+    background: var(--color-cream-deep);
+  }
+}
+@media (max-width: 539px) {
+  .pgf-seg--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pgf-seg--4 label:nth-child(3) {
+    border-left: 0;
+  }
+  .pgf-seg--4 label:nth-child(n + 3) {
+    border-top: 1px solid var(--color-gold);
+  }
+}

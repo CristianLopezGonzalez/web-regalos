@@ -1,0 +1,66 @@
+<div class="wrap pge">
+  <a class="pge-back" [routerLink]="['/plans', personId()]"
+    ><span aria-hidden="true">←</span> {{ person()?.name ?? 'Nuestros regalos' }}</a
+  >
+
+  @if (!store.loaded()) {
+    <div class="skeleton h-96" aria-busy="true" aria-label="Cargando el regalo"></div>
+  } @else if (!person() || (!isNew() && !gift())) {
+    <div class="pge-missing">
+      <h1>No encontrado</h1>
+      <p>Este regalo ya no está en vuestros planes.</p>
+      <a class="btn btn-outline btn-sm" routerLink="/plans">Volver a nuestros regalos</a>
+    </div>
+  } @else if (!store.other() || !store.meId()) {
+    <p class="form-alert" role="alert">
+      Para repartir los regalos hacen falta las dos personas que los planean. Avísame y lo reviso.
+    </p>
+  } @else {
+    <header class="pge-head">
+      <h1>{{ isNew() ? 'Nuevo regalo para ' + person()!.name : 'Editar regalo' }}</h1>
+      <p>
+        {{
+          isNew()
+            ? 'Solo lo veréis ' + store.other()!.name + ' y tú.'
+            : 'Para ' + person()!.name + '. Solo lo veis ' + store.other()!.name + ' y tú.'
+        }}
+      </p>
+    </header>
+
+    <app-plan-gift-form
+      [gift]="gift()"
+      [personId]="personId()"
+      [me]="store.meId()!"
+      [other]="store.other()!"
+      (saved)="onSaved($event)"
+    >
+      @if (gift()) {
+        <button type="button" class="btn btn-ghost pge-delete" (click)="deleteOpen.set(true)">
+          Borrar regalo
+        </button>
+      } @else {
+        <a class="btn btn-ghost" [routerLink]="['/plans', personId()]">Cancelar</a>
+      }
+    </app-plan-gift-form>
+
+    <app-modal heading="¿Borrar este regalo?" [(open)]="deleteOpen" [busy]="busy()">
+      <p class="m-0">
+        <strong>{{ gift()?.name }}</strong> desaparecerá de vuestros planes, con su reparto. No se
+        puede deshacer.
+      </p>
+      <ng-container actions>
+        <button
+          type="button"
+          class="btn btn-ghost"
+          (click)="deleteOpen.set(false)"
+          [disabled]="busy()"
+        >
+          No, mantener
+        </button>
+        <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">
+          {{ busy() ? 'Borrando…' : 'Borrar' }}
+        </button>
+      </ng-container>
+    </app-modal>
+  }
+</div>

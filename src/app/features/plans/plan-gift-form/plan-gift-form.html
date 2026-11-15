@@ -1,0 +1,201 @@
+<form class="pgf" [formRoot]="form">
+  <div class="pgf-photo">
+    <p class="field-label" id="pgf-photo-label">
+      Fotografía <span class="pgf-opt">(opcional)</span>
+    </p>
+    <app-product-image
+      class="pgf-preview"
+      [image]="preview()"
+      [alt]="form.name().value() || 'Nuevo regalo'"
+      sizes="280px"
+    />
+    <div class="pgf-photo-actions">
+      <label class="btn btn-outline btn-sm" [class.opacity-50]="processing()">
+        <input
+          class="sr-only"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="pick($event)"
+          [disabled]="processing()"
+          aria-labelledby="pgf-photo-label"
+          aria-describedby="pgf-photo-msg"
+        />
+        {{ processing() ? 'Preparando la foto…' : preview() ? 'Cambiar foto' : 'Elegir foto' }}
+      </label>
+      @if (preview()) {
+        <button type="button" class="btn btn-ghost" (click)="clearImage()">Quitar</button>
+      }
+    </div>
+    @if (imageError()) {
+      <p class="field-error" id="pgf-photo-msg" role="alert">{{ imageError() }}</p>
+    } @else if (imageNote()) {
+      <p class="field-hint" id="pgf-photo-msg" role="status">{{ imageNote() }}</p>
+    } @else {
+      <p class="field-hint" id="pgf-photo-msg">Una captura de la tienda vale.</p>
+    }
+  </div>
+
+  <div class="pgf-fields">
+    <app-labeled-field label="Regalo" forId="pgf-name">
+      <input id="pgf-name" class="input" [formField]="form.name" autocomplete="off" />
+    </app-labeled-field>
+
+    <div class="grid grid-cols-[1fr_8rem] gap-4">
+      <app-labeled-field label="Precio" forId="pgf-price">
+        <input
+          id="pgf-price"
+          class="input tabular"
+          type="number"
+          inputmode="decimal"
+          step="0.01"
+          [formField]="form.price"
+        />
+      </app-labeled-field>
+      <app-labeled-field label="Moneda" forId="pgf-currency">
+        <select id="pgf-currency" class="input" [formField]="form.currency">
+          @for (c of currencies; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </app-labeled-field>
+    </div>
+
+    <fieldset class="pgf-split">
+      <legend>¿Cuánto pone cada uno?</legend>
+      <div class="pgf-seg pgf-seg--4" role="radiogroup" aria-label="Reparto">
+        @for (p of presets(); track p.value) {
+          <label [class.on]="form.preset().value() === p.value">
+            <input
+              type="radio"
+              name="pgf-preset"
+              [value]="p.value"
+              [checked]="form.preset().value() === p.value"
+              (change)="setPreset(p.value)"
+            />
+            {{ p.label }}
+          </label>
+        }
+      </div>
+
+      <div class="pgf-amounts">
+        @if (form.preset().value() === 'custom') {
+          <app-labeled-field [label]="other().name + ' pone'" forId="pgf-other">
+            <span class="pgf-money">
+              <input
+                id="pgf-other"
+                class="input tabular"
+                type="number"
+                inputmode="decimal"
+                step="0.01"
+                [formField]="form.otherAmount"
+              />
+              <span aria-hidden="true">{{ symbol() }}</span>
+            </span>
+          </app-labeled-field>
+        } @else {
+          <div class="field">
+            <span class="field-label">{{ other().name }} pone</span>
+            <output class="pgf-amount tabular" for="pgf-price">{{ money(otherShare()) }}</output>
+          </div>
+        }
+        <div class="field">
+          <span class="field-label">Tú pones</span>
+          <output class="pgf-amount tabular" for="pgf-price pgf-other">{{
+            money(myShare())
+          }}</output>
+          @if (form.preset().value() === 'custom') {
+            <span class="field-hint">El resto, calculado solo</span>
+          }
+        </div>
+      </div>
+
+      <p class="pgf-sum" [class.pgf-sum--bad]="!sharesOk()" role="status">
+        @if (sharesOk()) {
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.6" />
+          </svg>
+        }
+        {{ sumLine() }}
+      </p>
+    </fieldset>
+
+    <fieldset class="pgf-group">
+      <legend class="field-label">¿Quién lo paga en la tienda?</legend>
+      <div class="pgf-seg pgf-seg--3" role="radiogroup" aria-label="Quién lo paga">
+        @for (p of payers(); track p.value) {
+          <label [class.on]="form.paidBy().value() === p.value">
+            <input
+              type="radio"
+              name="pgf-paid"
+              [value]="p.value"
+              [checked]="form.paidBy().value() === p.value"
+              (change)="setPaidBy(p.value)"
+            />
+            {{ p.label }}
+          </label>
+        }
+      </div>
+      <p class="field-hint">{{ payerHint() }}</p>
+    </fieldset>
+
+    <app-labeled-field
+      label="Enlace de compra"
+      forId="pgf-url"
+      [optional]="true"
+      hint="La página de la tienda, empezando por https://"
+    >
+      <input
+        id="pgf-url"
+        class="input"
+        type="url"
+        inputmode="url"
+        spellcheck="false"
+        [formField]="form.purchaseUrl"
+        placeholder="https://"
+      />
+    </app-labeled-field>
+
+    <app-labeled-field
+      label="Nota"
+      forId="pgf-note"
+      [optional]="true"
+      hint="Talla, color, dónde está… lo que os ayude a acertar."
+    >
+      <textarea id="pgf-note" class="input" rows="3" [formField]="form.note"></textarea>
+    </app-labeled-field>
+
+    <fieldset class="pgf-group">
+      <legend class="field-label">Estado</legend>
+      <div class="pgf-seg pgf-seg--3" role="radiogroup" aria-label="Estado">
+        @for (s of statuses; track s) {
+          <label [class.on]="form.status().value() === s">
+            <input
+              type="radio"
+              name="pgf-status"
+              [value]="s"
+              [checked]="form.status().value() === s"
+              (change)="setStatus(s)"
+            />
+            {{ statusLabel[s] }}
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    @if (failure()) {
+      <p class="form-alert" role="alert">{{ failure() }}</p>
+    }
+
+    <div class="flex flex-wrap items-center gap-4 pt-2">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="form().submitting() || processing()"
+        [attr.aria-busy]="form().submitting()"
+      >
+        {{ form().submitting() ? 'Guardando…' : gift() ? 'Guardar cambios' : 'Añadir regalo' }}
+      </button>
+      <ng-content />
+    </div>
+  </div>
+</form>

@@ -65,8 +65,8 @@
               "sourceMap": true,
               "fileReplacements": [
                 {
-                  "replace": "src/app/core/config.ts",
-                  "with": "src/app/core/config.demo.ts"
+                  "replace": "src/app/core/config/supabase-config.ts",
+                  "with": "src/app/core/config/supabase-config.demo.ts"
                 }
               ]
             }

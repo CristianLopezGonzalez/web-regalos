@@ -1,0 +1,139 @@
+/*
+  The window (4:5 + its gold frame) always fits on one screen: its height is capped by what is
+  left under the header and the "back" link (~210px), and its width follows. --gd-window-w is
+  shared with the loading skeleton in gift-page.css.
+*/
+:host {
+  --gd-window-w: max(280px, calc((100svh - 210px) * 0.8));
+}
+.gd {
+  display: grid;
+  gap: 48px;
+}
+@media (min-width: 900px) {
+  .gd {
+    grid-template-columns: min(58%, var(--gd-window-w)) minmax(0, 36rem);
+    gap: clamp(48px, 7vw, 112px);
+    align-items: start;
+  }
+  /* Static: the window already fits on screen, so the card doesn't need to follow the scroll. */
+  .gd-card {
+    padding-top: 40px;
+  }
+}
+.gd-window {
+  width: min(100%, var(--gd-window-w));
+  margin-inline: auto;
+  aspect-ratio: 4 / 5;
+  outline: 1px solid var(--color-gold);
+  outline-offset: 10px;
+  --pi-inset: 16% 9% 8%;
+  --pi-x: 9%;
+  --pi-h: 76%;
+  --pi-fit: contain;
+}
+.gd-plaque {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  translate: -50% 0;
+}
+.gd-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 28px;
+  color: var(--color-ink-soft);
+}
+.gd-crumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .gd-crumbs a:hover {
+    color: var(--color-cherry);
+  }
+}
+.gd-name {
+  margin: 0;
+  font: 400 clamp(36px, 4.6vw, 64px) / 1.02 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-burgundy);
+}
+.gd-price {
+  display: block;
+  margin-top: 20px;
+}
+.gd-priority {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0 0;
+  padding: 14px 0;
+  border-block: 1px solid var(--color-line);
+  font: italic 400 17px/1.4 var(--font-serif);
+  color: var(--color-chocolate);
+}
+.gd-pips {
+  display: inline-flex;
+  gap: 7px;
+}
+.gd-pips .diamond {
+  width: 7px;
+  height: 7px;
+}
+.gd-pips .off {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-gold);
+}
+.gd-desc {
+  margin: 24px 0 0;
+  max-width: 34rem;
+  font: 400 18px/1.7 var(--font-serif);
+}
+.gd-actions {
+  display: grid;
+  gap: 20px;
+  margin-top: 36px;
+}
+.gd-owner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.gd-owner-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+}
+.gd-owner-note {
+  margin: -4px 0 0;
+  font: italic 400 15px/1.5 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+/* Secondary to "Reservar", but clearly a button: full width, burgundy outline, the arrow nudges. */
+.gd-shop {
+  width: 100%;
+  border-color: var(--color-burgundy);
+}
+.gd-shop-arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gd-shop:hover .gd-shop-arrow {
+    transform: translate(3px, -3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gd-shop-arrow {
+    transition: none;
+  }
+}

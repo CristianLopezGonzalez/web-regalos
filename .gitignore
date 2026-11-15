@@ -79,3 +79,6 @@ CLAUDE.md
 # Logs
 *.log
 logs/
+
+# Snapshots de playwright-cli (pruebas en el navegador)
+.playwright-cli/

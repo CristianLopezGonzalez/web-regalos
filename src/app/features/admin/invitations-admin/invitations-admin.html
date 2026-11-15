@@ -1,0 +1,104 @@
+<app-admin-page-head
+  heading="Invitaciones"
+  lede="Crea un enlace, cópialo y envíaselo a quien quieras por WhatsApp, email o como prefieras. Cada enlace sirve para una sola cuenta."
+/>
+
+<section class="iv-new" aria-labelledby="new-h">
+  <h2 id="new-h">Nueva invitación</h2>
+  <form class="iv-form" [formRoot]="form">
+    <app-labeled-field
+      label="Para el email"
+      forId="iv-email"
+      [optional]="true"
+      hint="Si lo indicas, solo se podrá usar con ese email."
+    >
+      <input
+        id="iv-email"
+        class="input"
+        type="email"
+        [formField]="form.email"
+        spellcheck="false"
+        autocomplete="off"
+        placeholder="tia@ejemplo.com"
+      />
+    </app-labeled-field>
+    <app-labeled-field label="Tipo de cuenta" forId="iv-kind" [hint]="kindHint()">
+      <select id="iv-kind" class="input" [formField]="form.kind">
+        <option value="family">Familia</option>
+        <option value="list">Con su propia lista</option>
+      </select>
+    </app-labeled-field>
+    <app-labeled-field label="Caduca en" forId="iv-days">
+      <select id="iv-days" class="input" [formField]="form.days">
+        <option value="7">7 días</option>
+        <option value="14">14 días</option>
+        <option value="30">30 días</option>
+      </select>
+    </app-labeled-field>
+    <button type="submit" class="btn btn-primary" [disabled]="form().submitting()">
+      {{ form().submitting() ? 'Creando…' : 'Crear enlace' }}
+    </button>
+  </form>
+
+  @if (link(); as l) {
+    <div class="iv-link" role="status">
+      <label class="field-label" for="iv-link">Enlace de invitación</label>
+      <div class="iv-link-row">
+        <input
+          id="iv-link"
+          class="input tabular"
+          [value]="l"
+          readonly
+          (focus)="$any($event.target).select()"
+        />
+        <button type="button" class="btn btn-outline btn-sm" (click)="copy(l)">
+          {{ copied() ? 'Copiado' : 'Copiar' }}
+        </button>
+      </div>
+      <p class="field-hint">
+        Solo se muestra ahora. Si lo pierdes, revoca esta invitación y crea otra.
+      </p>
+    </div>
+  }
+</section>
+
+<section aria-labelledby="list-h">
+  <h2 id="list-h">Enviadas</h2>
+  @if (list.isLoading() && !list.hasValue()) {
+    <div class="skeleton h-40" aria-hidden="true"></div>
+  } @else if (list.error()) {
+    <p class="form-alert" role="alert">
+      {{ errorText(list.error()) }}
+      <button type="button" class="btn btn-ghost" (click)="list.reload()">Reintentar</button>
+    </p>
+  } @else if (rows().length) {
+    <ul class="iv-list" role="list">
+      @for (r of rows(); track r.inv.id) {
+        <li>
+          <span class="iv-who">
+            {{ r.inv.emailRestriction ?? 'Cualquier email' }}
+            @if (r.inv.withList) {
+              <span class="iv-kind">· con su propia lista</span>
+            }
+          </span>
+          <span class="iv-dates"
+            >Creada el {{ short(r.inv.createdAt) }} ·
+            {{
+              r.state === 'used'
+                ? 'usada el ' + short(r.inv.usedAt!)
+                : 'caduca el ' + short(r.inv.expiresAt)
+            }}</span
+          >
+          <span class="iv-state" [class]="'iv-state iv-' + r.state">{{ label[r.state] }}</span>
+          @if (r.state === 'pending') {
+            <button type="button" class="btn btn-ghost" (click)="revoke(r.inv)" [disabled]="busy()">
+              Revocar
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="iv-empty">Todavía no has creado ninguna invitación.</p>
+  }
+</section>

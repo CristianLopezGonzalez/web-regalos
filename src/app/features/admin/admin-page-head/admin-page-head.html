@@ -1,0 +1,9 @@
+<header class="aph">
+  <div>
+    <h1>{{ heading() }}</h1>
+    @if (lede()) {
+      <p>{{ lede() }}</p>
+    }
+  </div>
+  <div class="aph-actions"><ng-content /></div>
+</header>

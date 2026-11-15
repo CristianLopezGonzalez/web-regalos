@@ -1,0 +1,91 @@
+h2 {
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-line);
+  font: 400 21px/1.1 var(--font-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-burgundy);
+}
+.iv-new {
+  margin-bottom: clamp(56px, 7vw, 88px);
+}
+.iv-form {
+  display: grid;
+  gap: 20px;
+  max-width: 980px;
+}
+@media (min-width: 768px) {
+  .iv-form {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 8.5rem auto;
+    align-items: start;
+  }
+  .iv-form .btn {
+    margin-top: 28px;
+  }
+}
+.iv-link {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+  padding: 20px;
+  max-width: 720px;
+  background: var(--color-ivory);
+  border: 1px solid var(--color-gold);
+}
+.iv-link-row {
+  display: flex;
+  gap: 12px;
+}
+.iv-link .input {
+  font-size: 14px;
+}
+.iv-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.iv-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+@media (min-width: 900px) {
+  .iv-list li {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) 7rem 6rem;
+  }
+}
+.iv-kind {
+  font: italic 400 15px/1.4 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+.iv-who {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+.iv-dates {
+  grid-column: 1;
+  font-size: 14px;
+  color: var(--color-ink-soft);
+}
+@media (min-width: 900px) {
+  .iv-dates {
+    grid-column: auto;
+  }
+}
+.iv-state {
+  font: 500 11px/1 var(--font-sans);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+.iv-pending {
+  color: var(--color-burgundy);
+}
+.iv-empty {
+  font: italic 400 17px/1.5 var(--font-serif);
+  color: var(--color-ink-soft);
+}

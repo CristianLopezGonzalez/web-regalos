@@ -1,0 +1,45 @@
+.agf {
+  display: grid;
+  gap: 48px;
+}
+@media (min-width: 900px) {
+  .agf {
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 64px;
+    align-items: start;
+  }
+  .agf-photo {
+    position: sticky;
+    top: 112px;
+  }
+}
+.agf-photo {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.agf-preview {
+  width: min(100%, 300px);
+  aspect-ratio: 3 / 4;
+  outline: 1px solid var(--color-gold);
+  outline-offset: 6px;
+  margin: 6px 6px 8px;
+}
+.agf-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.agf-photo-actions label {
+  cursor: pointer;
+}
+.agf-photo-actions label:focus-within {
+  outline: 2px solid var(--color-cherry);
+  outline-offset: 3px;
+}
+.agf-fields {
+  display: grid;
+  gap: 28px;
+  max-width: 640px;
+}

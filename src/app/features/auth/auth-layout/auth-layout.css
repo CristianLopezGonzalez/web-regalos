@@ -1,0 +1,162 @@
+.al {
+  display: grid;
+  min-height: calc(100svh - 64px);
+}
+.al-night {
+  display: none;
+}
+.al-form {
+  display: grid;
+  place-items: center;
+  padding: clamp(48px, 9vw, 96px) 16px;
+}
+.al-form-in {
+  width: min(100%, 420px);
+}
+.al-title {
+  margin: 0;
+  font: 400 clamp(40px, 6vw, 60px) / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-burgundy);
+}
+.al-lede {
+  margin: 16px 0 0;
+  font: italic 400 18px/1.55 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+.al-body {
+  margin-top: 40px;
+}
+@media (min-width: 960px) {
+  .al {
+    grid-template-columns: 5fr 6fr;
+  }
+  .al-night {
+    position: relative;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 40px;
+    padding: 64px;
+    background: radial-gradient(
+      70% 60% at 50% 70%,
+      var(--color-night-soft),
+      var(--color-night) 70%
+    );
+  }
+  .al-arch {
+    width: min(70%, 320px);
+    height: auto;
+    overflow: visible;
+  }
+  .al-mark {
+    margin: 0;
+    font: 400 clamp(36px, 3vw, 44px) / 1.1 var(--font-display);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--color-ivory);
+  }
+}
+
+/* ---------- motion: the panel only exists from 960px, so nothing runs on phones ---------- */
+.al-swing {
+  transform-box: view-box;
+  transform-origin: 200px 40px; /* the pin at the top of the window */
+}
+.al-glint {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Entrance, once per visit: the ornament is lowered into the window on its thread. */
+  .al-drop {
+    animation: al-drop 1100ms var(--ease-out-strong) 150ms both;
+  }
+  /* Then it sways: sine segments, out from centre, across, back to centre. */
+  .al-swing {
+    animation: al-sway 7s linear 1250ms infinite both;
+  }
+  .al-glint {
+    animation: al-glint 6.5s linear 2400ms infinite both;
+  }
+  .al-flake {
+    animation-name: al-fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  .al-tw {
+    animation: al-twinkle 4.2s var(--ease-float) infinite alternate both;
+  }
+  .al-tw2 {
+    animation-delay: -1.4s;
+  }
+  .al-tw3 {
+    animation-delay: -2.8s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Same scene, still: the ornament simply fades in; snow rests where it is. */
+  .al-drop {
+    animation: al-fade 600ms ease-out both;
+  }
+}
+@keyframes al-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-90px);
+  }
+}
+@keyframes al-sway {
+  0% {
+    transform: rotate(0deg);
+    animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1); /* easeOutSine */
+  }
+  25% {
+    transform: rotate(2.5deg);
+    animation-timing-function: var(--ease-float);
+  }
+  75% {
+    transform: rotate(-2.5deg);
+    animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0); /* easeInSine */
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes al-fall {
+  from {
+    transform: translate(0, calc(-20px - var(--y0)));
+  }
+  to {
+    transform: translate(var(--dx), calc(540px - var(--y0)));
+  }
+}
+@keyframes al-glint {
+  0%,
+  82% {
+    opacity: 0;
+    transform: scale(0.6) rotate(0deg);
+  }
+  88% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7) rotate(90deg);
+  }
+}
+@keyframes al-twinkle {
+  to {
+    opacity: 0.3;
+  }
+}
+@keyframes al-fade {
+  from {
+    opacity: 0;
+  }
+}

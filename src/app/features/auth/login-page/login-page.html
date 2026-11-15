@@ -1,0 +1,27 @@
+<app-auth-layout heading="Entrar" lede="La lista es privada: solo la ve la familia.">
+  <div>
+    <app-login-form />
+    <p class="invite">
+      ¿Primera vez? Abre el enlace de invitación que te enviaron: te llevará a crear tu cuenta.
+    </p>
+    @if (api.isDemo) {
+      <aside class="demo" aria-label="Cuentas de la demo">
+        <p class="caps m-0">Modo demo</p>
+        <dl>
+          <dt>Dueña</dt>
+          <dd>{{ accounts.owner.email }}</dd>
+          <dt>Familia</dt>
+          <dd>{{ accounts.family.email }}</dd>
+          <dt>Contraseña</dt>
+          <dd>{{ accounts.owner.password }}</dd>
+        </dl>
+        <p class="m-0">
+          Invitación de prueba:
+          <a routerLink="/register" [queryParams]="{ invite: token }"
+            >/register?invite={{ token }}</a
+          >
+        </p>
+      </aside>
+    }
+  </div>
+</app-auth-layout>

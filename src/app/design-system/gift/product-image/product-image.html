@@ -1,0 +1,40 @@
+@if (image() && !failed()) {
+  <img
+    [src]="image()!.md"
+    [attr.srcset]="srcset()"
+    [sizes]="sizes()"
+    [alt]="alt()"
+    [attr.loading]="eager() ? 'eager' : 'lazy'"
+    [attr.fetchpriority]="eager() ? 'high' : null"
+    decoding="async"
+    (error)="failed.set(true)"
+  />
+} @else {
+  <svg class="pi-empty" viewBox="0 0 80 80" role="img" [attr.aria-label]="alt() + ' (sin foto)'">
+    <rect
+      x="16"
+      y="34"
+      width="48"
+      height="34"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.2"
+    />
+    <rect
+      x="12"
+      y="26"
+      width="56"
+      height="9"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.2"
+    />
+    <path
+      d="M40 26v42M40 26c-6-10-17-11-15-4 1 4 9 5 15 4zm0 0c6-10 17-11 15-4-1 4-9 5-15 4z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.2"
+    />
+  </svg>
+}
+<ng-content />

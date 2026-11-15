@@ -1,0 +1,19 @@
+<nav class="as" aria-label="Administración">
+  <p class="as-title">Trastienda</p>
+  <ol role="list">
+    @for (i of items(); track i.link; let n = $index) {
+      <li>
+        <a
+          [routerLink]="i.link"
+          routerLinkActive="on"
+          [routerLinkActiveOptions]="{ exact: i.exact }"
+          ariaCurrentWhenActive="page"
+        >
+          <span class="as-floor tabular" aria-hidden="true">{{ floors[n] }}</span>
+          <span>{{ i.label }}</span>
+        </a>
+      </li>
+    }
+  </ol>
+  <a class="as-back" routerLink="/wishlist">Ver las listas <span aria-hidden="true">→</span></a>
+</nav>

@@ -1,0 +1,52 @@
+<form class="grid gap-6" [formRoot]="form">
+  <app-labeled-field
+    label="Tu nombre"
+    forId="reg-name"
+    hint="Así te verán los demás en la wishlist."
+  >
+    <input id="reg-name" class="input" [formField]="form.displayName" autocomplete="given-name" />
+  </app-labeled-field>
+  <app-labeled-field label="Email" forId="reg-email">
+    <input
+      id="reg-email"
+      class="input"
+      type="email"
+      [formField]="form.email"
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+    />
+  </app-labeled-field>
+  <app-labeled-field label="Contraseña" forId="reg-password" hint="Al menos 8 caracteres.">
+    <div class="relative">
+      <input
+        id="reg-password"
+        class="input pr-28"
+        [type]="show() ? 'text' : 'password'"
+        [formField]="form.password"
+        autocomplete="new-password"
+      />
+      <button
+        type="button"
+        class="input-reveal"
+        (click)="show.set(!show())"
+        [attr.aria-pressed]="show()"
+      >
+        {{ show() ? 'Ocultar' : 'Mostrar' }}
+      </button>
+    </div>
+  </app-labeled-field>
+
+  @if (failure()) {
+    <p class="form-alert" role="alert">{{ failure() }}</p>
+  }
+
+  <button
+    type="submit"
+    class="btn btn-primary w-full"
+    [disabled]="form().submitting()"
+    [attr.aria-busy]="form().submitting()"
+  >
+    {{ form().submitting() ? 'Creando tu cuenta…' : 'Crear mi cuenta' }}
+  </button>
+</form>

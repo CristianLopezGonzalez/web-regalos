@@ -1,0 +1,42 @@
+.ia-ico {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.ia-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--color-gold);
+  background: none;
+  font: 500 13px/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 160ms var(--ease-out-strong);
+}
+.ia-night {
+  color: var(--color-brass);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ia-night:hover {
+    background: rgb(184 154 101 / 0.12);
+  }
+}
+.ia-btn:active {
+  transform: scale(0.98);
+}
+.btn .ia-ico {
+  margin-right: 8px;
+}
+.ia-steps {
+  margin: 0;
+  padding-left: 1.25em;
+  list-style: decimal; /* preflight removes list markers */
+  display: grid;
+  gap: 12px;
+  font-size: 17px;
+  line-height: 1.5;
+}

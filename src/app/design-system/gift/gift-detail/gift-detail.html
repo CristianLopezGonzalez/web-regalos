@@ -1,0 +1,72 @@
+<article class="gd">
+  <div class="gd-stage">
+    <app-product-image
+      class="gd-window"
+      [image]="gift().image"
+      [alt]="gift().name"
+      [eager]="true"
+      sizes="(max-width: 899px) 92vw, 46vw"
+      [dim]="gift().isReserved"
+    >
+      @if (gift().isReserved) {
+        <app-reservation-badge class="gd-plaque" [reserved]="true" [mine]="mine()" />
+      }
+    </app-product-image>
+  </div>
+
+  <div class="gd-card">
+    <p class="gd-crumbs caps">
+      <a routerLink="/wishlist" [queryParams]="{ para: gift().forId }">{{ listName() }}</a>
+      @if (category()) {
+        <span class="diamond" aria-hidden="true"></span>
+        <a
+          routerLink="/wishlist"
+          [queryParams]="{ para: gift().forId, categoria: category()!.slug }"
+          >{{ category()!.name }}</a
+        >
+      }
+    </p>
+    <h1 class="gd-name">{{ gift().name }}</h1>
+    <app-price class="gd-price" size="lg" [value]="gift().price" [currency]="gift().currency" />
+
+    <p class="gd-priority">
+      <span class="gd-pips" aria-hidden="true">
+        @for (p of [1, 2, 3]; track p) {
+          <span class="diamond" [class.off]="p > rank()"></span>
+        }
+      </span>
+      <span><span class="sr-only">Prioridad: </span>{{ priorityLabel() }}</span>
+    </p>
+
+    @if (gift().description) {
+      <p class="gd-desc">{{ gift().description }}</p>
+    }
+
+    <div class="gd-actions">
+      @if (isMyWish()) {
+        <div class="gd-owner">
+          <p class="gd-owner-state">
+            <span class="caps">Es uno de tus deseos</span>
+          </p>
+          <a class="btn btn-outline btn-sm" [routerLink]="['/admin/gifts', gift().id]"
+            >Editar regalo</a
+          >
+        </div>
+        <p class="gd-owner-note">Para que sea sorpresa, no verás si alguien lo ha reservado.</p>
+      } @else {
+        <app-reserve-button [gift]="gift()" />
+      }
+      @if (gift().purchaseUrl) {
+        <a
+          class="btn btn-outline gd-shop"
+          [href]="gift().purchaseUrl"
+          target="_blank"
+          rel="noopener noreferrer external"
+        >
+          Ver en la tienda <span class="gd-shop-arrow" aria-hidden="true">↗</span
+          ><span class="sr-only">(se abre en otra pestaña)</span>
+        </a>
+      }
+    </div>
+  </div>
+</article>

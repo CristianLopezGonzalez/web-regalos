@@ -1,0 +1,40 @@
+@if (pwa.canInstall()) {
+  <button
+    type="button"
+    [class]="tone() === 'night' ? 'ia-btn ia-night' : 'btn btn-outline btn-sm'"
+    (click)="install()"
+  >
+    <svg class="ia-ico" viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M8 1.5v8.5M4.5 6.5 8 10l3.5-3.5M2.5 11.5v2h11v-2"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+      />
+    </svg>
+    Instalar la app
+  </button>
+}
+<app-modal heading="Instalar la app" [open]="!!help()" (openChange)="!$event && help.set(null)">
+  @if (help() === 'ios') {
+    <ol class="ia-steps">
+      <li>
+        Pulsa el botón <strong>Compartir</strong>: el cuadrado con una flecha hacia arriba. En
+        Safari está abajo; en Chrome, arriba a la derecha.
+      </li>
+      <li>Baja y elige <strong>Añadir a pantalla de inicio</strong>.</li>
+      <li>Pulsa <strong>Añadir</strong>. La wishlist aparecerá con su icono, como una app más.</li>
+    </ol>
+  } @else {
+    <ol class="ia-steps">
+      <li>Abre el menú del navegador: los tres puntos <strong>⋮</strong>, arriba a la derecha.</li>
+      <li>
+        Elige <strong>Instalar aplicación</strong> o <strong>Añadir a pantalla de inicio</strong>.
+      </li>
+      <li>Confirma. La wishlist aparecerá con su icono, como una app más.</li>
+    </ol>
+  }
+  <ng-container actions>
+    <button type="button" class="btn btn-primary" (click)="help.set(null)">Entendido</button>
+  </ng-container>
+</app-modal>

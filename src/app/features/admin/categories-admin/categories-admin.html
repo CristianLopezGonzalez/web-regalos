@@ -1,0 +1,89 @@
+<app-admin-page-head
+  heading="Categorías"
+  lede="El orden de esta lista es el orden de las plantas del directorio."
+/>
+
+@if (cats(); as list) {
+  <ol class="ca" role="list">
+    @for (c of list; track c.id; let i = $index, first = $first, last = $last) {
+      <li class="ca-row">
+        <span class="ca-floor tabular" aria-hidden="true">{{ i === 0 ? 'G' : i }}</span>
+        <form class="ca-edit" (submit)="$event.preventDefault(); rename(c)">
+          <label class="sr-only" [for]="'cat-' + c.id">Nombre de la categoría {{ i + 1 }}</label>
+          <input
+            class="input"
+            [id]="'cat-' + c.id"
+            [value]="draft(c)"
+            (input)="setDraft(c, $any($event.target).value)"
+            [attr.maxlength]="nameMax"
+            required
+          />
+          @if (isRenamed(c)) {
+            <button type="submit" class="btn btn-outline btn-sm" [disabled]="!draft(c).trim()">
+              Guardar
+            </button>
+          }
+        </form>
+        <span class="ca-count tabular"
+          >{{ catalogue.countIn(c.id) }}
+          {{ catalogue.countIn(c.id) === 1 ? 'regalo' : 'regalos' }}</span
+        >
+        <div class="ca-actions">
+          <button
+            type="button"
+            class="ca-icon"
+            (click)="move(i, -1)"
+            [disabled]="first || busy()"
+            [attr.aria-label]="'Subir ' + c.name"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            class="ca-icon"
+            (click)="move(i, 1)"
+            [disabled]="last || busy()"
+            [attr.aria-label]="'Bajar ' + c.name"
+          >
+            ↓
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost"
+            (click)="remove(c)"
+            [disabled]="busy() || catalogue.countIn(c.id) > 0"
+            [attr.title]="
+              catalogue.countIn(c.id) > 0
+                ? 'Mueve sus regalos a otra categoría para poder borrarla'
+                : null
+            "
+          >
+            Borrar<span class="sr-only"> {{ c.name }}</span>
+          </button>
+        </div>
+      </li>
+    }
+  </ol>
+
+  <form class="ca-new" [formRoot]="newCategory">
+    <div class="field grow">
+      <label class="field-label" for="cat-new">Nueva categoría</label>
+      <input
+        id="cat-new"
+        class="input"
+        [formField]="newCategory.name"
+        placeholder="Por ejemplo: Libros"
+      />
+    </div>
+    <button
+      type="submit"
+      class="btn btn-primary btn-sm"
+      [disabled]="!newCategory.name().value().trim() || busy()"
+    >
+      Añadir
+    </button>
+  </form>
+  <p class="field-hint mt-3">Solo se puede borrar una categoría vacía.</p>
+} @else {
+  <div class="skeleton h-80" aria-hidden="true"></div>
+}

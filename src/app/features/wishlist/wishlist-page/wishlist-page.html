@@ -1,0 +1,132 @@
+<div class="wrap wl">
+  @if ((catalogue.lists()?.length ?? 0) > 1) {
+    <nav class="wl-lists" aria-label="Listas de deseos">
+      @for (l of catalogue.lists(); track l.id) {
+        <a
+          class="wl-list"
+          [class.on]="l.id === activeList()?.id"
+          [routerLink]="[]"
+          [queryParams]="{ para: l.id, ver: null, categoria: null }"
+          queryParamsHandling="merge"
+          [attr.aria-current]="l.id === activeList()?.id ? 'page' : null"
+        >
+          <span class="wl-list-name">{{ l.name }}</span>
+          @if (l.id === catalogue.meId()) {
+            <span class="wl-list-you">tú</span>
+          }
+          <span class="wl-list-count tabular"
+            ><span class="sr-only">, </span>{{ catalogue.giftsFor(l.id).length
+            }}<span class="sr-only"> deseos</span></span
+          >
+        </a>
+      }
+    </nav>
+  }
+  <header class="wl-head">
+    <h1>{{ activeList() ? catalogue.listTitle(activeList()!) : 'La wishlist' }}</h1>
+    <p class="wl-sub">
+      @if (catalogue.loaded()) {
+        @if (isMyList()) {
+          {{ stats().total }} deseos · lo que te han reservado es sorpresa
+        } @else {
+          {{ stats().total }} deseos · {{ stats().reserved }} ya reservados
+        }
+      } @else {
+        Encendiendo los escaparates…
+      }
+    </p>
+  </header>
+
+  @if (catalogue.error()) {
+    <div class="wl-error" role="alert">
+      <p>{{ errorText() }}</p>
+      <button type="button" class="btn btn-outline btn-sm" (click)="catalogue.load(true)">
+        Reintentar
+      </button>
+    </div>
+  } @else {
+    @if (catalogue.categories(); as cats) {
+      <app-category-filter
+        [categories]="cats"
+        [counts]="counts()"
+        [total]="stats().total"
+        [active]="activeSlug()"
+      />
+    } @else {
+      <div class="wl-filter-skel skeleton" aria-hidden="true"></div>
+    }
+
+    <div class="wl-tools" role="search">
+      <div class="field wl-search">
+        <label class="field-label" for="wl-q">Buscar</label>
+        <input
+          id="wl-q"
+          class="input"
+          type="search"
+          placeholder="Perfume, pluma, bufanda…"
+          autocomplete="off"
+          [value]="query()"
+          (input)="onSearch($any($event.target).value)"
+        />
+      </div>
+      @if (!isMyList()) {
+        <div class="field">
+          <label class="field-label" for="wl-show">Mostrar</label>
+          <select
+            id="wl-show"
+            class="input"
+            [value]="show()"
+            (change)="setParam('ver', $any($event.target).value, 'todos')"
+          >
+            <option value="todos">Todos</option>
+            <option value="disponibles">Disponibles</option>
+            <option value="reservados">Reservados</option>
+          </select>
+        </div>
+      }
+      <div class="field">
+        <label class="field-label" for="wl-sort">Ordenar por</label>
+        <select
+          id="wl-sort"
+          class="input"
+          [value]="sort()"
+          (change)="setParam('orden', $any($event.target).value, 'prioridad')"
+        >
+          <option value="prioridad">Más deseados</option>
+          <option value="precio-asc">Precio: de menor a mayor</option>
+          <option value="precio-desc">Precio: de mayor a menor</option>
+          <option value="recientes">Añadidos recientemente</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="sr-only" aria-live="polite">
+      {{ catalogue.loaded() ? visible()!.length + ' regalos' : '' }}
+    </p>
+
+    <app-gift-grid
+      class="wl-grid"
+      [gifts]="visible()"
+      [categories]="catalogue.categories()"
+      [mine]="catalogue.mine()"
+      [eagerCount]="4"
+    >
+      <div empty class="wl-empty">
+        @if (listGifts().length) {
+          <p>No hay ningún deseo con estos filtros.</p>
+          <a
+            class="btn btn-outline btn-sm"
+            routerLink="/wishlist"
+            [queryParams]="{ para: activeList()?.id }"
+            >Quitar filtros</a
+          >
+        } @else if (isMyList()) {
+          <p>Tu lista todavía está vacía.</p>
+          <a class="btn btn-primary btn-sm" routerLink="/admin/gifts/new">Añadir mi primer deseo</a>
+        } @else {
+          <p>{{ activeList()?.name }} todavía no ha añadido ningún deseo.</p>
+        }
+      </div>
+    </app-gift-grid>
+  }
+</div>

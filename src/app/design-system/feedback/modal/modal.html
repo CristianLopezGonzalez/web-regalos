@@ -1,0 +1,13 @@
+<dialog
+  #dlg
+  class="md"
+  [attr.aria-labelledby]="titleId"
+  (cancel)="$event.preventDefault(); requestClose()"
+  (click)="onBackdrop($event)"
+>
+  <div class="md-panel">
+    <h2 class="md-title" [id]="titleId">{{ heading() }}</h2>
+    <div class="md-body"><ng-content /></div>
+    <div class="md-actions"><ng-content select="[actions]" /></div>
+  </div>
+</dialog>

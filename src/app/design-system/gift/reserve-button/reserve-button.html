@@ -1,0 +1,79 @@
+@if (canReserve()) {
+  @switch (state()) {
+    @case ('available') {
+      <button
+        type="button"
+        class="btn btn-primary rb-main"
+        [class.animate-shake]="shake()"
+        (animationend)="shake.set(false)"
+        (click)="confirm.set(true)"
+      >
+        Reservar este regalo
+      </button>
+      <p class="rb-note">Nadie sabrá que has sido tú, ni siquiera {{ recipient() }}.</p>
+    }
+    @case ('mine') {
+      <div class="rb-mine">
+        <p class="rb-mine-line">
+          <span class="diamond" aria-hidden="true"></span> Lo has reservado tú
+        </p>
+        <button type="button" class="btn btn-ghost" (click)="cancelOpen.set(true)">
+          Cancelar mi reserva
+        </button>
+      </div>
+      <p class="rb-note">Lo encontrarás también en <a routerLink="/profile">tu perfil</a>.</p>
+    }
+    @case ('reserved') {
+      <button type="button" class="btn btn-primary rb-main" disabled aria-describedby="rb-why">
+        Ya está reservado
+      </button>
+      <p class="rb-note" id="rb-why">Otra persona se ha adelantado. Hay más deseos en la lista.</p>
+    }
+  }
+
+  <app-modal heading="¿Lo reservas?" [(open)]="confirm" [busy]="busy()">
+    <p class="m-0">
+      Vas a reservar <strong>{{ gift().name }}</strong>. Los demás verán que está reservado, pero no
+      quién lo ha hecho. Podrás cancelarlo cuando quieras desde tu perfil.
+    </p>
+    <ng-container actions>
+      <button type="button" class="btn btn-ghost" (click)="confirm.set(false)" [disabled]="busy()">
+        Ahora no
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="reserve()"
+        [disabled]="busy()"
+        [attr.aria-busy]="busy()"
+      >
+        @if (busy()) {
+          <span class="spin" aria-hidden="true"></span> Reservando…
+        } @else {
+          Sí, lo reservo
+        }
+      </button>
+    </ng-container>
+  </app-modal>
+
+  <app-modal heading="¿Cancelar la reserva?" [(open)]="cancelOpen" [busy]="busy()">
+    <p class="m-0">{{ gift().name }} volverá a estar disponible para el resto de la familia.</p>
+    <ng-container actions>
+      <button
+        type="button"
+        class="btn btn-ghost"
+        (click)="cancelOpen.set(false)"
+        [disabled]="busy()"
+      >
+        Mantener
+      </button>
+      <button type="button" class="btn btn-danger" (click)="cancel()" [disabled]="busy()">
+        @if (busy()) {
+          <span class="spin" aria-hidden="true"></span> Cancelando…
+        } @else {
+          Cancelar reserva
+        }
+      </button>
+    </ng-container>
+  </app-modal>
+}

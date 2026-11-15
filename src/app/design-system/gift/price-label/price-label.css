@@ -1,0 +1,15 @@
+:host {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+:host(.price--sm) {
+  font-size: 15px;
+  color: var(--color-ink-soft);
+}
+:host(.price--lg) {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 2.6vw, 34px);
+  letter-spacing: 0.01em;
+  color: var(--color-chocolate);
+}

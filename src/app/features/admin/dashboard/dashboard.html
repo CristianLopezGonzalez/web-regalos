@@ -1,0 +1,94 @@
+<app-admin-page-head
+  heading="Resumen"
+  lede="Lo que te reserven es sorpresa: aquí no verás qué está reservado de tu lista ni quién lo ha hecho."
+>
+  <a class="btn btn-primary btn-sm" routerLink="/admin/gifts/new">Añadir regalo</a>
+</app-admin-page-head>
+
+<dl class="db-stats">
+  <div>
+    <dt>Tus deseos</dt>
+    <dd class="tabular">{{ loaded() ? stats().total : '–' }}</dd>
+  </div>
+  <div>
+    <dt>Favoritos</dt>
+    <dd class="tabular">{{ loaded() ? stats().favorites : '–' }}</dd>
+  </div>
+  <div>
+    <dt>Para completar</dt>
+    <dd class="tabular">{{ loaded() ? stats().todo : '–' }}</dd>
+  </div>
+</dl>
+
+<div class="db-cols">
+  @if (session.isOwner()) {
+    <section aria-labelledby="res-h">
+      <h2 id="res-h">Reservados en otras listas</h2>
+      @if (!loaded()) {
+        <div class="skeleton h-40" aria-hidden="true"></div>
+      } @else if (reserved().length) {
+        <ul class="db-list" role="list">
+          @for (g of reserved(); track g.id) {
+            <li>
+              <a [routerLink]="['/wishlist', g.id]" class="db-name"
+                >{{ g.name }} <span class="db-reason">· {{ listName(g) }}</span></a
+              >
+              <app-price [value]="g.price" [currency]="g.currency" />
+              <button type="button" class="btn btn-ghost" (click)="toRelease.set(g)">
+                Liberar<span class="sr-only"> {{ g.name }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="db-empty">En las otras listas no hay nada reservado todavía.</p>
+      }
+    </section>
+  }
+
+  <section aria-labelledby="todo-h">
+    <h2 id="todo-h">Para completar</h2>
+    @if (!loaded()) {
+      <div class="skeleton h-40" aria-hidden="true"></div>
+    } @else if (todo().length) {
+      <ul class="db-list" role="list">
+        @for (t of todo(); track t.gift.id + t.reason) {
+          <li>
+            <a [routerLink]="['/admin/gifts', t.gift.id]" class="db-name">{{ t.gift.name }}</a>
+            <span class="db-reason">{{ t.reason }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="db-empty">Todos los regalos tienen foto, enlace y categoría.</p>
+    }
+    @if (session.isOwner()) {
+      <p class="db-links">
+        <a routerLink="/admin/invitations">Invitar a alguien</a>
+        <span class="diamond" aria-hidden="true"></span>
+        <a routerLink="/admin/categories">Ordenar categorías</a>
+      </p>
+    }
+  </section>
+</div>
+
+<app-modal
+  heading="¿Liberar este regalo?"
+  [open]="!!toRelease()"
+  (openChange)="!$event && toRelease.set(null)"
+  [busy]="busy()"
+>
+  <p class="m-0">
+    <strong>{{ toRelease()?.name }}</strong> volverá a aparecer como disponible. Quien lo reservó
+    dejará de tenerlo en su perfil, y tú seguirás sin saber quién era. Úsalo, por ejemplo, después
+    de Navidad.
+  </p>
+  <ng-container actions>
+    <button type="button" class="btn btn-ghost" (click)="toRelease.set(null)" [disabled]="busy()">
+      No
+    </button>
+    <button type="button" class="btn btn-danger" (click)="release()" [disabled]="busy()">
+      {{ busy() ? 'Liberando…' : 'Sí, liberar' }}
+    </button>
+  </ng-container>
+</app-modal>

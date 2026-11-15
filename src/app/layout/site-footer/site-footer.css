@@ -1,0 +1,65 @@
+.sf {
+  padding: clamp(80px, 10vw, 140px) 0 56px;
+  background: var(--color-night);
+  color: var(--color-ivory);
+}
+.sf-mark {
+  margin: 0 0 56px;
+  font: 400 clamp(36px, 7.4vw, 118px) / 1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.sf-row {
+  display: grid;
+  gap: 24px;
+  padding-top: 28px;
+  border-top: 1px solid rgb(184 154 101 / 0.5);
+}
+ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+a,
+button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 500 12px/1 var(--font-sans);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ivory);
+  text-decoration: none;
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  a:hover,
+  button:hover {
+    color: var(--color-brass);
+  }
+}
+.sf-row p {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-parchment);
+}
+.sf-credits {
+  margin: 48px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #cdb8b0;
+}
+@media (min-width: 900px) {
+  .sf-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

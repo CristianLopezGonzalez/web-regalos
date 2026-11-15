@@ -1,0 +1,77 @@
+.md {
+  margin: auto; /* Tailwind's preflight zeroes the browser's centring margin on <dialog> */
+  width: min(100% - 32px, 520px);
+  max-height: calc(100svh - 48px);
+  padding: 0;
+  border: 1px solid var(--color-gold);
+  outline: 1px solid var(--color-line);
+  outline-offset: 6px;
+  background: var(--color-ivory);
+  color: var(--color-chocolate);
+  overflow: visible;
+}
+.md::backdrop {
+  background: rgb(58 15 24 / 0.55);
+}
+.md[open] {
+  animation: md-in 240ms var(--ease-out-strong) both;
+}
+.md[open]::backdrop {
+  animation: md-fade 240ms ease-out both;
+}
+.md.closing {
+  animation: md-out 160ms ease-in both;
+}
+.md.closing::backdrop {
+  animation: md-fade 160ms ease-in reverse both;
+}
+.md-panel {
+  padding: clamp(28px, 5vw, 44px);
+  max-height: calc(100svh - 48px);
+  overflow: auto;
+}
+.md-title {
+  margin: 0 0 16px;
+  font: 400 clamp(21px, 3vw, 25px) / 1.2 var(--font-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-burgundy);
+}
+.md-body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.md-actions {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 28px;
+}
+@keyframes md-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+@keyframes md-out {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+@keyframes md-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md[open],
+  .md.closing {
+    animation-name: md-fade;
+  }
+  .md.closing {
+    animation-direction: reverse;
+  }
+}
