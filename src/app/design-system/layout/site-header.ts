@@ -59,7 +59,7 @@ interface NavItem {
   styles: `
     .sh {
       position: sticky;
-      top: 0;
+      top: var(--offline-bar-h, 0px); /* sits under the offline banner while it is shown */
       z-index: 40;
       background: var(--color-ivory);
       border-bottom: 1px solid var(--color-line);

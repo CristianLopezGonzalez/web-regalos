@@ -412,3 +412,11 @@
     animation: none;
   }
 }
+
+/* Offline banner (design-system/feedback/offline-banner.ts): reserve its height above the page */
+html.is-offline {
+  --offline-bar-h: calc(36px + env(safe-area-inset-top));
+}
+html.is-offline body {
+  padding-top: var(--offline-bar-h);
+}

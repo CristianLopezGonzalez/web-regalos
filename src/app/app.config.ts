@@ -1,4 +1,5 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideServiceWorker } from '@angular/service-worker';
 import { TitleStrategy, provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { useSupabase } from './core/config';
 import { DemoApi } from './core/demo-api';
@@ -18,5 +19,10 @@ export const appConfig: ApplicationConfig = {
     { provide: TitleStrategy, useClass: PageTitle },
     // Supabase as soon as core/config.ts has a URL and anon key; otherwise the in-browser demo.
     { provide: WishlistApi, useClass: useSupabase() ? SupabaseApi : DemoApi },
+    // Installable app (Android/iOS). Only in production builds; caches the app shell, never Supabase data.
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
 };

@@ -30,8 +30,10 @@ import { errorFor, httpsUrl } from './form-utils';
         </div>
         @if (imageError()) {
           <p class="field-error" id="agf-photo-msg" role="alert">{{ imageError() }}</p>
+        } @else if (imageNote()) {
+          <p class="field-hint" id="agf-photo-msg" role="status">{{ imageNote() }}</p>
         } @else {
-          <p class="field-hint" id="agf-photo-msg">JPG, PNG o WebP de al menos 800 px. Mejor sobre fondo claro y liso, con luz de ventana.</p>
+          <p class="field-hint" id="agf-photo-msg">JPG, PNG o WebP. Se ve más nítida a partir de 800 px, mejor sobre fondo claro y liso.</p>
         }
       </div>
 
@@ -173,6 +175,7 @@ export class AdminGiftForm implements OnDestroy {
   readonly failure = signal<string | null>(null);
   readonly processing = signal(false);
   readonly imageError = signal<string | null>(null);
+  readonly imageNote = signal<string | null>(null);
   /** null = unchanged, 'remove' = delete, Blob[] = new photo */
   private readonly newImage = signal<Blob[] | 'remove' | null>(null);
   private readonly objectUrl = signal<string | null>(null);
@@ -216,11 +219,15 @@ export class AdminGiftForm implements OnDestroy {
     inputEl.value = '';
     if (!file) return;
     this.imageError.set(null);
+    this.imageNote.set(null);
     const check = checkImageFile(file);
     if (!check.ok) return this.imageError.set(check.message);
     this.processing.set(true);
     try {
-      const { blobs } = await resizeImage(file);
+      const { blobs, width, height, small } = await resizeImage(file);
+      if (small) {
+        this.imageNote.set(`Foto pequeña (${width}×${height} px): en el móvil se verá bien; en pantallas grandes, algo menos nítida.`);
+      }
       this.newImage.set(blobs);
       this.setObjectUrl(URL.createObjectURL(blobs[1]));
     } catch (err) {
@@ -231,6 +238,7 @@ export class AdminGiftForm implements OnDestroy {
   }
 
   clearImage() {
+    this.imageNote.set(null);
     this.setObjectUrl(null);
     this.newImage.set(this.gift()?.image ? 'remove' : null);
   }
