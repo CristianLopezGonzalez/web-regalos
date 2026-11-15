@@ -15,7 +15,7 @@ import { AuthLayout } from './auth-layout';
   imports: [AuthLayout, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (!session.ready()) {
+    @if (!session.ready() || verifying()) {
       <app-auth-layout heading="Un momento">
         <p class="m-0 text-[17px]" role="status">Comprobando el enlace…</p>
       </app-auth-layout>
@@ -51,6 +51,24 @@ export class ResetPasswordPage {
   private readonly toasts = inject(Toasts);
   readonly busy = signal(false);
   readonly error = signal<string | null>(null);
+  readonly verifying = signal(false);
+
+  constructor() {
+    // Email link: /reset-password?token_hash=…&type=recovery (template in Supabase → Auth → Emails).
+    const q = new URLSearchParams(location.search);
+    const tokenHash = q.get('token_hash');
+    if (tokenHash && q.get('type') === 'recovery') {
+      this.verifying.set(true);
+      void this.api
+        .verifyRecovery(tokenHash)
+        .then(() => this.session.whenReady())
+        .finally(() => {
+          // The token is single-use: drop it from the address bar and history.
+          void this.router.navigateByUrl('/reset-password', { replaceUrl: true });
+          this.verifying.set(false);
+        });
+    }
+  }
 
   async save(password: string) {
     if (password.length < 8) return this.error.set('La contraseña necesita al menos 8 caracteres.');

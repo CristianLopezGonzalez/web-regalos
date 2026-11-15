@@ -22,6 +22,8 @@ export abstract class WishlistApi {
   abstract signOut(): Promise<void>;
   abstract updateDisplayName(name: string): Promise<void>;
   abstract requestPasswordReset(email: string): Promise<void>;
+  /** Signs in from the recovery email's one-time token (works on any device). False if invalid or expired. */
+  abstract verifyRecovery(tokenHash: string): Promise<boolean>;
   /** Sets a new password for the signed-in user (also used after a recovery link). */
   abstract updatePassword(password: string): Promise<void>;
 

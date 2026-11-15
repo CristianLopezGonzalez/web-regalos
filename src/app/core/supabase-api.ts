@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import type { AuthError, PostgrestError, Session, SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CONFIG } from './config';
 import {
@@ -131,6 +132,7 @@ export class SupabaseApi extends WishlistApi {
   private c() {
     return this.client;
   }
+  private readonly router = inject(Router);
   private readonly signed = new Map<string, { url: string; expires: number }>();
   private loadedFor: string | null = null;
 
@@ -139,7 +141,13 @@ export class SupabaseApi extends WishlistApi {
     void this.client
       .then((sb) =>
         sb.auth.onAuthStateChange((event, session) => {
-          if (event === 'PASSWORD_RECOVERY') this.recovering.set(true);
+          if (event === 'PASSWORD_RECOVERY') {
+            this.recovering.set(true);
+            // Older-style links (?code=…) land wherever Supabase sends them: take the person to the form.
+            if (!location.pathname.startsWith('/reset-password')) {
+              setTimeout(() => void this.router.navigateByUrl('/reset-password', { replaceUrl: true }), 0);
+            }
+          }
           // Never await Supabase calls inside this callback (it can deadlock the auth lock).
           setTimeout(() => void this.syncProfile(session), 0);
         }),
@@ -253,6 +261,18 @@ export class SupabaseApi extends WishlistApi {
       console.error('[password reset]', r.error);
       throw toApiError(r.error);
     }
+  }
+
+  async verifyRecovery(tokenHash: string) {
+    const sb = await this.c();
+    const { data, error } = await sb.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+    if (error || !data.session) {
+      console.error('[password reset] invalid link', error);
+      return false;
+    }
+    this.recovering.set(true);
+    await this.syncProfile(data.session); // so the page shows the form, not "link expired", right away
+    return true;
   }
 
   async updatePassword(password: string) {

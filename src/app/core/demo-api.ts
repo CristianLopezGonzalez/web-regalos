@@ -269,6 +269,11 @@ export class DemoApi extends WishlistApi {
     await wait();
   }
 
+  async verifyRecovery(_tokenHash: string) {
+    await wait();
+    return false;
+  }
+
   async updatePassword(password: string) {
     await wait();
     const s = await this.load();
