@@ -34,7 +34,8 @@ import { EMAIL_PATTERN, errorFor } from './form-utils';
         <button type="button" class="btn btn-ghost justify-self-center" (click)="mode.set('reset'); failure.set(null)">¿Has olvidado tu contraseña?</button>
       </form>
     } @else {
-      <form class="grid gap-6" (ngSubmit)="sendReset()" novalidate>
+      <!-- No [formGroup] here, so (ngSubmit) would not exist and the browser would reload the page: use (submit). -->
+      <form class="grid gap-6" (submit)="$event.preventDefault(); sendReset()" novalidate>
         <p class="m-0 text-[17px] leading-relaxed">Escribe tu email y te enviaremos un enlace para crear una contraseña nueva.</p>
         <app-form-field label="Email" forId="reset-email" [error]="err('email')">
           <input id="reset-email" class="input" type="email" [formControl]="form.controls.email" autocomplete="email" spellcheck="false" aria-describedby="reset-email-msg" />
@@ -42,8 +43,11 @@ import { EMAIL_PATTERN, errorFor } from './form-utils';
         @if (resetSent()) {
           <p class="form-note" role="status">Si existe una cuenta con ese email, te hemos enviado el enlace. Revisa también el correo no deseado.</p>
         }
+        @if (failure()) {
+          <p class="form-alert" role="alert">{{ failure() }}</p>
+        }
         <button type="submit" class="btn btn-primary w-full" [disabled]="busy()">{{ busy() ? 'Enviando…' : 'Enviar enlace' }}</button>
-        <button type="button" class="btn btn-ghost justify-self-center" (click)="mode.set('login'); resetSent.set(false)">Volver a entrar</button>
+        <button type="button" class="btn btn-ghost justify-self-center" (click)="mode.set('login'); resetSent.set(false); failure.set(null)">Volver a entrar</button>
       </form>
     }
   `,
@@ -91,11 +95,15 @@ export class LoginForm {
     this.submitted.set(true);
     if (this.form.controls.email.invalid) return;
     this.busy.set(true);
+    this.failure.set(null);
+    this.resetSent.set(false);
     try {
       await this.api.requestPasswordReset(this.form.controls.email.value);
+      this.resetSent.set(true);
+    } catch (e) {
+      this.failure.set(errorMessage(e));
     } finally {
       this.busy.set(false);
-      this.resetSent.set(true);
     }
   }
 }

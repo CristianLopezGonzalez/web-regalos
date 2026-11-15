@@ -74,11 +74,16 @@ function toApiError(e: unknown): ApiError {
       console.error('[sign-up] database error', e);
       return new ApiError('UNKNOWN', 'No se pudo crear la cuenta por un error del servidor. Avísame y lo reviso.');
     }
-    if (ae.code === 'over_email_send_rate_limit')
+    if (ae.code === 'over_email_send_rate_limit' || ae.status === 429)
       return new ApiError(
         'UNKNOWN',
-        'Se han enviado demasiados emails. Espera unos minutos y vuelve a intentarlo.',
+        'Se han enviado demasiados emails. Espera un rato (hasta una hora) y vuelve a intentarlo.',
       );
+    // Supabase's built-in sender only delivers to the project's team members until custom SMTP is set up.
+    if (ae.code === 'email_address_not_authorized' || /not authorized/i.test(msg))
+      return new ApiError('UNKNOWN', 'No se pudo enviar el correo: el envío de emails todavía no está configurado.');
+    if (/error sending|smtp/i.test(msg))
+      return new ApiError('UNKNOWN', 'No se pudo enviar el correo ahora mismo. Inténtalo más tarde.');
   }
   if ((e as PostgrestError)?.code === '42501') return new ApiError('FORBIDDEN');
   if (/failed to fetch|networkerror|load failed/i.test(msg)) return new ApiError('NETWORK');
@@ -239,10 +244,15 @@ export class SupabaseApi extends WishlistApi {
 
   async requestPasswordReset(email: string) {
     const sb = await this.c();
-    // Same response whether or not the account exists.
-    await sb.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    // Supabase answers the same whether or not the account exists; a real error means the email was NOT sent
+    // (rate limit, sender not configured…), so it must be shown instead of "we sent you a link".
+    const r = await sb.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
       redirectTo: `${location.origin}/reset-password`,
     });
+    if (r.error) {
+      console.error('[password reset]', r.error);
+      throw toApiError(r.error);
+    }
   }
 
   async updatePassword(password: string) {
