@@ -8,6 +8,7 @@ import { Gift } from '../../core/models';
 import { Session } from '../../core/session';
 import { Toasts } from '../../core/toast';
 import { WishlistApi } from '../../core/wishlist-api';
+import { InstallApp } from '../../design-system/feedback/install-app';
 import { Modal } from '../../design-system/feedback/modal';
 import { PriceLabel } from '../../design-system/gift/price-label';
 import { ProductImage } from '../../design-system/gift/product-image';
@@ -15,7 +16,7 @@ import { ProductImage } from '../../design-system/gift/product-image';
 /** /profile: name, account, "Mis reservas" (family), sign out. */
 @Component({
   selector: 'app-profile-page',
-  imports: [FormsModule, RouterLink, PriceLabel, ProductImage, Modal],
+  imports: [FormsModule, RouterLink, PriceLabel, ProductImage, Modal, InstallApp],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (session.profile(); as p) {
@@ -47,6 +48,7 @@ import { ProductImage } from '../../design-system/gift/product-image';
                 <button type="button" class="btn btn-ghost" (click)="signOut()">Cerrar sesión</button>
               </div>
             </form>
+            <app-install-app class="pf-install" />
             @if (api.isDemo) {
               <div class="pf-demo">
                 <p class="field-hint">Modo demo: los datos viven en este navegador.</p>
@@ -147,6 +149,10 @@ import { ProductImage } from '../../design-system/gift/product-image';
       margin: -8px 0 24px;
       font: italic 400 16px/1.5 var(--font-serif);
       color: var(--color-ink-soft);
+    }
+    .pf-install {
+      display: block;
+      margin-top: 28px;
     }
     .pf-demo {
       display: flex;

@@ -33,6 +33,7 @@ import {
   `,
   styles: `
     .md {
+      margin: auto; /* Tailwind's preflight zeroes the browser's centring margin on <dialog> */
       width: min(100% - 32px, 520px);
       max-height: calc(100svh - 48px);
       padding: 0;

@@ -4,6 +4,7 @@ import { IsActiveMatchOptions, NavigationEnd, Router, RouterLink, RouterLinkActi
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Session } from '../../core/session';
+import { InstallApp } from '../feedback/install-app';
 
 interface NavItem {
   label: string;
@@ -18,7 +19,7 @@ interface NavItem {
  */
 @Component({
   selector: 'app-site-header',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, InstallApp],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="sh">
@@ -49,6 +50,7 @@ interface NavItem {
               <li><a [routerLink]="i.link" [fragment]="i.fragment" (click)="menu.set(false)">{{ i.label }}</a></li>
             }
           </ul>
+          <app-install-app tone="night" class="sh-menu-install" />
           @if (session.signedIn()) {
             <p class="sh-menu-who">Has entrado como {{ session.profile()?.displayName }}</p>
           }
@@ -130,7 +132,7 @@ interface NavItem {
     }
     .sh-menu {
       position: fixed;
-      inset: 64px 0 0;
+      inset: calc(64px + var(--offline-bar-h, 0px)) 0 0;
       display: grid;
       align-content: start;
       padding: 32px 16px;
@@ -150,6 +152,10 @@ interface NavItem {
       text-transform: uppercase;
       color: var(--color-ivory);
       text-decoration: none;
+    }
+    .sh-menu-install {
+      margin-top: 28px;
+      justify-self: start;
     }
     .sh-menu-who {
       margin: 32px 0 0;
