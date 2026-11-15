@@ -16,7 +16,7 @@ import { EMAIL_PATTERN, errorFor } from './form-utils';
   host: { class: 'block' },
   template: `
     <form class="grid gap-6" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <app-form-field label="Tu nombre" forId="reg-name" hint="Así te verá la dueña de la lista en su panel." [error]="err('displayName')">
+      <app-form-field label="Tu nombre" forId="reg-name" hint="Así te verán los demás en la wishlist." [error]="err('displayName')">
         <input id="reg-name" class="input" formControlName="displayName" autocomplete="given-name" maxlength="60" aria-describedby="reg-name-msg" [attr.aria-invalid]="!!err('displayName')" />
       </app-form-field>
       <app-form-field label="Email" forId="reg-email" [error]="err('email')">

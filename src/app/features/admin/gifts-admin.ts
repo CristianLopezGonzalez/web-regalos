@@ -4,16 +4,18 @@ import { Catalogue } from '../../core/catalogue';
 import { PRIORITY_LABEL } from '../../core/models';
 import { PriceLabel } from '../../design-system/gift/price-label';
 import { ProductImage } from '../../design-system/gift/product-image';
-import { ReservationBadge } from '../../design-system/gift/reservation-badge';
 import { AdminPageHead } from './admin-page-head';
 
-/** /admin/gifts: an inventory ledger, not a data grid. Rows stack into cards on phones. */
+/**
+ * /admin/gifts: an inventory ledger of YOUR list, not a data grid. Rows stack into cards on phones.
+ * No reservation column: what you have been given is a surprise.
+ */
 @Component({
   selector: 'app-gifts-admin',
-  imports: [RouterLink, AdminPageHead, PriceLabel, ProductImage, ReservationBadge],
+  imports: [RouterLink, AdminPageHead, PriceLabel, ProductImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-admin-page-head heading="Regalos" lede="Todo lo que aparece en la wishlist. Pulsa un regalo para editarlo.">
+    <app-admin-page-head heading="Mis regalos" lede="Los deseos de tu lista. Pulsa uno para editarlo. Lo que te reserven es sorpresa: aquí no aparece.">
       <a class="btn btn-primary btn-sm" routerLink="/admin/gifts/new">Añadir regalo</a>
     </app-admin-page-head>
 
@@ -25,14 +27,13 @@ import { AdminPageHead } from './admin-page-head';
       </div>
     } @else if (rows().length) {
       <table class="ga">
-        <caption class="sr-only">Regalos de la wishlist</caption>
+        <caption class="sr-only">Regalos de tu lista</caption>
         <thead>
           <tr>
             <th scope="col"><span class="sr-only">Foto</span></th>
             <th scope="col">Regalo</th>
             <th scope="col">Prioridad</th>
             <th scope="col" class="num">Precio</th>
-            <th scope="col">Estado</th>
           </tr>
         </thead>
         <tbody>
@@ -50,14 +51,13 @@ import { AdminPageHead } from './admin-page-head';
               </td>
               <td class="ga-pri">{{ priority[r.gift.priority] }}</td>
               <td class="num"><app-price [value]="r.gift.price" [currency]="r.gift.currency" /></td>
-              <td><app-reservation-badge [reserved]="r.gift.isReserved" /></td>
             </tr>
           }
         </tbody>
       </table>
     } @else {
       <div class="ga-empty">
-        <p>La wishlist está vacía. Empieza por el regalo que más ilusión te haga.</p>
+        <p>Tu lista está vacía. Empieza por el regalo que más ilusión te haga.</p>
         <a class="btn btn-primary" routerLink="/admin/gifts/new">Añadir el primer regalo</a>
       </div>
     }
@@ -164,10 +164,6 @@ import { AdminPageHead } from './admin-page-head';
         grid-column: 3;
         grid-row: 2;
       }
-      td:last-child {
-        grid-column: 2 / 4;
-        margin-top: 6px;
-      }
     }
   `,
 })
@@ -175,7 +171,7 @@ export class GiftsAdmin {
   readonly catalogue = inject(Catalogue);
   readonly priority = PRIORITY_LABEL;
   readonly rows = computed(() =>
-    [...(this.catalogue.gifts() ?? [])]
+    [...(this.catalogue.meId() ? this.catalogue.giftsFor(this.catalogue.meId()!) : [])]
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((gift) => ({ gift, category: this.catalogue.category(gift.categoryId)?.name ?? null })),
   );

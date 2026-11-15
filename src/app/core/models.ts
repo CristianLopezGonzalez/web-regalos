@@ -11,7 +11,18 @@ export interface Profile {
   email: string;
   displayName: string;
   role: Role;
+  /** Has a wish list of their own: the owner, and anyone invited "con su propia lista" (e.g. Angela). */
+  hasList: boolean;
   createdAt: string;
+}
+
+/**
+ * One person's wish list. Its id IS that person's profile id (gifts.recipient_id).
+ * Nobody sees which of their OWN gifts are reserved: enforced by RLS on gift_status.
+ */
+export interface WishList {
+  id: string;
+  name: string;
 }
 
 export interface Category {
@@ -41,7 +52,9 @@ export interface Gift {
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
-  /** Public status only (gift_status.is_reserved). Never who. */
+  /** Whose wish it is: the WishList (= profile) id. */
+  forId: string;
+  /** Public status only (gift_status.is_reserved). Never who. Always false on your own gifts. */
   isReserved: boolean;
 }
 
@@ -60,6 +73,8 @@ export type InvitationState = 'pending' | 'used' | 'expired' | 'revoked';
 
 export interface Invitation {
   id: string;
+  /** The account created from it gets a wish list of its own. */
+  withList: boolean;
   emailRestriction: string | null;
   expiresAt: string;
   usedAt: string | null;
@@ -75,6 +90,7 @@ export type ApiErrorCode =
   | 'GIFT_ALREADY_RESERVED'
   | 'NO_RESERVATION_TO_CANCEL'
   | 'ONLY_FAMILY_CAN_RESERVE'
+  | 'CANNOT_RESERVE_OWN_GIFT'
   | 'GIFT_NOT_FOUND'
   | 'FORBIDDEN'
   | 'INVALID_CREDENTIALS'

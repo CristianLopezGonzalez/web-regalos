@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Session } from '../../core/session';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 /**
@@ -13,7 +14,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     <nav class="as" aria-label="Administración">
       <p class="as-title">Trastienda</p>
       <ol role="list">
-        @for (i of items; track i.link; let n = $index) {
+        @for (i of items(); track i.link; let n = $index) {
           <li>
             <a [routerLink]="i.link" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: i.exact }" ariaCurrentWhenActive="page">
               <span class="as-floor tabular" aria-hidden="true">{{ floors[n] }}</span>
@@ -22,7 +23,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           </li>
         }
       </ol>
-      <a class="as-back" routerLink="/wishlist">Ver la wishlist como la familia <span aria-hidden="true">→</span></a>
+      <a class="as-back" routerLink="/wishlist">Ver las listas <span aria-hidden="true">→</span></a>
     </nav>
   `,
   styles: `
@@ -118,12 +119,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   `,
 })
 export class AdminSidebar {
+  private readonly session = inject(Session);
   readonly floors = ['G', '1', '2', '3', '4'];
-  readonly items = [
+  /** Someone with a list but not the owner (Angela) only manages her own gifts. */
+  readonly items = computed(() => [
     { label: 'Resumen', link: '/admin', exact: true },
-    { label: 'Regalos', link: '/admin/gifts', exact: false },
-    { label: 'Categorías', link: '/admin/categories', exact: true },
-    { label: 'Invitaciones', link: '/admin/invitations', exact: true },
-    { label: 'Familia', link: '/admin/family', exact: true },
-  ];
+    { label: 'Mis regalos', link: '/admin/gifts', exact: false },
+    ...(this.session.isOwner()
+      ? [
+          { label: 'Categorías', link: '/admin/categories', exact: true },
+          { label: 'Invitaciones', link: '/admin/invitations', exact: true },
+          { label: 'Familia', link: '/admin/family', exact: true },
+        ]
+      : []),
+  ]);
 }

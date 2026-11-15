@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { DEMO_ACCOUNTS, DEMO_CATEGORIES, DEMO_GIFTS, DEMO_INVITE_TOKEN } from './demo-data';
-import { ApiError, Category, Gift, GiftImage, GiftInput, Invitation, Profile, Role } from './models';
+import { ApiError, Category, Gift, GiftImage, GiftInput, Invitation, Profile, Role, WishList } from './models';
 import { WishlistApi } from './wishlist-api';
 
 /*
@@ -25,7 +25,7 @@ interface DemoInvitation extends Invitation {
   role: Role;
 }
 interface DemoState {
-  v: 1;
+  v: 2;
   users: DemoUser[];
   categories: Category[];
   gifts: Omit<Gift, 'isReserved'>[];
@@ -33,7 +33,7 @@ interface DemoState {
   invitations: DemoInvitation[];
 }
 
-const DATA_KEY = 'mcw-demo-data-v1';
+const DATA_KEY = 'mcw-demo-data-v2'; // v2: two wish lists
 const SESSION_KEY = 'mcw-demo-session';
 const CHANNEL = 'mcw-demo-status';
 
@@ -91,8 +91,8 @@ export class DemoApi extends WishlistApi {
 
   constructor() {
     super();
-    this.channel?.addEventListener('message', (e: MessageEvent<{ giftId: string; isReserved: boolean }>) =>
-      this.listeners.forEach((l) => l(e.data.giftId, e.data.isReserved)),
+    this.channel?.addEventListener('message', (e: MessageEvent<{ giftId: string; forId: string; isReserved: boolean }>) =>
+      this.notify(e.data.giftId, e.data.forId, e.data.isReserved),
     );
     void this.restore();
   }
@@ -106,6 +106,7 @@ export class DemoApi extends WishlistApi {
       password: a.password,
       displayName: a.displayName,
       role: key === 'owner' ? 'owner' : 'family',
+      hasList: key === 'owner' || key === 'partner',
       createdAt: new Date(Date.now() - (30 - i * 6) * 86400000).toISOString(),
     }));
     const img = (p: string): GiftImage => ({
@@ -114,7 +115,7 @@ export class DemoApi extends WishlistApi {
       lg: `stand-ins/${p}-960.jpg`,
     });
     return {
-      v: 1,
+      v: 2,
       users,
       categories: DEMO_CATEGORIES.map((c) => ({ ...c })),
       gifts: DEMO_GIFTS.map((g, i) => ({
@@ -128,6 +129,7 @@ export class DemoApi extends WishlistApi {
         categoryId: g.categoryId,
         priority: g.priority,
         isFavorite: g.isFavorite,
+        forId: `u-${g.forAccount}`,
         createdAt: new Date(Date.now() - (20 - i) * 86400000).toISOString(),
         updatedAt: t,
       })),
@@ -140,6 +142,7 @@ export class DemoApi extends WishlistApi {
           id: uid(),
           tokenHash: await sha256(DEMO_INVITE_TOKEN),
           role: 'family',
+          withList: false,
           emailRestriction: null,
           expiresAt: new Date(Date.now() + 14 * 86400000).toISOString(),
           usedAt: null,
@@ -155,7 +158,7 @@ export class DemoApi extends WishlistApi {
     if (raw) {
       try {
         const s = JSON.parse(raw) as DemoState;
-        if (s.v === 1) return s;
+        if (s.v === 2) return s;
       } catch {
         /* fall through to a fresh seed */
       }
@@ -193,13 +196,28 @@ export class DemoApi extends WishlistApi {
     if (this.me(s).role !== 'owner') throw new ApiError('FORBIDDEN');
   }
 
-  private withStatus(s: DemoState, g: Omit<Gift, 'isReserved'>): Gift {
-    return { ...g, isReserved: s.reservations.some((r) => r.giftId === g.id) };
+  private hasList(s: DemoState) {
+    const u = this.me(s);
+    if (!u.hasList) throw new ApiError('FORBIDDEN');
+    return u;
   }
 
-  private broadcast(giftId: string, isReserved: boolean) {
-    this.channel?.postMessage({ giftId, isReserved });
+  /** Mirrors the gift_status RLS policy: your own gifts never show as reserved. */
+  private withStatus(s: DemoState, g: Omit<Gift, 'isReserved'>): Gift {
+    const mine = g.forId === this.profile()?.id;
+    return { ...g, isReserved: !mine && s.reservations.some((r) => r.giftId === g.id) };
+  }
+
+  /** Mirrors Realtime + RLS: status changes of your own gifts are never delivered to you. */
+  private notify(giftId: string, forId: string, isReserved: boolean) {
+    if (forId === this.profile()?.id) return;
     this.listeners.forEach((l) => l(giftId, isReserved));
+  }
+
+  private broadcast(s: DemoState, giftId: string, isReserved: boolean) {
+    const forId = s.gifts.find((g) => g.id === giftId)?.forId ?? '';
+    this.channel?.postMessage({ giftId, forId, isReserved });
+    this.notify(giftId, forId, isReserved);
   }
 
   // ---------------------------------------------------------------- auth
@@ -240,6 +258,7 @@ export class DemoApi extends WishlistApi {
       password: input.password,
       displayName: input.displayName.trim() || email.split('@')[0],
       role: inv.role,
+      hasList: inv.withList,
       createdAt: now(),
     };
     inv.usedAt = now();
@@ -282,6 +301,16 @@ export class DemoApi extends WishlistApi {
   }
 
   // ---------------------------------------------------------------- catalogue
+  async listWishLists(): Promise<WishList[]> {
+    await wait(120);
+    const s = await this.load();
+    this.me(s);
+    return s.users
+      .filter((u) => u.hasList)
+      .sort((a, b) => Number(b.role === 'owner') - Number(a.role === 'owner') || a.createdAt.localeCompare(b.createdAt))
+      .map((u) => ({ id: u.id, name: u.displayName }));
+  }
+
   async listCategories() {
     await wait(120);
     const s = await this.load();
@@ -317,13 +346,15 @@ export class DemoApi extends WishlistApi {
     await this.exclusive(async () => {
       const s = await this.load();
       const u = this.me(s);
-      if (u.role !== 'family') throw new ApiError('ONLY_FAMILY_CAN_RESERVE');
-      if (!s.gifts.some((g) => g.id === giftId)) throw new ApiError('GIFT_NOT_FOUND');
+      const g = s.gifts.find((x) => x.id === giftId);
+      if (!g) throw new ApiError('GIFT_NOT_FOUND');
+      // Checked before "already reserved", so trying never reveals the state of your own gift.
+      if (g.forId === u.id) throw new ApiError('CANNOT_RESERVE_OWN_GIFT');
       if (s.reservations.some((r) => r.giftId === giftId)) throw new ApiError('GIFT_ALREADY_RESERVED');
       s.reservations.push({ giftId, reservedBy: u.id });
       this.save(s);
+      this.broadcast(s, giftId, true);
     });
-    this.broadcast(giftId, true);
   }
 
   private exclusive<T>(fn: () => Promise<T>): Promise<T> {
@@ -338,7 +369,7 @@ export class DemoApi extends WishlistApi {
     if (i < 0) throw new ApiError('NO_RESERVATION_TO_CANCEL');
     s.reservations.splice(i, 1);
     this.save(s);
-    this.broadcast(giftId, false);
+    this.broadcast(s, giftId, false);
   }
 
   async myReservations() {
@@ -358,9 +389,9 @@ export class DemoApi extends WishlistApi {
   async createGift(input: GiftInput, image: Blob[] | null) {
     await wait(500);
     const s = await this.load();
-    this.owner(s);
+    const u = this.hasList(s);
     const t = now();
-    const g = { id: uid(), ...input, image: image ? await this.storeImage(image) : null, createdAt: t, updatedAt: t };
+    const g = { id: uid(), ...input, image: image ? await this.storeImage(image) : null, forId: u.id, createdAt: t, updatedAt: t };
     s.gifts.push(g);
     this.save(s);
     return this.withStatus(s, g);
@@ -369,9 +400,10 @@ export class DemoApi extends WishlistApi {
   async updateGift(id: string, input: GiftInput, image: Blob[] | null | 'remove') {
     await wait(450);
     const s = await this.load();
-    this.owner(s);
+    const u = this.hasList(s);
     const g = s.gifts.find((x) => x.id === id);
     if (!g) throw new ApiError('GIFT_NOT_FOUND');
+    if (g.forId !== u.id) throw new ApiError('FORBIDDEN'); // only your own wishes
     Object.assign(g, input, { updatedAt: now() });
     if (image === 'remove') g.image = null;
     else if (image) g.image = await this.storeImage(image);
@@ -382,7 +414,8 @@ export class DemoApi extends WishlistApi {
   async deleteGift(id: string) {
     await wait(350);
     const s = await this.load();
-    this.owner(s);
+    const u = this.hasList(s);
+    if (s.gifts.find((g) => g.id === id)?.forId !== u.id) throw new ApiError('FORBIDDEN');
     s.gifts = s.gifts.filter((g) => g.id !== id);
     s.reservations = s.reservations.filter((r) => r.giftId !== id); // cascade
     this.save(s);
@@ -392,9 +425,11 @@ export class DemoApi extends WishlistApi {
     await wait(300);
     const s = await this.load();
     this.owner(s);
+    // Never on your own gifts: that would spoil your surprise.
+    if (s.gifts.find((g) => g.id === id)?.forId === this.me(s).id) throw new ApiError('FORBIDDEN');
     s.reservations = s.reservations.filter((r) => r.giftId !== id);
     this.save(s);
-    this.broadcast(id, false);
+    this.broadcast(s, id, false);
   }
 
   async saveCategory(c: { id?: string; name: string }) {
@@ -447,7 +482,7 @@ export class DemoApi extends WishlistApi {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  async createInvitation(email: string | null, days: number) {
+  async createInvitation(email: string | null, days: number, withList = false) {
     await wait(350);
     const s = await this.load();
     this.owner(s);
@@ -457,6 +492,7 @@ export class DemoApi extends WishlistApi {
       id: uid(),
       tokenHash: await sha256(token),
       role: 'family',
+      withList,
       emailRestriction: email?.trim().toLowerCase() || null,
       expiresAt: new Date(Date.now() + Math.min(Math.max(days, 1), 60) * 86400000).toISOString(),
       usedAt: null,
@@ -488,6 +524,10 @@ export class DemoApi extends WishlistApi {
     const s = await this.load();
     this.owner(s);
     s.users = s.users.filter((u) => !(u.id === id && u.role === 'family'));
+    // Someone with a list of their own takes it with them (gifts.recipient_id … on delete cascade).
+    const gone = new Set(s.gifts.filter((g) => g.forId === id).map((g) => g.id));
+    s.gifts = s.gifts.filter((g) => !gone.has(g.id));
+    s.reservations = s.reservations.filter((r) => !gone.has(r.giftId));
     // Their reservations stay (reserved_by → null): removing someone must not reveal what they held.
     s.reservations.forEach((r) => {
       if (r.reservedBy === id) r.reservedBy = null;

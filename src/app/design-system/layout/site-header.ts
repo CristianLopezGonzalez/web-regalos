@@ -214,7 +214,10 @@ export class SiteHeader {
 
   readonly right = computed<NavItem[]>(() =>
     this.session.signedIn()
-      ? [...(this.session.isOwner() ? [{ label: 'Admin', link: '/admin' }] : []), { label: 'Perfil', link: '/profile' }]
+      ? [
+          ...(this.session.hasList() ? [{ label: this.session.isOwner() ? 'Admin' : 'Mi lista', link: '/admin' }] : []),
+          { label: 'Perfil', link: '/profile' },
+        ]
       : [{ label: 'Entrar', link: '/login' }],
   );
 

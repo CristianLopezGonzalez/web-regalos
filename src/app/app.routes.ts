@@ -1,6 +1,6 @@
 import { isDevMode } from '@angular/core';
 import { Routes } from '@angular/router';
-import { guestGuard, ownerGuard, signedInGuard } from './core/session';
+import { guestGuard, listGuard, signedInGuard } from './core/session';
 
 /** Guards only route people sensibly; the database enforces every permission (RLS + RPC). */
 export const routes: Routes = [
@@ -42,7 +42,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canMatch: [ownerGuard],
+    canMatch: [listGuard],
     loadComponent: () => import('./features/admin/admin-shell').then((m) => m.AdminShell),
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },

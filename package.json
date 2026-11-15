@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "start:demo": "ng serve --configuration demo --port 4400"
   },
   "private": true,
   "packageManager": "npm@12.1.0",

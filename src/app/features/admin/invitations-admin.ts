@@ -38,6 +38,16 @@ const STATE_LABEL: Record<InvitationState, string> = {
           }
         </div>
         <div class="field">
+          <label class="field-label" for="iv-kind">Tipo de cuenta</label>
+          <select id="iv-kind" class="input" name="withList" [(ngModel)]="withList" aria-describedby="iv-kind-msg">
+            <option [ngValue]="false">Familia</option>
+            <option [ngValue]="true">Con su propia lista</option>
+          </select>
+          <p class="field-hint" id="iv-kind-msg">
+            {{ withList ? 'Podrá añadir sus deseos y reservar los de los demás. No verá lo que le reserven.' : 'Verá las listas y podrá reservar regalos.' }}
+          </p>
+        </div>
+        <div class="field">
           <label class="field-label" for="iv-days">Caduca en</label>
           <select id="iv-days" class="input" name="days" [(ngModel)]="days">
             <option [ngValue]="7">7 días</option>
@@ -70,7 +80,12 @@ const STATE_LABEL: Record<InvitationState, string> = {
         <ul class="iv-list" role="list">
           @for (r of rows(); track r.inv.id) {
             <li>
-              <span class="iv-who">{{ r.inv.emailRestriction ?? 'Cualquier email' }}</span>
+              <span class="iv-who">
+                {{ r.inv.emailRestriction ?? 'Cualquier email' }}
+                @if (r.inv.withList) {
+                  <span class="iv-kind">· con su propia lista</span>
+                }
+              </span>
               <span class="iv-dates">Creada el {{ short(r.inv.createdAt) }} · {{ r.state === 'used' ? 'usada el ' + short(r.inv.usedAt!) : 'caduca el ' + short(r.inv.expiresAt) }}</span>
               <span class="iv-state" [class]="'iv-state iv-' + r.state">{{ label[r.state] }}</span>
               @if (r.state === 'pending') {
@@ -100,11 +115,11 @@ const STATE_LABEL: Record<InvitationState, string> = {
     .iv-form {
       display: grid;
       gap: 20px;
-      max-width: 720px;
+      max-width: 980px;
     }
     @media (min-width: 768px) {
       .iv-form {
-        grid-template-columns: minmax(0, 1fr) 10rem auto;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 8.5rem auto;
         align-items: start;
       }
       .iv-form .btn {
@@ -145,6 +160,10 @@ const STATE_LABEL: Record<InvitationState, string> = {
         grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) 7rem 6rem;
       }
     }
+    .iv-kind {
+      font: italic 400 15px/1.4 var(--font-serif);
+      color: var(--color-ink-soft);
+    }
     .iv-who {
       font-size: 17px;
       overflow-wrap: anywhere;
@@ -181,6 +200,7 @@ export class InvitationsAdmin {
 
   email = '';
   days = 14;
+  withList = false;
   readonly busy = signal(false);
   readonly link = signal<string | null>(null);
   readonly copied = signal(false);
@@ -206,9 +226,10 @@ export class InvitationsAdmin {
     this.busy.set(true);
     this.copied.set(false);
     try {
-      const token = await this.api.createInvitation(this.email.trim() || null, this.days);
+      const token = await this.api.createInvitation(this.email.trim() || null, this.days, this.withList);
       this.link.set(`${location.origin}/register?invite=${encodeURIComponent(token)}`);
       this.email = '';
+      this.withList = false;
       this.submitted.set(false);
       this.list.reload();
     } catch (e) {

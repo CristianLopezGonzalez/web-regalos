@@ -8,7 +8,7 @@ import { Toasts } from '../../core/toast';
 import { Modal } from '../feedback/modal';
 
 /**
- * The reservation control, for family members only (the owner never sees it).
+ * The reservation control, for everyone except on their own wishes (those stay a surprise).
  *  available     → "Reservar este regalo" → confirm → plaque appears
  *  mine          → "Lo has reservado tú" + cancel
  *  reserved      → disabled, with the reason
@@ -20,13 +20,13 @@ import { Modal } from '../feedback/modal';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
-    @if (session.isFamily()) {
+    @if (canReserve()) {
       @switch (state()) {
         @case ('available') {
           <button type="button" class="btn btn-primary rb-main" [class.animate-shake]="shake()" (animationend)="shake.set(false)" (click)="confirm.set(true)">
             Reservar este regalo
           </button>
-          <p class="rb-note">Nadie sabrá que has sido tú, ni siquiera yo.</p>
+          <p class="rb-note">Nadie sabrá que has sido tú, ni siquiera {{ recipient() }}.</p>
         }
         @case ('mine') {
           <div class="rb-mine">
@@ -37,7 +37,7 @@ import { Modal } from '../feedback/modal';
         }
         @case ('reserved') {
           <button type="button" class="btn btn-primary rb-main" disabled aria-describedby="rb-why">Ya está reservado</button>
-          <p class="rb-note" id="rb-why">Otra persona de la familia se ha adelantado. Hay más deseos en la lista.</p>
+          <p class="rb-note" id="rb-why">Otra persona se ha adelantado. Hay más deseos en la lista.</p>
         }
       }
 
@@ -130,6 +130,9 @@ export class ReserveButton {
   readonly cancelOpen = signal(false);
   readonly busy = signal(false);
   readonly shake = signal(false);
+  /** Never on your own wishes (the database refuses it too). */
+  readonly canReserve = computed(() => !!this.session.profile() && !this.catalogue.isMine(this.gift()));
+  readonly recipient = computed(() => this.catalogue.list(this.gift().forId)?.name ?? 'la persona de la lista');
 
   readonly state = computed(() =>
     this.catalogue.mine().has(this.gift().id) ? 'mine' : this.gift().isReserved ? 'reserved' : 'available',

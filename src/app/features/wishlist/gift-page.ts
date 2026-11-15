@@ -12,7 +12,9 @@ import { GiftGrid } from '../../design-system/gift/gift-grid';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="wrap gp">
-      <a class="gp-back" routerLink="/wishlist"><span aria-hidden="true">←</span> Volver a la wishlist</a>
+      <a class="gp-back" routerLink="/wishlist" [queryParams]="{ para: gift()?.forId ?? null }">
+        <span aria-hidden="true">←</span> {{ backLabel() }}
+      </a>
 
       @if (!catalogue.loaded()) {
         <div class="gp-skel" aria-busy="true" aria-label="Cargando el regalo">
@@ -116,11 +118,16 @@ export class GiftPage {
 
   readonly gift = computed(() => this.catalogue.gift(this.id()));
 
-  /** Same department first, then anything still available. */
+  readonly backLabel = computed(() => {
+    const l = this.catalogue.list(this.gift()?.forId);
+    return l ? `Volver a ${l.id === this.catalogue.meId() ? 'tu lista' : 'la lista de ' + l.name}` : 'Volver a la wishlist';
+  });
+
+  /** Same list only: same department first, then anything still available. */
   readonly more = computed(() => {
     const g = this.gift();
-    const all = this.catalogue.gifts() ?? [];
     if (!g) return [];
+    const all = this.catalogue.giftsFor(g.forId);
     const same = all.filter((x) => x.id !== g.id && x.categoryId === g.categoryId);
     const rest = all.filter((x) => x.id !== g.id && x.categoryId !== g.categoryId && !x.isReserved);
     return [...same, ...rest].slice(0, 4);

@@ -14,6 +14,7 @@ import {
   Priority,
   Profile,
   Role,
+  WishList,
 } from './models';
 import { WishlistApi } from './wishlist-api';
 
@@ -41,15 +42,18 @@ interface GiftRow {
   is_favorite: boolean;
   created_at: string;
   updated_at: string;
+  recipient_id: string;
+  /** null on your own gifts: RLS hides their status from you (the surprise). */
   gift_status: { is_reserved: boolean } | null;
 }
 const GIFT_COLUMNS =
-  'id, name, description, price, currency, image_path, purchase_url, category_id, priority, is_favorite, created_at, updated_at, gift_status(is_reserved)';
+  'id, name, description, price, currency, image_path, purchase_url, category_id, priority, is_favorite, created_at, updated_at, recipient_id, gift_status(is_reserved)';
 
 const CODES: ApiErrorCode[] = [
   'GIFT_ALREADY_RESERVED',
   'NO_RESERVATION_TO_CANCEL',
   'ONLY_FAMILY_CAN_RESERVE',
+  'CANNOT_RESERVE_OWN_GIFT',
   'GIFT_NOT_FOUND',
   'FORBIDDEN',
   'INVITATION_EMAIL_MISMATCH',
@@ -167,7 +171,7 @@ export class SupabaseApi extends WishlistApi {
     if (this.loadedFor === uid && this.profile()) return;
     const { data, error } = await sb
       .from('profiles')
-      .select('id, email, display_name, role, created_at')
+      .select('id, email, display_name, role, has_list, created_at')
       .eq('id', uid)
       .maybeSingle();
     if (error || !data) {
@@ -182,6 +186,7 @@ export class SupabaseApi extends WishlistApi {
       email: data.email,
       displayName: data.display_name,
       role: data.role as Role,
+      hasList: !!data.has_list,
       createdAt: data.created_at,
     });
   }
@@ -283,6 +288,12 @@ export class SupabaseApi extends WishlistApi {
   }
 
   // ---------------------------------------------------------------- catalogue
+  async listWishLists(): Promise<WishList[]> {
+    const sb = await this.c();
+    const rows = check(await sb.rpc('wish_lists')) as unknown as { id: string; name: string }[] | null;
+    return (rows ?? []).map((r) => ({ id: r.id, name: r.name }));
+  }
+
   async listCategories(): Promise<Category[]> {
     const sb = await this.c();
     const rows = check(
@@ -348,6 +359,7 @@ export class SupabaseApi extends WishlistApi {
       isFavorite: r.is_favorite,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
+      forId: r.recipient_id,
       isReserved: !!r.gift_status?.is_reserved,
     };
   }
@@ -536,12 +548,13 @@ export class SupabaseApi extends WishlistApi {
     const rows = check(
       await sb
         .from('invitations')
-        .select('id, email_restriction, expires_at, used_at, revoked_at, created_at')
+        .select('id, with_list, email_restriction, expires_at, used_at, revoked_at, created_at')
         .eq('role', 'family')
         .order('created_at', { ascending: false }),
     );
     return rows.map((i) => ({
       id: i.id,
+      withList: !!i.with_list,
       emailRestriction: i.email_restriction,
       expiresAt: i.expires_at,
       usedAt: i.used_at,
@@ -550,10 +563,10 @@ export class SupabaseApi extends WishlistApi {
     }));
   }
 
-  async createInvitation(email: string | null, days: number) {
+  async createInvitation(email: string | null, days: number, withList = false) {
     const sb = await this.c();
     return check(
-      await sb.rpc('create_invitation', { p_email: email, p_days: days }),
+      await sb.rpc('create_invitation', { p_email: email, p_days: days, p_with_list: withList }),
     ) as unknown as string;
   }
 
@@ -573,7 +586,7 @@ export class SupabaseApi extends WishlistApi {
     const rows = check(
       await sb
         .from('profiles')
-        .select('id, email, display_name, role, created_at')
+        .select('id, email, display_name, role, has_list, created_at')
         .eq('role', 'family')
         .order('created_at'),
     );
@@ -582,6 +595,7 @@ export class SupabaseApi extends WishlistApi {
       email: p.email,
       displayName: p.display_name,
       role: p.role as Role,
+      hasList: !!p.has_list,
       createdAt: p.created_at,
     }));
   }

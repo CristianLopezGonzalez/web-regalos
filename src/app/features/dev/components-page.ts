@@ -16,6 +16,7 @@ const sample = (id: string, name: string, photo: string | null, over: Partial<Gi
   id,
   name,
   description: '',
+  forId: 'sample',
   price: 68,
   currency: 'EUR',
   image: photo ? { sm: `stand-ins/${photo}-500.jpg`, md: `stand-ins/${photo}-960.jpg`, lg: `stand-ins/${photo}-960.jpg` } : null,

@@ -19,15 +19,15 @@ import { WishlistApi } from '../../core/wishlist-api';
             @if (session.signedIn()) {
               <li><a routerLink="/wishlist">Wishlist</a></li>
               <li><a routerLink="/profile">Perfil</a></li>
-              @if (session.isOwner()) {
-                <li><a routerLink="/admin">Admin</a></li>
+              @if (session.hasList()) {
+                <li><a routerLink="/admin">{{ session.isOwner() ? 'Admin' : 'Mi lista' }}</a></li>
               }
               <li><button type="button" (click)="signOut()">Cerrar sesión</button></li>
             } @else {
               <li><a routerLink="/login">Entrar</a></li>
             }
           </ul>
-          <p>Las reservas son anónimas: la aplicación no muestra a nadie quién ha reservado cada regalo, tampoco a la dueña de la lista.</p>
+          <p>Las reservas son anónimas: nadie ve quién ha reservado cada regalo, y nadie ve qué está reservado de su propia lista.</p>
         </div>
         @if (api.isDemo) {
           <p class="sf-credits">Modo demo: datos simulados en este navegador. {{ credits }}</p>

@@ -1,22 +1,27 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
-import { Category, Gift } from './models';
+import { Category, Gift, WishList } from './models';
 import { WishlistApi } from './wishlist-api';
 
 /**
- * In-memory view of the wishlist for the signed-in person: gifts, categories, live
- * reservation status and (family only) which reservations are theirs.
+ * In-memory view of the wishlists for the signed-in person: the lists (one per person with a
+ * list of their own), gifts, categories, live reservation status and which reservations are theirs.
+ * Your own gifts always arrive as "not reserved": the database hides that from you.
  */
 @Injectable({ providedIn: 'root' })
 export class Catalogue {
   private readonly api = inject(WishlistApi);
 
+  readonly lists = signal<WishList[] | null>(null);
   readonly gifts = signal<Gift[] | null>(null);
   readonly categories = signal<Category[] | null>(null);
-  /** Gift ids reserved by the current family member (my_reservations RPC). */
+  /** Gift ids reserved by the current person (my_reservations RPC). */
   readonly mine = signal<ReadonlySet<string>>(new Set());
   readonly error = signal<unknown>(null);
 
-  readonly loaded = computed(() => this.gifts() !== null && this.categories() !== null);
+  readonly loaded = computed(() => this.gifts() !== null && this.categories() !== null && this.lists() !== null);
+  /** The signed-in person's id = the id of their own list, if they have one. */
+  readonly meId = computed(() => this.api.profile()?.id ?? null);
+  readonly myList = computed(() => this.lists()?.find((l) => l.id === this.meId()) ?? null);
   readonly favorites = computed(() => (this.gifts() ?? []).filter((g) => g.isFavorite));
   readonly stats = computed(() => {
     const g = this.gifts() ?? [];
@@ -42,6 +47,7 @@ export class Catalogue {
     this.unwatch?.();
     this.unwatch = null;
     this.loading = null;
+    this.lists.set(null);
     this.gifts.set(null);
     this.categories.set(null);
     this.mine.set(new Set());
@@ -53,12 +59,13 @@ export class Catalogue {
     this.error.set(null);
     this.loading = (async () => {
       try {
-        const isFamily = this.api.profile()?.role === 'family';
-        const [gifts, categories, mine] = await Promise.all([
+        const [lists, gifts, categories, mine] = await Promise.all([
+          this.api.listWishLists(),
           this.api.listGifts(),
           this.api.listCategories(),
-          isFamily ? this.api.myReservations() : Promise.resolve([]),
+          this.api.myReservations(),
         ]);
+        this.lists.set(lists);
         this.gifts.set(gifts);
         this.categories.set(categories);
         this.mine.set(new Set(mine));
@@ -74,6 +81,20 @@ export class Catalogue {
   gift(id: string) {
     return this.gifts()?.find((g) => g.id === id) ?? null;
   }
+  /** One of the signed-in person's own wishes (its reservation state is a surprise). */
+  isMine(g: Gift) {
+    return g.forId === this.meId();
+  }
+  list(id: string | null | undefined) {
+    return id ? (this.lists()?.find((l) => l.id === id) ?? null) : null;
+  }
+  giftsFor(listId: string) {
+    return (this.gifts() ?? []).filter((g) => g.forId === listId);
+  }
+  /** "Tu lista" for your own, "La lista de Angela" for the rest. */
+  listTitle(l: WishList) {
+    return l.id === this.meId() ? 'Tu lista' : `La lista de ${l.name}`;
+  }
   category(id: string | null) {
     return id ? (this.categories()?.find((c) => c.id === id) ?? null) : null;
   }
@@ -82,7 +103,8 @@ export class Catalogue {
   }
 
   setStatus(giftId: string, isReserved: boolean) {
-    this.gifts.update((l) => l?.map((g) => (g.id === giftId ? { ...g, isReserved } : g)) ?? l);
+    // Belt and braces: the database never sends these for your own gifts.
+    this.gifts.update((l) => l?.map((g) => (g.id === giftId && !this.isMine(g) ? { ...g, isReserved } : g)) ?? l);
   }
 
   async reserve(giftId: string) {

@@ -33,10 +33,10 @@ import { ReserveButton } from './reserve-button';
 
       <div class="gd-card">
         <p class="gd-crumbs caps">
-          <a routerLink="/wishlist">Wishlist</a>
+          <a routerLink="/wishlist" [queryParams]="{ para: gift().forId }">{{ listName() }}</a>
           @if (category()) {
             <span class="diamond" aria-hidden="true"></span>
-            <a routerLink="/wishlist" [queryParams]="{ categoria: category()!.slug }">{{ category()!.name }}</a>
+            <a routerLink="/wishlist" [queryParams]="{ para: gift().forId, categoria: category()!.slug }">{{ category()!.name }}</a>
           }
         </p>
         <h1 class="gd-name">{{ gift().name }}</h1>
@@ -56,17 +56,16 @@ import { ReserveButton } from './reserve-button';
         }
 
         <div class="gd-actions">
-          @if (session.isFamily()) {
-            <app-reserve-button [gift]="gift()" />
-          } @else if (session.isOwner()) {
+          @if (isMyWish()) {
             <div class="gd-owner">
               <p class="gd-owner-state">
-                <span class="caps">Estado</span>
-                <app-reservation-badge [reserved]="gift().isReserved" />
+                <span class="caps">Es uno de tus deseos</span>
               </p>
               <a class="btn btn-outline btn-sm" [routerLink]="['/admin/gifts', gift().id]">Editar regalo</a>
             </div>
-            <p class="gd-owner-note">Ves si está reservado, pero nunca quién lo ha reservado.</p>
+            <p class="gd-owner-note">Para que sea sorpresa, no verás si alguien lo ha reservado.</p>
+          } @else {
+            <app-reserve-button [gift]="gift()" />
           }
           @if (gift().purchaseUrl) {
             <a class="gd-shop" [href]="gift().purchaseUrl" target="_blank" rel="noopener noreferrer external">
@@ -213,6 +212,12 @@ export class GiftDetail {
   readonly session = inject(Session);
   private readonly catalogue = inject(Catalogue);
   readonly mine = computed(() => this.catalogue.mine().has(this.gift().id));
+  /** Your own wish: no reserve button, no status (the database doesn't even send it). */
+  readonly isMyWish = computed(() => this.catalogue.isMine(this.gift()));
+  readonly listName = computed(() => {
+    const l = this.catalogue.list(this.gift().forId);
+    return l ? (l.id === this.catalogue.meId() ? 'Tu lista' : `Lista de ${l.name}`) : 'Wishlist';
+  });
   readonly rank = computed(() => PRIORITY_RANK[this.gift().priority]);
   readonly priorityLabel = computed(() => PRIORITY_LABEL[this.gift().priority]);
 }

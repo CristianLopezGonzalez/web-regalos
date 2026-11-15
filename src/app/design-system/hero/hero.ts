@@ -59,9 +59,9 @@ const TOTAL_MS = 6000;
           </h1>
           <p class="hv-sub">Un poco de magia, muchos deseos.</p>
           @if (ctaFragment()) {
-            <a class="hv-cta" [routerLink]="[]" [fragment]="ctaFragment()!">Descubre mi wishlist</a>
+            <a class="hv-cta" [routerLink]="[]" [fragment]="ctaFragment()!">Descubre la wishlist</a>
           } @else {
-            <a class="hv-cta" [routerLink]="ctaLink()">Descubre mi wishlist</a>
+            <a class="hv-cta" [routerLink]="ctaLink()">Descubre la wishlist</a>
           }
         </div>
 

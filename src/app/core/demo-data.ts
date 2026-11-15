@@ -5,10 +5,13 @@ import { Category, Currency, Priority } from './models';
  * footer while demo mode is on); in production the owner uploads her own.
  */
 export const DEMO_ACCOUNTS = {
-  owner: { email: 'yo@demo.test', password: 'navidad', displayName: 'Yo' },
+  owner: { email: 'yo@demo.test', password: 'navidad', displayName: 'Cristian' },
+  /** Has a list of her own: manages her gifts, never sees their reservations. */
+  partner: { email: 'angela@demo.test', password: 'navidad', displayName: 'Angela' },
   family: { email: 'mama@demo.test', password: 'navidad', displayName: 'Mamá' },
   family2: { email: 'tio@demo.test', password: 'navidad', displayName: 'Tío Javier' },
 };
+export type DemoAccount = keyof typeof DEMO_ACCOUNTS;
 /** A pre-made, valid invitation so the register flow can be tried in demo mode. */
 export const DEMO_INVITE_TOKEN = 'demo-invitacion-navidad';
 
@@ -32,12 +35,15 @@ interface SeedGift {
   categoryId: string;
   priority: Priority;
   isFavorite: boolean;
-  reservedBy?: keyof typeof DEMO_ACCOUNTS;
+  /** Whose wish it is. */
+  forAccount: 'owner' | 'partner';
+  reservedBy?: DemoAccount;
 }
 
 export const DEMO_GIFTS: SeedGift[] = [
   {
     id: 'g-atomizador',
+    forAccount: 'partner',
     name: 'Atomizador de cristal cobalto',
     description: 'Cristal tallado con pera de seda, para el tocador. Me encanta cómo atrapa la luz por la mañana.',
     price: 68,
@@ -50,6 +56,7 @@ export const DEMO_GIFTS: SeedGift[] = [
   },
   {
     id: 'g-vela',
+    forAccount: 'owner',
     name: 'Vela de higo y cedro',
     description: 'Vaso de escayola, cera de soja y unas cuarenta horas de llama. Para las tardes de lectura.',
     price: 42,
@@ -63,6 +70,7 @@ export const DEMO_GIFTS: SeedGift[] = [
   },
   {
     id: 'g-reloj',
+    forAccount: 'owner',
     name: 'Reloj de esfera crema',
     description: 'Caja fina, correa de malla de acero y sin números. Discreto para llevarlo todos los días.',
     price: 189,
@@ -75,6 +83,7 @@ export const DEMO_GIFTS: SeedGift[] = [
   },
   {
     id: 'g-pluma',
+    forAccount: 'owner',
     name: 'Pluma estilográfica de plumín dorado',
     description: 'Plumín medio y resina negra. Para escribir las tarjetas de Navidad del año que viene.',
     price: 145,
@@ -84,9 +93,11 @@ export const DEMO_GIFTS: SeedGift[] = [
     categoryId: 'c-papeleria',
     priority: 'medium',
     isFavorite: true,
+    reservedBy: 'partner',
   },
   {
     id: 'g-ambar',
+    forAccount: 'partner',
     name: 'Eau de parfum de ámbar',
     description: 'Cálido y resinoso, en un estuche lacado. Huele a invierno.',
     price: 120,
@@ -99,6 +110,7 @@ export const DEMO_GIFTS: SeedGift[] = [
   },
   {
     id: 'g-tetera',
+    forAccount: 'partner',
     name: 'Tetera de porcelana pintada',
     description: 'Rosas pintadas a mano; caben cuatro tazas. Para los domingos largos.',
     price: 85,
@@ -108,9 +120,11 @@ export const DEMO_GIFTS: SeedGift[] = [
     categoryId: 'c-hogar',
     priority: 'medium',
     isFavorite: false,
+    reservedBy: 'family',
   },
   {
     id: 'g-cartera',
+    forAccount: 'owner',
     name: 'Cartera de cuero repujado',
     description: 'Curtido vegetal y hebilla de latón. Cabe un libro y poco más, que es lo que quiero.',
     price: 240,
@@ -123,6 +137,7 @@ export const DEMO_GIFTS: SeedGift[] = [
   },
   {
     id: 'g-cascos',
+    forAccount: 'owner',
     name: 'Auriculares de diadema',
     description: 'Con cable y almohadillas de piel. Para el tren y para concentrarme.',
     price: 199,
@@ -136,6 +151,7 @@ export const DEMO_GIFTS: SeedGift[] = [
   },
   {
     id: 'g-bufanda',
+    forAccount: 'partner',
     name: 'Bufanda de lana cereza',
     description: 'Larga, con flecos, del color del lazo. Para enero.',
     price: 75,
@@ -145,6 +161,7 @@ export const DEMO_GIFTS: SeedGift[] = [
     categoryId: 'c-moda',
     priority: 'medium',
     isFavorite: false,
+    reservedBy: 'owner',
   },
 ];
 

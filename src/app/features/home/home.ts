@@ -23,13 +23,29 @@ const FLOORS = ['G', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         <h2 id="intro-h">Nada de esto es obligatorio. Todo es una pequeña ilusión.</h2>
         @if (session.signedIn()) {
           <p>
-            Estas son las cosas que me encantaría desenvolver este año: un perfume para el tocador, una pluma para las
-            tarjetas de Navidad, algo calentito para enero. En cada escaparate verás el precio y dónde encontrarlo.
+            Estas son las cosas que nos encantaría desenvolver este año. Elige una lista: en cada escaparate verás el
+            precio y dónde encontrarlo.
           </p>
+          <ul class="lists" role="list">
+            @for (l of catalogue.lists() ?? []; track l.id) {
+              <li>
+                <a class="list-card" routerLink="/wishlist" [queryParams]="{ para: l.id }">
+                  <span class="list-eyebrow">{{ l.id === catalogue.meId() ? 'Tu lista' : 'La lista de' }}</span>
+                  <span class="list-name">{{ l.name }}</span>
+                  <span class="list-count tabular">{{ catalogue.giftsFor(l.id).length }} deseos</span>
+                </a>
+              </li>
+            } @empty {
+              @if (!catalogue.loaded()) {
+                <li class="list-card skeleton" aria-hidden="true"></li>
+                <li class="list-card skeleton" aria-hidden="true"></li>
+              }
+            }
+          </ul>
           <p class="plaque-note">
-            Reserva un regalo antes de comprarlo, así nadie lo compra dos veces. Tu nombre queda oculto, también para mí.
+            Reserva un regalo antes de comprarlo, así nadie lo compra dos veces. Tu nombre queda oculto, y nadie ve lo que
+            le han reservado de su propia lista.
           </p>
-          <a class="btn btn-primary mt-5" routerLink="/wishlist">Descubre mis deseos</a>
         } @else {
           <p>
             Es una lista privada para la familia. Entra con tu cuenta para ver los regalos; si es tu primera vez, abre el
@@ -107,6 +123,57 @@ const FLOORS = ['G', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
       max-width: 36rem;
       font-size: 18px;
       line-height: 1.65;
+    }
+    .lists {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+      gap: 16px;
+      margin: 36px auto 28px;
+      padding: 0;
+      max-width: 40rem;
+      list-style: none;
+    }
+    .list-card {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      min-height: 152px;
+      align-content: center;
+      padding: 28px 20px;
+      border: 1px solid var(--color-gold);
+      outline: 1px solid var(--color-line);
+      outline-offset: 5px;
+      background: var(--color-ivory);
+      color: var(--color-burgundy);
+      text-decoration: none;
+      transition:
+        background-color 220ms ease,
+        color 220ms ease;
+    }
+    .list-eyebrow {
+      font: italic 400 16px/1 var(--font-serif);
+      color: var(--color-ink-soft);
+    }
+    .list-name {
+      font: 400 clamp(30px, 3.6vw, 40px) / 1 var(--font-display);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .list-count {
+      font: 500 12px/1 var(--font-sans);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink-soft);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      a.list-card:hover {
+        background: var(--color-burgundy);
+        color: var(--color-ivory);
+      }
+      a.list-card:hover .list-eyebrow,
+      a.list-card:hover .list-count {
+        color: var(--color-brass);
+      }
     }
     .plaque-note {
       display: inline-block;

@@ -33,6 +33,8 @@ export function errorMessage(e: unknown): string {
       return 'No tienes ninguna reserva de este regalo que cancelar.';
     case 'ONLY_FAMILY_CAN_RESERVE':
       return 'Solo la familia puede reservar regalos.';
+    case 'CANNOT_RESERVE_OWN_GIFT':
+      return 'Es uno de tus deseos: no puedes reservártelo a ti.';
     case 'GIFT_NOT_FOUND':
       return 'Este regalo ya no está en la lista.';
     case 'FORBIDDEN':

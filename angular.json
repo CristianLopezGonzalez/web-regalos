@@ -58,6 +58,17 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "demo": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/core/config.ts",
+                  "with": "src/app/core/config.demo.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -70,6 +81,9 @@
             },
             "development": {
               "buildTarget": "my-christmas-wishlist:build:development"
+            },
+            "demo": {
+              "buildTarget": "my-christmas-wishlist:build:demo"
             }
           },
           "defaultConfiguration": "development"

@@ -13,7 +13,7 @@ import { Modal } from '../../design-system/feedback/modal';
 import { PriceLabel } from '../../design-system/gift/price-label';
 import { ProductImage } from '../../design-system/gift/product-image';
 
-/** /profile: name, account, "Mis reservas" (family), sign out. */
+/** /profile: name, account, "Mis reservas" (everyone can reserve, except their own wishes), sign out. */
 @Component({
   selector: 'app-profile-page',
   imports: [FormsModule, RouterLink, PriceLabel, ProductImage, Modal, InstallApp],
@@ -23,7 +23,7 @@ import { ProductImage } from '../../design-system/gift/product-image';
       <div class="wrap pf">
         <header class="pf-head">
           <h1>Perfil</h1>
-          <p class="pf-sub">{{ p.role === 'owner' ? 'La dueña de la lista' : 'Familia' }} · desde el {{ since() }}</p>
+          <p class="pf-sub">{{ p.role === 'owner' ? 'Administras la wishlist' : p.hasList ? 'Con tu propia lista' : 'Familia' }} · desde el {{ since() }}</p>
         </header>
 
         <div class="pf-grid">
@@ -36,7 +36,7 @@ import { ProductImage } from '../../design-system/gift/product-image';
                 @if (nameError()) {
                   <p class="field-error" id="pf-name-msg">{{ nameError() }}</p>
                 } @else {
-                  <p class="field-hint" id="pf-name-msg">{{ p.role === 'owner' ? 'Así firmas la lista.' : 'Así te ve la dueña de la lista en su panel. Nunca junto a tus reservas.' }}</p>
+                  <p class="field-hint" id="pf-name-msg">{{ p.hasList ? 'Así se llama tu lista para los demás.' : 'Así te ve quien administra la wishlist. Nunca junto a tus reservas.' }}</p>
                 }
               </div>
               <div class="field">
@@ -57,7 +57,7 @@ import { ProductImage } from '../../design-system/gift/product-image';
             }
           </section>
 
-          @if (p.role === 'family') {
+          @if (p) {
             <section aria-labelledby="mine-h">
               <h2 id="mine-h">Mis reservas</h2>
               <p class="pf-note">Solo tú ves esta lista. Los demás ven «Reservado», sin nombre.</p>

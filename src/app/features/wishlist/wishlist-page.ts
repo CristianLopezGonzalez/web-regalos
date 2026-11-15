@@ -17,18 +17,45 @@ const norm = (s: string) =>
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase();
 
-/** /wishlist?categoria=&q=&orden=&ver= : every filter lives in the URL. */
+/**
+ * /wishlist?para=&categoria=&q=&orden=&ver= : every filter lives in the URL.
+ * One list at a time (para = whose list). Your own list never shows reservations: surprise.
+ */
 @Component({
   selector: 'app-wishlist-page',
   imports: [CategoryFilter, GiftGrid, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="wrap wl">
+      @if ((catalogue.lists()?.length ?? 0) > 1) {
+        <nav class="wl-lists" aria-label="Listas de deseos">
+          @for (l of catalogue.lists(); track l.id) {
+            <a
+              class="wl-list"
+              [class.on]="l.id === activeList()?.id"
+              [routerLink]="[]"
+              [queryParams]="{ para: l.id, ver: null, categoria: null }"
+              queryParamsHandling="merge"
+              [attr.aria-current]="l.id === activeList()?.id ? 'page' : null"
+            >
+              <span class="wl-list-name">{{ l.name }}</span>
+              @if (l.id === catalogue.meId()) {
+                <span class="wl-list-you">tú</span>
+              }
+              <span class="wl-list-count tabular"><span class="sr-only">, </span>{{ catalogue.giftsFor(l.id).length }}<span class="sr-only"> deseos</span></span>
+            </a>
+          }
+        </nav>
+      }
       <header class="wl-head">
-        <h1>La wishlist</h1>
+        <h1>{{ activeList() ? catalogue.listTitle(activeList()!) : 'La wishlist' }}</h1>
         <p class="wl-sub">
           @if (catalogue.loaded()) {
-            {{ stats().total }} deseos · {{ stats().reserved }} ya reservados
+            @if (isMyList()) {
+              {{ stats().total }} deseos · lo que te han reservado es sorpresa
+            } @else {
+              {{ stats().total }} deseos · {{ stats().reserved }} ya reservados
+            }
           } @else {
             Encendiendo los escaparates…
           }
@@ -52,6 +79,7 @@ const norm = (s: string) =>
             <label class="field-label" for="wl-q">Buscar</label>
             <input id="wl-q" class="input" type="search" placeholder="Perfume, pluma, bufanda…" autocomplete="off" [value]="query()" (input)="onSearch($any($event.target).value)" />
           </div>
+          @if (!isMyList()) {
           <div class="field">
             <label class="field-label" for="wl-show">Mostrar</label>
             <select id="wl-show" class="input" [value]="show()" (change)="setParam('ver', $any($event.target).value, 'todos')">
@@ -60,6 +88,7 @@ const norm = (s: string) =>
               <option value="reservados">Reservados</option>
             </select>
           </div>
+          }
           <div class="field">
             <label class="field-label" for="wl-sort">Ordenar por</label>
             <select id="wl-sort" class="input" [value]="sort()" (change)="setParam('orden', $any($event.target).value, 'prioridad')">
@@ -75,8 +104,15 @@ const norm = (s: string) =>
 
         <app-gift-grid class="wl-grid" [gifts]="visible()" [categories]="catalogue.categories()" [mine]="catalogue.mine()" [eagerCount]="4">
           <div empty class="wl-empty">
-            <p>No hay ningún deseo con estos filtros.</p>
-            <a class="btn btn-outline btn-sm" routerLink="/wishlist">Quitar filtros</a>
+            @if (listGifts().length) {
+              <p>No hay ningún deseo con estos filtros.</p>
+              <a class="btn btn-outline btn-sm" routerLink="/wishlist" [queryParams]="{ para: activeList()?.id }">Quitar filtros</a>
+            } @else if (isMyList()) {
+              <p>Tu lista todavía está vacía.</p>
+              <a class="btn btn-primary btn-sm" routerLink="/admin/gifts/new">Añadir mi primer deseo</a>
+            } @else {
+              <p>{{ activeList()?.name }} todavía no ha añadido ningún deseo.</p>
+            }
           </div>
         </app-gift-grid>
       }
@@ -85,6 +121,53 @@ const norm = (s: string) =>
   styles: `
     .wl {
       padding-block: clamp(56px, 8vw, 112px) clamp(96px, 12vw, 160px);
+    }
+    .wl-lists {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: clamp(28px, 4vw, 44px);
+    }
+    .wl-list {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 12px;
+      min-height: 52px;
+      padding: 14px 22px;
+      border: 1px solid var(--color-gold);
+      color: var(--color-burgundy);
+      text-decoration: none;
+      transition:
+        background-color 200ms ease,
+        color 200ms ease;
+    }
+    .wl-list-name {
+      font: 400 clamp(20px, 2.4vw, 26px) / 1 var(--font-display);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .wl-list-you {
+      font: italic 400 15px/1 var(--font-serif);
+      color: var(--color-ink-soft);
+    }
+    .wl-list-count {
+      font: 500 13px/1 var(--font-sans);
+      letter-spacing: 0.1em;
+      color: var(--color-ink-soft);
+    }
+    .wl-list.on {
+      background: var(--color-burgundy);
+      border-color: var(--color-burgundy);
+      color: var(--color-ivory);
+    }
+    .wl-list.on .wl-list-you,
+    .wl-list.on .wl-list-count {
+      color: var(--color-brass);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .wl-list:not(.on):hover {
+        background: var(--color-cream-deep);
+      }
     }
     .wl-head {
       margin-bottom: clamp(32px, 5vw, 56px);
@@ -137,6 +220,7 @@ const norm = (s: string) =>
 })
 export class WishlistPage {
   // query params (component input binding)
+  readonly para = input<string | undefined>();
   readonly categoria = input<string | undefined>();
   readonly q = input<string | undefined>();
   readonly orden = input<string | undefined>();
@@ -148,7 +232,21 @@ export class WishlistPage {
   readonly query = signal('');
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
-  readonly stats = this.catalogue.stats;
+  /** The list on screen: ?para=, else the first one that isn't yours (what you can gift), else yours. */
+  readonly activeList = computed(() => {
+    const lists = this.catalogue.lists() ?? [];
+    return lists.find((l) => l.id === this.para()) ?? lists.find((l) => l.id !== this.catalogue.meId()) ?? lists[0] ?? null;
+  });
+  readonly isMyList = computed(() => !!this.activeList() && this.activeList()!.id === this.catalogue.meId());
+  readonly listGifts = computed(() => {
+    const l = this.activeList();
+    return l ? this.catalogue.giftsFor(l.id) : [];
+  });
+  readonly stats = computed(() => {
+    const g = this.listGifts();
+    const reserved = g.filter((x) => x.isReserved).length;
+    return { total: g.length, reserved, available: g.length - reserved };
+  });
   readonly sort = computed<Sort>(() => (SORTS.includes(this.orden() as Sort) ? (this.orden() as Sort) : 'prioridad'));
   readonly show = computed<Show>(() => (SHOWS.includes(this.ver() as Show) ? (this.ver() as Show) : 'todos'));
   readonly activeCategory = computed(() => this.catalogue.categories()?.find((c) => c.slug === this.categoria()) ?? null);
@@ -157,16 +255,16 @@ export class WishlistPage {
 
   readonly counts = computed(() => {
     const out: Record<string, number> = {};
-    for (const g of this.catalogue.gifts() ?? []) if (g.categoryId) out[g.categoryId] = (out[g.categoryId] ?? 0) + 1;
+    for (const g of this.listGifts()) if (g.categoryId) out[g.categoryId] = (out[g.categoryId] ?? 0) + 1;
     return out;
   });
 
   readonly visible = computed<Gift[] | null>(() => {
-    const all = this.catalogue.gifts();
-    if (!all || !this.catalogue.categories()) return null;
+    if (!this.catalogue.loaded()) return null;
+    const all = this.listGifts();
     const cat = this.activeCategory();
     const q = norm(this.query().trim());
-    const show = this.show();
+    const show = this.isMyList() ? 'todos' : this.show();
     const list = all.filter(
       (g) =>
         (!cat || g.categoryId === cat.id) &&

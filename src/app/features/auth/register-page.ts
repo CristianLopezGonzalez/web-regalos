@@ -34,7 +34,7 @@ type InviteState = 'checking' | 'valid' | 'invalid' | 'missing' | 'confirm-email
           <div>
             <p class="lead">
               @if (state() === 'missing') {
-                Para crear una cuenta necesitas el enlace de invitación que te envió la dueña de la lista.
+                Para crear una cuenta necesitas el enlace de invitación que te enviaron.
               } @else {
                 Esta invitación no es válida: puede que haya caducado, que ya se haya usado o que el enlace esté incompleto.
                 Pide un enlace nuevo.

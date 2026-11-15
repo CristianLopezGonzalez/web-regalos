@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { Category, Gift, GiftInput, Invitation, Profile } from './models';
+import { Category, Gift, GiftInput, Invitation, Profile, WishList } from './models';
 
 /**
  * The one contract every screen talks to. Two implementations:
@@ -28,28 +28,33 @@ export abstract class WishlistApi {
   abstract updatePassword(password: string): Promise<void>;
 
   // ---- catalogue (authenticated) ----
+  /** Everyone with a list of their own, owner first. */
+  abstract listWishLists(): Promise<WishList[]>;
   abstract listCategories(): Promise<Category[]>;
   abstract listGifts(): Promise<Gift[]>;
   abstract getGift(id: string): Promise<Gift | null>;
   /** Live reservation status: called with (giftId, isReserved). Returns an unsubscribe. */
   abstract watchStatus(cb: (giftId: string, isReserved: boolean) => void): () => void;
 
-  // ---- reservations (family) ----
+  // ---- reservations (anyone, never on their own gifts) ----
   abstract reserve(giftId: string): Promise<void>;
   abstract cancelReservation(giftId: string): Promise<void>;
   abstract myReservations(): Promise<string[]>;
 
-  // ---- owner ----
+  // ---- people with a list: their OWN gifts only (the gift is always for the caller) ----
   abstract createGift(input: GiftInput, image: Blob[] | null): Promise<Gift>;
   abstract updateGift(id: string, input: GiftInput, image: Blob[] | null | 'remove'): Promise<Gift>;
   abstract deleteGift(id: string): Promise<void>;
+
+  // ---- owner (administration) ----
+  /** Never on the owner's own gifts: that would reveal the surprise. */
   abstract releaseGift(id: string): Promise<void>;
   abstract saveCategory(c: { id?: string; name: string }): Promise<Category>;
   abstract deleteCategory(id: string): Promise<void>;
   abstract reorderCategories(ids: string[]): Promise<void>;
   abstract listInvitations(): Promise<Invitation[]>;
   /** Returns the plain token exactly once; only its hash is stored. */
-  abstract createInvitation(email: string | null, days: number): Promise<string>;
+  abstract createInvitation(email: string | null, days: number, withList?: boolean): Promise<string>;
   abstract revokeInvitation(id: string): Promise<void>;
   abstract listFamily(): Promise<Profile[]>;
   abstract removeFamilyMember(id: string): Promise<void>;

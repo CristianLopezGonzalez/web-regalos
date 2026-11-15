@@ -25,7 +25,12 @@ import { AdminPageHead } from './admin-page-head';
       <ul class="fa" role="list">
         @for (p of list.value(); track p.id) {
           <li>
-            <span class="fa-name">{{ p.displayName }}</span>
+            <span class="fa-name">
+              {{ p.displayName }}
+              @if (p.hasList) {
+                <span class="fa-email">· con su propia lista</span>
+              }
+            </span>
             <span class="fa-email">{{ p.email }}</span>
             <span class="fa-since">Desde el {{ date(p.createdAt) }}</span>
             <button type="button" class="btn btn-ghost" (click)="toRemove.set(p)">Quitar acceso<span class="sr-only"> a {{ p.displayName }}</span></button>
@@ -39,7 +44,10 @@ import { AdminPageHead } from './admin-page-head';
     <app-modal heading="¿Quitar el acceso?" [open]="!!toRemove()" (openChange)="!$event && toRemove.set(null)" [busy]="busy()">
       <p class="m-0">
         {{ toRemove()?.displayName }} ya no podrá entrar. Si tenía regalos reservados, seguirán reservados y no sabrás
-        cuáles eran. Puedes liberarlos uno a uno desde la ficha de cada regalo.
+        cuáles eran.
+        @if (toRemove()?.hasList) {
+          <strong>Su lista y todos sus deseos se borrarán también.</strong>
+        }
       </p>
       <ng-container actions>
         <button type="button" class="btn btn-ghost" (click)="toRemove.set(null)" [disabled]="busy()">Cancelar</button>

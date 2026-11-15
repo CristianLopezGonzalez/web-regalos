@@ -13,6 +13,8 @@ export class Session {
   readonly signedIn = computed(() => !!this.profile());
   readonly isOwner = computed(() => this.profile()?.role === 'owner');
   readonly isFamily = computed(() => this.profile()?.role === 'family');
+  /** Has a wish list of their own (the owner, Angela): can open /admin to manage their gifts. */
+  readonly hasList = computed(() => !!this.profile()?.hasList);
 
   private readonly profile$ = toObservable(this.profile);
   /** Resolves once the stored session has been restored (immediately if it already is). */
@@ -38,6 +40,15 @@ export const ownerGuard: CanMatchFn = async () => {
   const router = inject(Router);
   const p = await session.whenReady();
   if (p?.role === 'owner') return true;
+  return router.createUrlTree(p ? ['/wishlist'] : ['/login'], p ? {} : { queryParams: { next: '/admin' } });
+};
+
+/** /admin: whoever has a list of their own. The owner-only sections add ownerGuard on top. */
+export const listGuard: CanMatchFn = async () => {
+  const session = inject(Session);
+  const router = inject(Router);
+  const p = await session.whenReady();
+  if (p?.hasList) return true;
   return router.createUrlTree(p ? ['/wishlist'] : ['/login'], p ? {} : { queryParams: { next: '/admin' } });
 };
 
