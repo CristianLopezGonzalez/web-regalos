@@ -1,16 +1,58 @@
 .gg {
   display: grid;
-  gap: 64px 24px;
-  max-width: 340px;
+  /* Phones: two narrow windows per row; the card shrinks its type to match (see gift-card). */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px 16px;
   margin: 0 auto;
   padding: 0;
   list-style: none;
+  align-items: start;
 }
 @media (min-width: 640px) {
   .gg {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: none;
+    gap: 64px 24px;
     align-items: end;
+  }
+}
+@media (max-width: 767.98px) {
+  .gg {
+    --gc-outline-offset: 4px;
+    --gc-name-size: 13px;
+    --gc-name-gap: 16px;
+    --gc-name-tracking: 0.04em;
+    --gc-name-lines: 3;
+    --gc-meta-size: 13px;
+  }
+  /*
+    Rail: one horizontal row that snaps window by window. It bleeds to the screen edge
+    (the .wrap gutter is 16px) so the next window peeks in, and hides its scrollbar.
+  */
+  :host(.gg-host--rail) .gg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 72%;
+    gap: 20px;
+    align-items: end;
+    margin-inline: -16px;
+    /* room for the gold outline that sits outside each window */
+    padding: 10px 16px 4px;
+    scroll-padding-inline: 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    --gc-name-size: 15px;
+    --gc-name-lines: 2;
+    --gc-meta-size: 14px;
+    --gc-outline-offset: 6px;
+  }
+  :host(.gg-host--rail) .gg::-webkit-scrollbar {
+    display: none;
+  }
+  :host(.gg-host--rail) .gg > * {
+    scroll-snap-align: start;
   }
 }
 @media (min-width: 1100px) {
@@ -30,6 +72,12 @@
   height: 18px;
   width: 70%;
   margin: 28px auto 0;
+}
+@media (max-width: 767.98px) {
+  .gg-skel-line {
+    height: 14px;
+    margin-top: 18px;
+  }
 }
 .gg-skel-line--short {
   width: 36%;
@@ -52,5 +100,35 @@
 @media (prefers-reduced-motion: reduce) {
   .gg-in {
     animation: none;
+  }
+}
+/*
+  reveal="view": when the row comes into view each window is uncovered from the bottom up
+  (clip-path, 1050 ms, every 110 ms) while its photo settles, the frame closes in and the name
+  follows. The card reads these variables (see gift-card.css); the stagger is dropped once
+  settled so hover answers at once.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .gg[data-rv] > li {
+    --gc-clip: inset(0 0 0 0);
+    --gc-delay: calc(min(var(--i), 6) * 110ms);
+    --gc-photo-dur: 1500ms;
+    --gc-text-lag: calc(min(var(--i), 6) * 30ms + 420ms);
+  }
+  .gg[data-rv] > li.gg-in {
+    animation: none;
+  }
+  .gg[data-rv]:not(.rv-in) > li {
+    --gc-clip: inset(100% 0 0 0);
+    --gc-photo: translateY(8%) scale(1.14);
+    --gc-frame-o: 0;
+    --gc-frame-t: scale(0.97);
+    --gc-text-o: 0;
+    --gc-text-t: translateY(16px);
+  }
+  .gg[data-rv].rv-settled > li {
+    --gc-delay: 0s;
+    --gc-photo-dur: 700ms;
+    --gc-text-lag: 0s;
   }
 }

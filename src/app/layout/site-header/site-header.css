@@ -62,17 +62,56 @@
   color: var(--color-burgundy);
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    opacity 260ms ease,
+    transform 360ms var(--ease-premium),
+    visibility 0s;
+}
+/*
+  Home only: the name waits while the hero's big title is on screen, and slides in once it has
+  scrolled away. visibility (delayed until the fade ends) keeps the hidden link out of the tab order.
+*/
+.sh-mark--away {
+  opacity: 0;
+  transform: translateY(4px);
+  visibility: hidden;
+  transition:
+    opacity 200ms ease,
+    transform 360ms var(--ease-premium),
+    visibility 0s linear 200ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-mark,
+  .sh-mark--away {
+    transform: none;
+    transition:
+      opacity 150ms linear,
+      visibility 0s linear 0s;
+  }
+  .sh-mark--away {
+    transition-delay: 0s, 150ms;
+  }
 }
 @media (min-width: 768px) {
   .sh-mark {
     font-size: 16px;
   }
 }
-/* Very narrow phones: just the icon, so the name has room. */
-@media (max-width: 380px) {
-  .sh-menu-label {
-    display: none;
+/* Phones: just the icon (with a 44px tap area), so the centred name has room. */
+@media (max-width: 767px) {
+  .sh-menu-btn {
+    min-width: 44px;
   }
+  .sh-menu-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (max-width: 360px) {
   .sh-mark {
     font-size: 13px;
     letter-spacing: 0.12em;
@@ -140,7 +179,9 @@
   white-space: nowrap; /* "Nuestros regalos" stays one item, on one line */
   color: var(--color-ivory);
   text-decoration: none;
-  transition: color 200ms ease, transform 200ms var(--ease-out-strong);
+  transition:
+    color 200ms ease,
+    transform 200ms var(--ease-out-strong);
 }
 .sh-menu li a.on {
   color: var(--color-gold);

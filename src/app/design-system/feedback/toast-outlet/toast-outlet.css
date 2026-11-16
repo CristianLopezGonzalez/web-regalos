@@ -2,7 +2,8 @@
   position: fixed;
   z-index: 60;
   left: 50%;
-  bottom: max(16px, env(safe-area-inset-bottom));
+  /* --bottom-bar: height of a fixed bar at the bottom (the gift page's reserve bar), if any. */
+  bottom: calc(var(--bottom-bar, 0px) + max(16px, env(safe-area-inset-bottom)));
   translate: -50% 0;
   display: grid;
   gap: 8px;

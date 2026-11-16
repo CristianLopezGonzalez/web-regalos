@@ -4,6 +4,7 @@
       <button
         type="button"
         class="btn btn-primary rb-main"
+        data-reserve-action="reserve"
         [class.animate-shake]="shake()"
         (animationend)="shake.set(false)"
         (click)="confirm.set(true)"
@@ -17,7 +18,12 @@
         <p class="rb-mine-line">
           <span class="diamond" aria-hidden="true"></span> Lo has reservado tú
         </p>
-        <button type="button" class="btn btn-ghost" (click)="cancelOpen.set(true)">
+        <button
+          type="button"
+          class="btn btn-ghost"
+          data-reserve-action="cancel"
+          (click)="cancelOpen.set(true)"
+        >
           Cancelar mi reserva
         </button>
       </div>

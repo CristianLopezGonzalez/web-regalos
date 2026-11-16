@@ -1,38 +1,89 @@
-@switch (state()) {
-  @case ('checking') {
-    <app-auth-layout heading="Un momento">
-      <p class="lead" role="status">Comprobando tu invitación…</p>
-    </app-auth-layout>
-  }
-  @case ('valid') {
-    <app-auth-layout
-      heading="Te damos la bienvenida"
-      lede="Tienes una invitación. Crea tu cuenta para ver la wishlist y reservar regalos."
-    >
-      <app-register-form [token]="invite()!" (registered)="done($event)" />
-    </app-auth-layout>
-  }
-  @case ('confirm-email') {
-    <app-auth-layout heading="Revisa tu email">
-      <p class="lead" role="status">
-        Te hemos enviado un enlace para confirmar tu cuenta. Ábrelo y después entra con tu
-        contraseña.
-      </p>
-    </app-auth-layout>
-  }
-  @default {
-    <app-auth-layout heading="Hace falta una invitación">
-      <div>
-        <p class="lead">
-          @if (state() === 'missing') {
-            Para crear una cuenta necesitas el enlace de invitación que te enviaron.
-          } @else {
-            Esta invitación no es válida: puede que haya caducado, que ya se haya usado o que el
-            enlace esté incompleto. Pide un enlace nuevo.
-          }
-        </p>
-        <a class="btn btn-outline mt-8" routerLink="/login">Ya tengo cuenta</a>
+<app-auth-layout
+  eyebrow="Invitación"
+  [heading]="view().heading"
+  [lede]="view().lede"
+  [state]="view().envelope"
+  [arrival]="650"
+>
+  @switch (state()) {
+    @case ('checking') {
+      <div class="al-body al-enter">
+        <p class="al-text" role="status">Comprobando tu invitación…</p>
+        <div class="al-thread" aria-hidden="true"></div>
       </div>
-    </app-auth-layout>
+    }
+    @case ('valid') {
+      <div class="al-enter">
+        <app-register-form
+          [token]="invite()!"
+          (registered)="done($event)"
+          (invitationGone)="invitationGone()"
+        />
+        <nav class="al-links" aria-label="Otras opciones">
+          <a class="al-link" authLink="/login">Ya tengo cuenta</a>
+        </nav>
+      </div>
+    }
+    @case ('confirm-email') {
+      <div class="al-body al-enter">
+        <p class="al-text" role="status">
+          Te hemos enviado un enlace para confirmar tu cuenta. Ábrelo y después entra con tu
+          contraseña.
+        </p>
+        <a class="btn btn-outline w-full" authLink="/login">Ir a entrar</a>
+      </div>
+    }
+    @case ('offline') {
+      <div class="al-body al-enter">
+        <button type="button" class="btn btn-primary w-full" (click)="retry()">
+          Intentar otra vez
+        </button>
+        <nav class="al-links" aria-label="Otras opciones">
+          <a class="al-link" authLink="/login">Ya tengo cuenta</a>
+        </nav>
+      </div>
+    }
+    @case ('invalid') {
+      <div class="al-body al-enter">
+        <p class="al-text">
+          Si ya creaste tu cuenta con ella, entra con tu email. Si no, pide un enlace nuevo a quien
+          te invitó: tarda un momento.
+        </p>
+        <a class="btn btn-primary w-full" authLink="/login">Ya tengo cuenta</a>
+        <nav class="al-links" aria-label="Otras opciones">
+          <a class="al-link" authLink="/register">Tengo otro enlace</a>
+        </nav>
+      </div>
+    }
+    @default {
+      <!-- missing: no token in the address. Paste the link if it can't be opened from the message. -->
+      <div class="al-enter">
+        <form class="al-form" novalidate (submit)="openPasted($event)">
+          <app-auth-field
+            label="Enlace de invitación"
+            forId="invite-link"
+            hint="Si no se abre desde el mensaje, cópialo y pégalo aquí."
+            [attempted]="pasteAttempted()"
+          >
+            <input
+              id="invite-link"
+              class="input"
+              type="url"
+              [formField]="paste.link"
+              inputmode="url"
+              autocomplete="off"
+              autocapitalize="none"
+              autocorrect="off"
+              spellcheck="false"
+              enterkeyhint="go"
+            />
+          </app-auth-field>
+          <button type="submit" class="btn btn-primary w-full">Abrir invitación</button>
+        </form>
+        <nav class="al-links" aria-label="Otras opciones">
+          <a class="al-link" authLink="/login">Ya tengo cuenta</a>
+        </nav>
+      </div>
+    }
   }
-}
+</app-auth-layout>

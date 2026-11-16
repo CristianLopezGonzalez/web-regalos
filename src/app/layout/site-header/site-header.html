@@ -1,6 +1,7 @@
 <header class="sh">
   <nav class="sh-in" aria-label="Principal">
     <button
+      #menuBtn
       type="button"
       class="sh-menu-btn"
       [attr.aria-expanded]="menu()"
@@ -10,7 +11,12 @@
       <span class="sh-burger" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="sh-menu-label">Menú</span>
     </button>
-    <a class="sh-mark" routerLink="/" lang="en" aria-label="My Christmas Wishlist, inicio"
+    <a
+      class="sh-mark"
+      [class.sh-mark--away]="brand.away()"
+      routerLink="/"
+      lang="en"
+      aria-label="My Christmas Wishlist, inicio"
       >My Christmas Wishlist</a
     >
   </nav>
@@ -32,12 +38,11 @@
     aria-label="Menú"
     animate.enter="sh-menu-in"
     animate.leave="sh-menu-out"
+    (keydown)="trapTab($event)"
   >
     <div class="sh-menu-top">
       <span class="sh-menu-brand" lang="en">My Christmas Wishlist</span>
-      <button #closeBtn type="button" class="sh-close" (click)="menu.set(false)">
-        Cerrar
-      </button>
+      <button #closeBtn type="button" class="sh-close" (click)="menu.set(false)">Cerrar</button>
     </div>
     <ul role="list">
       @for (i of items(); track i.label) {

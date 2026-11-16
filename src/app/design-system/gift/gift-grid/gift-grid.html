@@ -13,7 +13,7 @@
     <ng-content select="[empty]" />
   </div>
 } @else {
-  <ul class="gg" role="list">
+  <ul class="gg" role="list" [appReveal]="reveal() === 'view'">
     @for (g of gifts(); track g.id; let i = $index) {
       <li animate.enter="gg-in" [style.--i]="i">
         <app-gift-card

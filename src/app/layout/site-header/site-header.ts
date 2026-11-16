@@ -1,13 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import {
   IsActiveMatchOptions,
   NavigationEnd,
@@ -19,6 +11,7 @@ import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Session } from '@app/core/auth/session';
 import { InstallApp } from '@app/design-system/feedback/install-app/install-app';
+import { HeaderBrand } from './header-brand';
 
 interface NavItem {
   label: string;
@@ -40,10 +33,13 @@ interface NavItem {
 })
 export class SiteHeader {
   protected readonly session = inject(Session);
+  /** On the home page the name only appears once the hero's big title has scrolled away. */
+  protected readonly brand = inject(HeaderBrand);
   private readonly doc = inject(DOCUMENT);
 
   protected readonly menu = signal(false);
   private readonly closeBtn = viewChild<ElementRef<HTMLButtonElement>>('closeBtn');
+  private readonly menuBtn = viewChild.required<ElementRef<HTMLButtonElement>>('menuBtn');
 
   protected readonly left = computed<NavItem[]>(() =>
     this.session.signedIn()
@@ -84,10 +80,37 @@ export class SiteHeader {
         takeUntilDestroyed(),
       )
       .subscribe(() => this.menu.set(false));
-    // Lock page scroll behind the open drawer and move focus into it.
+    // Lock page scroll behind the open drawer and move focus into it; on closing, give focus
+    // back to "Menú" (however it closed: Esc, backdrop, a link) instead of dropping it on <body>.
+    let wasOpen = false;
     effect(() => {
-      this.doc.documentElement.style.overflow = this.menu() ? 'hidden' : '';
-      this.closeBtn()?.nativeElement.focus();
+      const open = this.menu();
+      this.doc.documentElement.style.overflow = open ? 'hidden' : '';
+      if (open) this.closeBtn()?.nativeElement.focus();
+      else if (wasOpen) this.menuBtn().nativeElement.focus({ preventScroll: true });
+      wasOpen = open;
     });
+  }
+
+  /** aria-modal promises the page behind is out of reach: keep Tab cycling inside the drawer. */
+  protected trapTab(e: KeyboardEvent) {
+    if (e.key !== 'Tab') return;
+    const box = e.currentTarget as HTMLElement;
+    const items = [
+      ...box.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ].filter((el) => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = this.doc.activeElement;
+    if (e.shiftKey && (active === first || !box.contains(active))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || !box.contains(active))) {
+      e.preventDefault();
+      first.focus();
+    }
   }
 }

@@ -1,4 +1,4 @@
-<div class="wrap gp">
+<div class="wrap gp" [class.gp--bar]="!!barState()">
   <a class="gp-back" routerLink="/wishlist" [queryParams]="{ para: gift()?.forId ?? null }">
     <span aria-hidden="true">←</span> {{ backLabel() }}
   </a>
@@ -23,3 +23,39 @@
     </div>
   }
 </div>
+
+<!-- Mobile only: a shortcut to the reserve control while it is still below the fold. -->
+@if (barState(); as state) {
+  @if (gift(); as g) {
+    <aside
+      class="gp-bar"
+      [class.is-shown]="barShown()"
+      [inert]="!barShown()"
+      aria-label="Reserva rápida"
+    >
+      <app-price class="gp-bar-price" [value]="g.price" [currency]="g.currency" />
+      @switch (state) {
+        @case ('available') {
+          <button type="button" class="btn btn-primary gp-bar-btn" (click)="forward('reserve')">
+            Reservar
+          </button>
+        }
+        @case ('mine') {
+          <span class="gp-bar-mine caps">
+            <span class="diamond" aria-hidden="true"></span> Reservado por ti
+          </span>
+          <button
+            type="button"
+            class="btn btn-ghost gp-bar-cancel"
+            (click)="forward('cancel')"
+          >
+            Cancelar<span class="sr-only"> mi reserva</span>
+          </button>
+        }
+        @case ('reserved') {
+          <button type="button" class="btn btn-primary gp-bar-btn" disabled>Reservado</button>
+        }
+      }
+    </aside>
+  }
+}

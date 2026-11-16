@@ -1,31 +1,21 @@
 <footer class="sf">
   <div class="wrap">
-    <p class="sf-mark" lang="en">My Christmas Wishlist</p>
-    <div class="sf-row">
-      <ul role="list">
-        @if (session.signedIn()) {
-          <li><a routerLink="/wishlist">Wishlist</a></li>
-          <li><a routerLink="/profile">Perfil</a></li>
-          @if (session.isPlanner()) {
-            <li><a routerLink="/plans">Nuestros regalos</a></li>
-          }
-          @if (session.hasList()) {
-            <li>
-              <a routerLink="/admin">{{ session.isOwner() ? 'Admin' : 'Mi lista' }}</a>
-            </li>
-          }
-          <li><button type="button" (click)="signOut()">Cerrar sesión</button></li>
-        } @else {
-          <li><a routerLink="/login">Entrar</a></li>
-        }
-      </ul>
+    <div class="sf-top">
+      <p class="sf-mark" lang="en">My Christmas Wishlist</p>
+      @if (session.signedIn()) {
+        <button type="button" class="sf-action" (click)="signOut()">Cerrar sesión</button>
+      } @else {
+        <a routerLink="/login" class="sf-action">Entrar</a>
+      }
+    </div>
+    <div class="sf-notes">
       <p>
         Las reservas son anónimas: nadie ve quién ha reservado cada regalo, y nadie ve qué está
         reservado de su propia lista.
       </p>
+      @if (api.isDemo) {
+        <p class="sf-credits">Modo demo: datos simulados en este navegador. {{ credits }}</p>
+      }
     </div>
-    @if (api.isDemo) {
-      <p class="sf-credits">Modo demo: datos simulados en este navegador. {{ credits }}</p>
-    }
   </div>
 </footer>

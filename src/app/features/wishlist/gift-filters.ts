@@ -1,3 +1,4 @@
+import { Category } from '@app/core/models/category';
 import { Gift, PRIORITY_RANK } from '@app/core/models/gift';
 import { foldAccents } from '@app/core/text/slugify';
 
@@ -48,4 +49,20 @@ export function countByCategory(gifts: readonly Gift[]): Record<string, number> 
   const out: Record<string, number> = {};
   for (const g of gifts) if (g.categoryId) out[g.categoryId] = (out[g.categoryId] ?? 0) + 1;
   return out;
+}
+
+/** True when ?ver= / ?orden= differ from the defaults (the "Filtrar" button shows a dot). */
+export const hasActiveFilters = (f: Pick<GiftFilter, 'show' | 'sort'>): boolean =>
+  f.show !== 'todos' || f.sort !== 'prioridad';
+
+/**
+ * The category tabs worth showing: only those with gifts, plus the active one
+ * (so a link to an empty category still has a selected tab).
+ */
+export function tabCategories(
+  categories: readonly Category[],
+  counts: Record<string, number>,
+  activeSlug: string | null,
+): Category[] {
+  return categories.filter((c) => (counts[c.id] ?? 0) > 0 || c.slug === activeSlug);
 }

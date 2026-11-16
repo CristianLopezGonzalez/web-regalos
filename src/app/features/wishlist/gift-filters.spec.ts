@@ -1,5 +1,13 @@
 import { Gift } from '@app/core/models/gift';
-import { countByCategory, filterGifts, parseShow, parseSort } from './gift-filters';
+import { Category } from '@app/core/models/category';
+import {
+  countByCategory,
+  filterGifts,
+  hasActiveFilters,
+  parseShow,
+  parseSort,
+  tabCategories,
+} from './gift-filters';
 
 const gift = (id: string, over: Partial<Gift> = {}): Gift => ({
   id,
@@ -72,5 +80,22 @@ describe('gift filters', () => {
     filterGifts(gifts, { ...all, sort: 'precio-desc' });
     expect(gifts.map((g) => g.id)).toEqual(before);
     expect(countByCategory(gifts)).toEqual({ 'c-hogar': 1, 'c-accesorios': 1 });
+  });
+
+  it('flags anything other than the default show/sort', () => {
+    expect(hasActiveFilters({ show: 'todos', sort: 'prioridad' })).toBe(false);
+    expect(hasActiveFilters({ show: 'disponibles', sort: 'prioridad' })).toBe(true);
+    expect(hasActiveFilters({ show: 'todos', sort: 'precio-asc' })).toBe(true);
+  });
+
+  it('hides empty category tabs, except the active one', () => {
+    const cats = [
+      { id: 'c-hogar', slug: 'hogar' },
+      { id: 'c-libros', slug: 'libros' },
+      { id: 'c-moda', slug: 'moda' },
+    ] as Category[];
+    const counts = countByCategory(gifts);
+    expect(tabCategories(cats, counts, null).map((c) => c.slug)).toEqual(['hogar']);
+    expect(tabCategories(cats, counts, 'moda').map((c) => c.slug)).toEqual(['hogar', 'moda']);
   });
 });

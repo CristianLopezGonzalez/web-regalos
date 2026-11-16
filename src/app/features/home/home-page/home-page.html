@@ -1,22 +1,28 @@
-<app-hero [ctaLink]="'/wishlist'" [ctaFragment]="session.signedIn() ? null : 'descubre'" />
+<app-hero [ctaLink]="session.signedIn() ? '/wishlist' : '/login'" />
 
 <section id="descubre" class="intro" aria-labelledby="intro-h">
-  <div class="wrap intro-in">
-    <h2 id="intro-h">Nada de esto es obligatorio. Todo es una pequeña ilusión.</h2>
+  <div class="wrap intro-in" appReveal>
+    <h2 id="intro-h">
+      <span class="rm" style="--i: 0"><span>Nada de esto es obligatorio. </span></span>
+      <span class="rm" style="--i: 1"><span>Todo es una pequeña ilusión.</span></span>
+    </h2>
     @if (session.signedIn()) {
-      <p>
+      <p class="rv" style="--d: 260ms">
         Estas son las cosas que nos encantaría desenvolver este año. Elige una lista: en cada
         escaparate verás el precio y dónde encontrarlo.
       </p>
       <ul class="lists" role="list">
-        @for (l of catalogue.lists() ?? []; track l.id) {
-          <li>
+        @for (l of catalogue.lists() ?? []; track l.id; let i = $index) {
+          <li class="rv" [style.--i]="i" style="--d: 380ms">
             <a class="list-card" routerLink="/wishlist" [queryParams]="{ para: l.id }">
               <span class="list-eyebrow">{{
                 l.id === catalogue.meId() ? 'Tu lista' : 'La lista de'
               }}</span>
               <span class="list-name">{{ l.name }}</span>
-              <span class="list-count tabular">{{ catalogue.giftsFor(l.id).length }} deseos</span>
+              <span class="list-count tabular"
+                >{{ catalogue.giftsFor(l.id).length }} deseos
+                <span class="arrow" aria-hidden="true"></span
+              ></span>
             </a>
           </li>
         } @empty {
@@ -26,16 +32,19 @@
           }
         }
       </ul>
-      <p class="plaque-note">
+      <p class="plaque-note rv" style="--d: 620ms">
         Reserva un regalo antes de comprarlo, así nadie lo compra dos veces. Tu nombre queda oculto,
         y nadie ve lo que le han reservado de su propia lista.
       </p>
     } @else {
-      <p>
+      <p class="rv" style="--d: 260ms">
         Es una lista privada para la familia. Entra con tu cuenta para ver los regalos; si es tu
         primera vez, abre el enlace de invitación que te he enviado.
       </p>
-      <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 mt-5">
+      <div
+        class="rv flex flex-wrap justify-center items-center gap-x-8 gap-y-3 mt-5"
+        style="--d: 380ms"
+      >
         <a class="btn btn-primary" routerLink="/login">Entrar</a>
       </div>
     }
@@ -45,9 +54,11 @@
 @if (session.signedIn()) {
   <section id="categorias" class="dir" aria-labelledby="dir-h">
     <div class="wrap">
-      <div class="board">
-        <h2 id="dir-h">Directorio</h2>
-        <p class="board-sub">
+      <div class="board" appReveal>
+        <h2 id="dir-h">
+          <span class="rm"><span>Directorio</span></span>
+        </h2>
+        <p class="board-sub rv" style="--d: 200ms">
           @if (catalogue.loaded()) {
             {{ catalogue.stats().total }} deseos repartidos en
             {{ catalogue.categories()!.length }} departamentos
@@ -57,7 +68,7 @@
         </p>
         <ol class="dir-list" role="list">
           @for (c of catalogue.categories() ?? []; track c.id; let i = $index) {
-            <li>
+            <li class="rv" [style.--i]="i" style="--d: 260ms">
               <a routerLink="/wishlist" [queryParams]="{ categoria: c.slug }">
                 <span class="floor tabular" aria-hidden="true">{{ floor(i) }}</span>
                 <span class="dept">{{ c.name }}</span>
@@ -82,9 +93,13 @@
 
   <section class="windows" aria-labelledby="win-h">
     <div class="wrap">
-      <div class="head">
-        <h2 id="win-h">En el escaparate</h2>
-        <a class="textlink" routerLink="/wishlist">Ver toda la wishlist</a>
+      <div class="head" appReveal>
+        <h2 id="win-h">
+          <span class="rm"><span>En el escaparate</span></span>
+        </h2>
+        <a class="textlink rv" style="--d: 300ms" routerLink="/wishlist"
+          >Ver toda la wishlist <span class="arrow" aria-hidden="true"></span
+        ></a>
       </div>
       <app-gift-grid
         [gifts]="favorites()"
@@ -92,6 +107,8 @@
         [mine]="catalogue.mine()"
         [eagerCount]="0"
         [skeletonCount]="4"
+        layout="rail"
+        reveal="view"
       >
         <p empty class="empty">
           Todavía no hay favoritos en el escaparate. <a routerLink="/wishlist">Ver la wishlist</a>

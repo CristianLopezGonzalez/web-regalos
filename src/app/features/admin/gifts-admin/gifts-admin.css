@@ -34,6 +34,7 @@ td {
   text-transform: uppercase;
   text-decoration: none;
   color: var(--color-burgundy);
+  overflow-wrap: anywhere; /* a name with no spaces must not push the page sideways */
 }
 .ga-name::after {
   /* the whole row is the click target */

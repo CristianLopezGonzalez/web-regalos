@@ -38,6 +38,15 @@ describe('two wish lists: the surprise rules (demo backend mirrors the database)
     const api = await signedInAs('mama@demo.test');
     expect((await api.listWishLists()).map((l) => l.name)).toEqual(['Cristian', 'Angela']);
   }, 20000);
+
+  it('removing someone keeps their reservations, so nobody learns what they held', async () => {
+    const api = await signedInAs('yo@demo.test');
+    const mama = (await api.listFamily()).find((p) => p.displayName === 'Mamá')!;
+    // In the seed, Mamá reserved Angela's tetera.
+    expect((await api.listGifts()).find((g) => g.id === 'g-tetera')?.isReserved).toBe(true);
+    await api.removeFamilyMember(mama.id);
+    expect((await api.listGifts()).find((g) => g.id === 'g-tetera')?.isReserved).toBe(true);
+  }, 20000);
 });
 
 describe('"Nuestros regalos": only the two planners (demo mirrors the plan_* policies)', () => {

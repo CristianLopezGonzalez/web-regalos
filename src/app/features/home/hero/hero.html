@@ -1,102 +1,79 @@
-@for (k of [run()]; track k) {
-  <div class="hv-stage">
-    <div class="hv-flood" aria-hidden="true"></div>
-
+<div class="hv-stage">
+  <div class="hv-text">
     <p class="hv-line">Una pequeña colección de deseos de Navidad</p>
+    <h1 #title class="hv-title" lang="en">
+      <span class="hv-mask"><span class="hv-w">My </span></span>
+      <span class="hv-mask"><span class="hv-w">Christmas </span></span>
+      <span class="hv-mask"><span class="hv-w">Wishlist</span></span>
+    </h1>
+    <i class="hv-rule" aria-hidden="true"></i>
+    <p class="hv-sub">Un poco de magia, muchos deseos.</p>
+    <a class="btn btn-primary hv-cta" [routerLink]="ctaLink()"
+      >Descubre la wishlist <span class="hv-arrow" aria-hidden="true"></span
+    ></a>
+  </div>
 
-    <div class="hv-brand">
-      <h1 class="hv-title" lang="en">
-        <span class="hv-mask"><span class="hv-w hv-w1">My</span></span>
-        <span class="hv-mask"><span class="hv-w hv-w2">Christmas</span></span>
-        <span class="hv-mask"><span class="hv-w hv-w3">Wishlist</span></span>
-      </h1>
-      <p class="hv-sub">Un poco de magia, muchos deseos.</p>
-      @if (ctaFragment()) {
-        <a class="hv-cta" [routerLink]="[]" [fragment]="ctaFragment()!">Descubre la wishlist</a>
-      } @else {
-        <a class="hv-cta" [routerLink]="ctaLink()">Descubre la wishlist</a>
-      }
-    </div>
-
-    <div class="hv-art">
-      <svg viewBox="0 0 600 640" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id="hvVelvet" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#5e1b2a" />
-            <stop offset="1" stop-color="#2c0a12" />
-          </linearGradient>
-          <linearGradient id="hvSpot" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#fff4da" stop-opacity=".0" />
-            <stop offset=".25" stop-color="#fff4da" stop-opacity=".35" />
-            <stop offset="1" stop-color="#fff4da" stop-opacity=".05" />
-          </linearGradient>
-          <radialGradient id="hvPool" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stop-color="#fff4da" stop-opacity=".7" />
-            <stop offset="1" stop-color="#fff4da" stop-opacity="0" />
-          </radialGradient>
-          <linearGradient id="hvPaper" x1="0" x2="1">
-            <stop offset="0" stop-color="#7a2a3b" />
-            <stop offset=".5" stop-color="#641c2b" />
-            <stop offset="1" stop-color="#4e1522" />
-          </linearGradient>
-          <linearGradient id="hvSatin" x1="0" x2="1">
-            <stop offset="0" stop-color="#7d1d2b" />
-            <stop offset=".38" stop-color="#c4485a" />
-            <stop offset=".52" stop-color="#a52b3b" />
-            <stop offset="1" stop-color="#761a28" />
-          </linearGradient>
-          <radialGradient id="hvGlow" cx="50%" cy="60%" r="60%">
-            <stop offset="0" stop-color="#fff6e0" stop-opacity="1" />
-            <stop offset=".5" stop-color="#f3dcae" stop-opacity=".45" />
-            <stop offset="1" stop-color="#f3dcae" stop-opacity="0" />
-          </radialGradient>
-          <clipPath id="hvArchClip">
-            <path d="M96,640 L96,262 A204,204 0 0 1 504,262 L504,640 Z" />
-          </clipPath>
-        </defs>
-
-        <path
-          class="hv-window"
-          d="M96,640 L96,262 A204,204 0 0 1 504,262 L504,640 Z"
-          fill="url(#hvVelvet)"
-        />
-
-        <g clip-path="url(#hvArchClip)">
-          <polygon class="hv-spot" points="262,40 338,40 470,584 130,584" fill="url(#hvSpot)" />
+  <!-- .hv-art: stays behind on scroll · .hv-plate: the wipe · .sc: the scene settles -->
+  <div class="hv-art" aria-hidden="true">
+    <div class="hv-plate">
+      <div class="sc">
+        <svg class="sc-back" viewBox="0 0 600 640" focusable="false">
+          <defs>
+            <linearGradient id="hvVelvet" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#5e1b2a" />
+              <stop offset="1" stop-color="#2c0a12" />
+            </linearGradient>
+          </defs>
+          <path d="M96,640 L96,262 A204,204 0 0 1 504,262 L504,640 Z" fill="url(#hvVelvet)" />
+          <path
+            d="M96,640 L96,262 A204,204 0 0 1 504,262 L504,640"
+            fill="none"
+            stroke="#b89a65"
+            stroke-width="2.4"
+          />
+          <path
+            d="M112,640 L112,262 A188,188 0 0 1 488,262 L488,640"
+            fill="none"
+            stroke="#b89a65"
+            stroke-width="1"
+            opacity=".55"
+          />
+        </svg>
+        <div class="sc-arch">
+          <div class="sc-spot"></div>
           @for (s of stars; track $index) {
-            <g
-              class="hv-star"
-              [style.--x]="s.x + 'px'"
-              [style.--y]="s.y + 'px'"
-              [style.--wx]="s.wx + 'px'"
+            <i
+              class="sc-star"
+              [style.--x]="s.x"
+              [style.--y]="s.y"
+              [style.--wx]="s.wx"
               [style.--s]="s.s"
-              [style.--d]="s.d + 'ms'"
-              [style.--dl]="s.dl + 'ms'"
-            >
-              <path [attr.d]="spark" fill="#d8bf8c" transform="translate(300 470)" />
-            </g>
+              [style.--i]="$index"
+              ><svg viewBox="-10 -10 20 20" focusable="false">
+                <path [attr.d]="spark" fill="#d8bf8c" /></svg
+            ></i>
           }
-        </g>
-
-        <path
-          class="hv-arch"
-          pathLength="1"
-          d="M96,640 L96,262 A204,204 0 0 1 504,262 L504,640"
-          fill="none"
-          stroke="#b89a65"
-          stroke-width="2.4"
-        />
-        <path
-          class="hv-arch hv-arch-2"
-          pathLength="1"
-          d="M112,640 L112,262 A188,188 0 0 1 488,262 L488,640"
-          fill="none"
-          stroke="#b89a65"
-          stroke-width="1"
-        />
-
-        <g class="hv-plinth">
-          <ellipse class="hv-pool" cx="300" cy="566" rx="150" ry="26" fill="url(#hvPool)" />
+        </div>
+        <div class="sc-glow"></div>
+        <svg class="sc-front" viewBox="0 0 600 640" focusable="false">
+          <defs>
+            <radialGradient id="hvPool" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#fff4da" stop-opacity=".7" />
+              <stop offset="1" stop-color="#fff4da" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="hvPaper" x1="0" x2="1">
+              <stop offset="0" stop-color="#7a2a3b" />
+              <stop offset=".5" stop-color="#641c2b" />
+              <stop offset="1" stop-color="#4e1522" />
+            </linearGradient>
+            <linearGradient id="hvSatin" x1="0" x2="1">
+              <stop offset="0" stop-color="#7d1d2b" />
+              <stop offset=".38" stop-color="#c4485a" />
+              <stop offset=".52" stop-color="#a52b3b" />
+              <stop offset="1" stop-color="#761a28" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="300" cy="566" rx="150" ry="26" fill="url(#hvPool)" />
           <rect x="186" y="566" width="228" height="74" fill="#efe5d6" />
           <rect x="186" y="566" width="228" height="74" fill="#332421" opacity=".06" />
           <ellipse cx="300" cy="566" rx="114" ry="14" fill="#fcfaf6" />
@@ -109,83 +86,57 @@
             stroke="#b89a65"
             stroke-width="1.2"
           />
-        </g>
-
-        <g class="hv-box">
-          <g class="hv-hop">
-            <ellipse class="hv-glow" cx="300" cy="438" rx="150" ry="110" fill="url(#hvGlow)" />
-            <g class="hv-body">
-              <rect x="212" y="438" width="176" height="128" fill="url(#hvPaper)" />
-              <rect x="212" y="438" width="176" height="10" fill="#2a0b11" opacity=".55" />
-              <rect x="282" y="438" width="36" height="128" fill="url(#hvSatin)" />
-              <rect
-                x="212.75"
-                y="438.75"
-                width="174.5"
-                height="126.5"
-                fill="none"
-                stroke="#b89a65"
-                stroke-opacity=".7"
-                stroke-width="1.5"
-              />
-            </g>
-            <g transform="translate(300 446)">
-              @for (k of sparks; track $index) {
-                <g
-                  class="hv-spark"
-                  [style.--a]="k.a + 'deg'"
-                  [style.--len]="k.len + 'px'"
-                  [style.--dl]="k.dl + 'ms'"
-                >
-                  <rect x="-1" y="-10" width="2" height="10" fill="#d8bf8c" />
-                </g>
-              }
-            </g>
-            <g class="hv-lid-bob">
-              <g class="hv-lid">
-                <rect x="202" y="410" width="196" height="36" rx="2" fill="url(#hvPaper)" />
-                <rect x="202" y="440" width="196" height="6" fill="#2a0b11" opacity=".45" />
-                <rect x="282" y="410" width="36" height="36" fill="url(#hvSatin)" />
-                <rect
-                  x="202.75"
-                  y="410.75"
-                  width="194.5"
-                  height="34.5"
-                  rx="2"
-                  fill="none"
-                  stroke="#b89a65"
-                  stroke-opacity=".7"
-                  stroke-width="1.5"
-                />
-                <path
-                  class="hv-tail hv-tail-l"
-                  d="M297,410 C290,428 280,448 266,466 L278,472 C289,454 298,434 304,413 Z"
-                  fill="url(#hvSatin)"
-                />
-                <path
-                  class="hv-tail hv-tail-r"
-                  d="M303,410 C310,428 320,448 334,466 L322,472 C311,454 302,434 296,413 Z"
-                  fill="url(#hvSatin)"
-                />
-                <path
-                  d="M300,408 C274,368 226,366 234,394 C239,412 274,413 300,408 Z"
-                  fill="url(#hvSatin)"
-                />
-                <path
-                  d="M300,408 C326,368 374,366 366,394 C361,412 326,413 300,408 Z"
-                  fill="url(#hvSatin)"
-                />
-                <ellipse cx="300" cy="409" rx="13" ry="10" fill="#b23545" />
-              </g>
-            </g>
-          </g>
-        </g>
-      </svg>
+          <rect x="212" y="438" width="176" height="128" fill="url(#hvPaper)" />
+          <rect x="212" y="438" width="176" height="10" fill="#2a0b11" opacity=".55" />
+          <rect x="282" y="438" width="36" height="128" fill="url(#hvSatin)" />
+          <rect
+            x="212.75"
+            y="438.75"
+            width="174.5"
+            height="126.5"
+            fill="none"
+            stroke="#b89a65"
+            stroke-opacity=".7"
+            stroke-width="1.5"
+          />
+        </svg>
+        <div class="sc-lid-bob">
+          <svg class="sc-lid" viewBox="190 356 220 124" focusable="false">
+            <rect x="202" y="410" width="196" height="36" rx="2" fill="url(#hvPaper)" />
+            <rect x="202" y="440" width="196" height="6" fill="#2a0b11" opacity=".45" />
+            <rect x="282" y="410" width="36" height="36" fill="url(#hvSatin)" />
+            <rect
+              x="202.75"
+              y="410.75"
+              width="194.5"
+              height="34.5"
+              rx="2"
+              fill="none"
+              stroke="#b89a65"
+              stroke-opacity=".7"
+              stroke-width="1.5"
+            />
+            <path
+              d="M297,410 C290,428 280,448 266,466 L278,472 C289,454 298,434 304,413 Z"
+              fill="url(#hvSatin)"
+            />
+            <path
+              d="M303,410 C310,428 320,448 334,466 L322,472 C311,454 302,434 296,413 Z"
+              fill="url(#hvSatin)"
+            />
+            <path
+              d="M300,408 C274,368 226,366 234,394 C239,412 274,413 300,408 Z"
+              fill="url(#hvSatin)"
+            />
+            <path
+              d="M300,408 C326,368 374,366 366,394 C361,412 326,413 300,408 Z"
+              fill="url(#hvSatin)"
+            />
+            <ellipse cx="300" cy="409" rx="13" ry="10" fill="#b23545" />
+          </svg>
+        </div>
+      </div>
     </div>
   </div>
-}
-@if (!done()) {
-  <button type="button" class="hv-skip" (click)="skip()">Saltar intro</button>
-} @else if (!framed() && !reduce) {
-  <button type="button" class="hv-replay" (click)="replay()">Ver la intro otra vez</button>
-}
+  <p class="hv-no" aria-hidden="true">Escaparate n.º 03 · Navidad</p>
+</div>

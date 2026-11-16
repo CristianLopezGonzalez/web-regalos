@@ -1,16 +1,19 @@
 <article class="gc" [class.gc--tall]="tall()">
   <a class="gc-link" [routerLink]="['/wishlist', gift().id]">
-    <app-product-image
-      class="gc-window"
-      [image]="gift().image"
-      [alt]="gift().name"
-      [dim]="gift().isReserved"
-      [eager]="eager()"
-    >
-      @if (gift().isReserved) {
-        <app-reservation-badge class="gc-plaque" [reserved]="true" [mine]="mine()" />
-      }
-    </app-product-image>
+    <div class="gc-wrap">
+      <i class="gc-frame" aria-hidden="true"></i>
+      <app-product-image
+        class="gc-window"
+        [image]="gift().image"
+        [alt]="gift().name"
+        [dim]="gift().isReserved"
+        [eager]="eager()"
+      >
+        @if (gift().isReserved) {
+          <app-reservation-badge class="gc-plaque" [reserved]="true" [mine]="mine()" />
+        }
+      </app-product-image>
+    </div>
     <h3 class="gc-name" [attr.title]="gift().name">{{ gift().name }}</h3>
     <p class="gc-meta">
       @if (categoryName()) {

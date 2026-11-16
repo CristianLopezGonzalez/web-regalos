@@ -1,124 +1,137 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
-  ViewEncapsulation,
   afterNextRender,
   inject,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HeaderBrand } from '@app/layout/site-header/header-brand';
 
 interface Star {
   x: number;
   y: number;
   wx: number;
   s: number;
-  d: number;
-  dl: number;
-}
-interface Spark {
-  a: number;
-  len: number;
-  dl: number;
 }
 
 const SPARK = 'M0,-10 C1,-2 2,-1 10,0 C2,1 1,2 0,10 C-1,2 -2,1 -10,0 C-2,-1 -1,-2 0,-10Z';
-const PLAYED_KEY = 'mcw-hero-played';
-const TOTAL_MS = 6000;
+/** Set once the entrance has been shown to this person (any later visit rests on the final frame). */
+export const HERO_SEEN_KEY = 'mcw-home-intro-seen';
+
+/** Has this browser already seen the full entrance? Storage may be blocked: then it plays. */
+export function heroSeen(): boolean {
+  try {
+    return localStorage.getItem(HERO_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+function markHeroSeen() {
+  try {
+    localStorage.setItem(HERO_SEEN_KEY, '1');
+  } catch {
+    /* storage blocked: it simply plays again next time */
+  }
+}
 
 /**
- * HERO — "The Midnight Window"
- * A shop window at dusk: a gold arch draws itself, the gift is set on a plinth under a
- * spotlight, hops twice, opens, and night floods out of it while stars rise.
+ * HERO — "Portada editorial" (concept C, approved).
+ * The cover of a Christmas magazine: cream page, a huge burgundy title on the left, and the
+ * midnight shop window as the plate. The night lives only inside the arch.
  *
- * Built as inline SVG + CSS keyframes (fill-mode both, so the resting style IS the final
- * frame). That gives the static alternative for reduced motion, and "skip" through the Web
- * Animations API. The full sequence plays once per session; afterwards it rests on the final frame.
+ * Entrance ≈ 3.2 s, title and button usable at ≈ 1.3 s. CSS keyframes with fill-mode both, so the
+ * resting style IS the final frame. Played once per person (localStorage); later visits, the
+ * component gallery and reduced motion show the final frame with a short fade. Any "I want to
+ * carry on" gesture (wheel, touch drag, a key) completes it at once — no skip button.
+ *
+ * The scene is three layers (back SVG / small HTML pieces / front SVG) so everything that moves
+ * is a small element animated with transform/opacity only (compositor), plus one clip-path wipe.
  */
 @Component({
   selector: 'app-hero',
   imports: [RouterLink],
-  encapsulation: ViewEncapsulation.None,
   styleUrl: './hero.css',
-  host: { class: 'hv', '[class.hv--framed]': 'framed()', '[class.hv--rest]': 'rest()' },
+  host: {
+    class: 'hv',
+    '[class.hv--framed]': 'framed()',
+    '[class.hv--play]': '!rest() && !framed()',
+    '[class.hv--rest]': 'rest() || framed()',
+  },
   templateUrl: './hero.html',
 })
 export class Hero {
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly brand = inject(HeaderBrand);
+  private readonly title = viewChild.required<ElementRef<HTMLElement>>('title');
 
-  /** Fixed-aspect version for the component gallery. */
+  /** Fixed-aspect version for the component gallery: always the final frame. */
   readonly framed = input(false);
   readonly ctaLink = input<string | unknown[]>('/wishlist');
-  /** When set, the CTA scrolls to this fragment on the same page instead. */
-  readonly ctaFragment = input<string | null>(null);
 
   protected readonly spark = SPARK;
-  protected readonly run = signal(0);
-  protected readonly rest = signal(false);
-  protected readonly done = signal(false);
-  private timer: ReturnType<typeof setTimeout> | undefined;
-  protected readonly reduce =
-    typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /** true = final frame (seen before, reduced motion, gallery); false = play the entrance. */
+  protected readonly rest = signal(
+    heroSeen() ||
+      (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches),
+  );
 
   protected readonly stars: Star[] = [
-    { x: -120, y: -300, wx: 18, s: 1.2, d: 2400, dl: 3050 },
-    { x: 96, y: -340, wx: -14, s: 0.8, d: 2500, dl: 3120 },
-    { x: -40, y: -380, wx: 10, s: 0.6, d: 2600, dl: 3240 },
-    { x: 150, y: -230, wx: 16, s: 1.0, d: 2300, dl: 3080 },
-    { x: -160, y: -190, wx: -12, s: 0.7, d: 2200, dl: 3200 },
-    { x: 30, y: -250, wx: -18, s: 1.4, d: 2400, dl: 3160 },
-    { x: -90, y: -120, wx: 12, s: 0.5, d: 2100, dl: 3300 },
-    { x: 120, y: -120, wx: -10, s: 0.6, d: 2200, dl: 3340 },
-    { x: 60, y: -395, wx: 8, s: 0.9, d: 2600, dl: 3380 },
-    { x: -140, y: -370, wx: -8, s: 0.55, d: 2500, dl: 3260 },
+    { x: -120, y: -300, wx: 18, s: 1.2 },
+    { x: 96, y: -340, wx: -14, s: 0.8 },
+    { x: -40, y: -380, wx: 10, s: 0.6 },
+    { x: 150, y: -230, wx: 16, s: 1.0 },
+    { x: -160, y: -190, wx: -12, s: 0.7 },
+    { x: 30, y: -250, wx: -18, s: 1.4 },
+    { x: -90, y: -120, wx: 12, s: 0.5 },
+    { x: 120, y: -120, wx: -10, s: 0.6 },
+    { x: 60, y: -395, wx: 8, s: 0.9 },
   ];
-  protected readonly sparks: Spark[] = [-70, -45, -20, 0, 20, 45, 70, -90, 90].map((a, i) => ({
-    a,
-    len: 70 + (i % 3) * 22,
-    dl: 2990 + (i % 4) * 30,
-  }));
 
   constructor() {
-    let played = false;
-    try {
-      played = sessionStorage.getItem(PLAYED_KEY) === '1';
-    } catch {
-      /* storage blocked: play every time */
-    }
-    if (played || this.reduce) {
-      this.rest.set(true);
-      this.done.set(true);
-    } else {
-      this.start();
-    }
+    const destroyRef = inject(DestroyRef);
+    const gestures = new AbortController();
+    destroyRef.onDestroy(() => gestures.abort());
+
     afterNextRender(() => {
-      try {
-        sessionStorage.setItem(PLAYED_KEY, '1');
-      } catch {
-        /* ignore */
+      if (this.framed()) return;
+      markHeroSeen();
+
+      // Wheel, touch drag or a key (not Tab/Shift: those just move focus) completes the entrance.
+      if (!this.rest()) {
+        const finish = (e: Event) => {
+          if (e instanceof KeyboardEvent && (e.key === 'Tab' || e.key === 'Shift')) return;
+          gestures.abort();
+          this.finish();
+        };
+        for (const type of ['wheel', 'touchmove', 'keydown']) {
+          addEventListener(type, finish, { passive: true, signal: gestures.signal });
+        }
       }
+
+      // The header's small name steps aside while this big title is on screen.
+      destroyRef.onDestroy(() => this.brand.away.set(false));
+      if (typeof IntersectionObserver === 'undefined') {
+        this.brand.away.set(false);
+        return;
+      }
+      const io = new IntersectionObserver(([e]) => this.brand.away.set(e.isIntersecting), {
+        rootMargin: '-64px 0px 0px 0px', // under the sticky header
+      });
+      io.observe(this.title().nativeElement);
+      destroyRef.onDestroy(() => io.disconnect());
     });
   }
 
-  private start() {
-    this.done.set(false);
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.done.set(true), TOTAL_MS);
-  }
-
-  protected skip() {
-    for (const a of this.host.nativeElement.getAnimations({ subtree: true })) {
+  /** Jump every entrance animation to its last frame (scroll-linked ones are left alone). */
+  finish() {
+    for (const a of this.host.getAnimations?.({ subtree: true }) ?? []) {
+      if (a.timeline !== document.timeline) continue;
       const end = a.effect?.getComputedTiming().endTime;
       if (end != null && end !== Infinity) a.finish();
     }
-    clearTimeout(this.timer);
-    this.done.set(true);
-  }
-
-  protected replay() {
-    this.rest.set(false);
-    this.run.update((v) => v + 1);
-    this.start();
   }
 }

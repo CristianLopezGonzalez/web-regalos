@@ -1,82 +1,96 @@
 @if (mode() === 'login') {
-  <form class="grid gap-6" [formRoot]="form">
-    <app-labeled-field label="Email" forId="login-email">
+  <form class="al-form" novalidate (submit)="signIn($event)">
+    <app-auth-field label="Email" forId="login-email" [attempted]="attempted()">
       <input
         id="login-email"
         class="input"
         type="email"
         [formField]="form.email"
-        autocomplete="email"
+        autocomplete="username"
         inputmode="email"
+        autocapitalize="none"
+        autocorrect="off"
         spellcheck="false"
+        enterkeyhint="next"
+        (keydown.enter)="nextField($event)"
       />
-    </app-labeled-field>
-    <app-labeled-field label="Contraseña" forId="login-password">
-      <div class="relative">
+    </app-auth-field>
+    <app-auth-field label="Contraseña" forId="login-password" [attempted]="attempted()">
+      <div class="al-reveal-wrap">
         <input
+          #pw
           id="login-password"
-          class="input pr-28"
+          class="input"
           [type]="show() ? 'text' : 'password'"
           [formField]="form.password"
           autocomplete="current-password"
+          enterkeyhint="go"
         />
         <button
           type="button"
-          class="input-reveal"
+          class="al-reveal"
           (click)="show.set(!show())"
           [attr.aria-pressed]="show()"
         >
-          {{ show() ? 'Ocultar' : 'Mostrar' }}
+          {{ show() ? 'Ocultar' : 'Mostrar' }}<span class="sr-only"> contraseña</span>
         </button>
       </div>
-    </app-labeled-field>
+    </app-auth-field>
 
-    @if (failure()) {
-      <p class="form-alert" role="alert">{{ failure() }}</p>
-    }
+    <div class="al-live" role="alert">
+      @if (failure()) {
+        <p class="al-alert">{{ failure() }}</p>
+      }
+    </div>
 
     <button
       type="submit"
       class="btn btn-primary w-full"
-      [disabled]="form().submitting()"
-      [attr.aria-busy]="form().submitting()"
+      [class.is-loading]="busy()"
+      [attr.aria-disabled]="busy()"
     >
-      {{ form().submitting() ? 'Entrando…' : 'Entrar' }}
-    </button>
-    <button type="button" class="btn btn-ghost justify-self-center" (click)="setMode('reset')">
-      ¿Has olvidado tu contraseña?
+      {{ busy() ? 'Entrando…' : 'Entrar' }}
     </button>
   </form>
 } @else {
-  <!-- Only the email is submitted here (see sendReset), so no [formRoot]: it would sign in. -->
-  <form class="grid gap-6" (submit)="$event.preventDefault(); sendReset()" novalidate>
-    <p class="m-0 text-[17px] leading-relaxed">
-      Escribe tu email y te enviaremos un enlace para crear una contraseña nueva.
-    </p>
-    <app-labeled-field label="Email" forId="reset-email">
+  <form class="al-form" novalidate (submit)="sendReset($event)">
+    <app-auth-field label="Email" forId="reset-email" [attempted]="resetAttempted()">
       <input
         id="reset-email"
         class="input"
         type="email"
         [formField]="form.email"
-        autocomplete="email"
+        autocomplete="username"
+        inputmode="email"
+        autocapitalize="none"
+        autocorrect="off"
         spellcheck="false"
+        enterkeyhint="send"
       />
-    </app-labeled-field>
-    @if (resetSent()) {
-      <p class="form-note" role="status">
-        Si existe una cuenta con ese email, te hemos enviado el enlace. Revisa también el correo no
-        deseado.
-      </p>
-    }
-    @if (failure()) {
-      <p class="form-alert" role="alert">{{ failure() }}</p>
-    }
-    <button type="submit" class="btn btn-primary w-full" [disabled]="form.email().submitting()">
-      {{ form.email().submitting() ? 'Enviando…' : 'Enviar enlace' }}
-    </button>
-    <button type="button" class="btn btn-ghost justify-self-center" (click)="setMode('login')">
-      Volver a entrar
+    </app-auth-field>
+
+    <div class="al-live" role="status">
+      @if (sentTo()) {
+        <p class="al-note">
+          Si hay una cuenta con <strong>{{ sentTo() }}</strong>, el enlace ya va de camino. Mira
+          también en el correo no deseado.
+        </p>
+      }
+    </div>
+    <div class="al-live" role="alert">
+      @if (failure()) {
+        <p class="al-alert">{{ failure() }}</p>
+      }
+    </div>
+
+    <button
+      type="submit"
+      class="btn btn-primary w-full"
+      [class.is-loading]="busy()"
+      [class.is-resting]="cooldown() > 0"
+      [attr.aria-disabled]="busy() || cooldown() > 0"
+    >
+      {{ resetLabel() }}
     </button>
   </form>
 }

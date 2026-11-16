@@ -1,27 +1,33 @@
-<app-auth-layout heading="Entrar" lede="La lista es privada: solo la ve la familia.">
-  <div>
-    <app-login-form />
-    <p class="invite">
-      ¿Primera vez? Abre el enlace de invitación que te enviaron: te llevará a crear tu cuenta.
-    </p>
-    @if (api.isDemo) {
-      <aside class="demo" aria-label="Cuentas de la demo">
-        <p class="caps m-0">Modo demo</p>
-        <dl>
-          <dt>Dueña</dt>
-          <dd>{{ accounts.owner.email }}</dd>
-          <dt>Familia</dt>
-          <dd>{{ accounts.family.email }}</dd>
-          <dt>Contraseña</dt>
-          <dd>{{ accounts.owner.password }}</dd>
-        </dl>
-        <p class="m-0">
-          Invitación de prueba:
-          <a routerLink="/register" [queryParams]="{ invite: token }"
-            >/register?invite={{ token }}</a
-          >
-        </p>
-      </aside>
+<app-auth-layout
+  eyebrow="Solo familia"
+  [heading]="view() === 'reset' ? 'Nueva contraseña' : 'Entrar'"
+  [lede]="
+    view() === 'reset'
+      ? 'Escribe tu email y te enviamos un enlace para elegir otra.'
+      : 'La lista es privada: solo la ve la familia.'
+  "
+>
+  <app-login-form [mode]="view()" />
+  <nav class="al-links" aria-label="Otras opciones">
+    @if (view() === 'login') {
+      <a class="al-link" [authLink]="resetUrl()">¿Has olvidado tu contraseña?</a>
+      <a class="al-link" [authLink]="registerUrl">Tengo una invitación</a>
+    } @else {
+      <a class="al-link" [authLink]="loginUrl()">Volver a entrar</a>
     }
-  </div>
+  </nav>
+
+  @if (api.isDemo) {
+    <aside alAside class="al-aside" aria-label="Cuentas de la demo">
+      <p class="caps m-0 mb-2">Modo demo</p>
+      <p class="m-0">
+        Dueño <strong>{{ accounts.owner.email }}</strong> · Familia
+        <strong>{{ accounts.family.email }}</strong> · Contraseña
+        <strong>{{ accounts.owner.password }}</strong>
+      </p>
+      <p class="m-0 mt-2">
+        Invitación de prueba: <a [authLink]="inviteUrl">{{ inviteUrl }}</a>
+      </p>
+    </aside>
+  }
 </app-auth-layout>

@@ -63,6 +63,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-burgundy);
+  overflow-wrap: anywhere; /* a name with no spaces must not push the page sideways */
 }
 .gd-price {
   display: block;

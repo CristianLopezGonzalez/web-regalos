@@ -5,7 +5,7 @@ import { Session } from '@app/core/auth/session';
 import { Toasts } from '@app/core/toast/toasts';
 import { WishlistApi } from '@app/core/api/wishlist-api';
 
-/** The street at night: the name large in Italiana, the promise of anonymity, the exits. */
+/** The street at night: the name in Italiana, the promise of anonymity, the way in or out. */
 @Component({
   selector: 'app-site-footer',
   imports: [RouterLink],

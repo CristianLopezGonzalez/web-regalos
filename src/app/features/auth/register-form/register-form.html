@@ -1,12 +1,26 @@
-<form class="grid gap-6" [formRoot]="form">
-  <app-labeled-field
+<form class="al-form" novalidate (submit)="signUp($event)">
+  <app-auth-field
     label="Tu nombre"
     forId="reg-name"
-    hint="Así te verán los demás en la wishlist."
+    hint="Así te verá la familia en la lista."
+    [attempted]="attempted()"
   >
-    <input id="reg-name" class="input" [formField]="form.displayName" autocomplete="given-name" />
-  </app-labeled-field>
-  <app-labeled-field label="Email" forId="reg-email">
+    <input
+      id="reg-name"
+      class="input"
+      [formField]="form.displayName"
+      autocomplete="given-name"
+      autocapitalize="words"
+      enterkeyhint="next"
+      (keydown.enter)="nextField($event, 0)"
+    />
+  </app-auth-field>
+  <app-auth-field
+    label="Email"
+    forId="reg-email"
+    [attempted]="attempted()"
+    [error]="emailError()"
+  >
     <input
       id="reg-email"
       class="input"
@@ -14,39 +28,58 @@
       [formField]="form.email"
       autocomplete="email"
       inputmode="email"
+      autocapitalize="none"
+      autocorrect="off"
       spellcheck="false"
+      enterkeyhint="next"
+      (keydown.enter)="nextField($event, 1)"
     />
-  </app-labeled-field>
-  <app-labeled-field label="Contraseña" forId="reg-password" hint="Al menos 8 caracteres.">
-    <div class="relative">
+  </app-auth-field>
+  <app-auth-field
+    label="Contraseña"
+    forId="reg-password"
+    hint="Al menos 8 caracteres."
+    okText="Vale: 8 caracteres o más."
+    [attempted]="attempted()"
+    [live]="true"
+  >
+    <div class="al-reveal-wrap">
       <input
         id="reg-password"
-        class="input pr-28"
+        class="input"
         [type]="show() ? 'text' : 'password'"
         [formField]="form.password"
         autocomplete="new-password"
+        enterkeyhint="go"
       />
       <button
         type="button"
-        class="input-reveal"
+        class="al-reveal"
         (click)="show.set(!show())"
         [attr.aria-pressed]="show()"
       >
-        {{ show() ? 'Ocultar' : 'Mostrar' }}
+        {{ show() ? 'Ocultar' : 'Mostrar' }}<span class="sr-only"> contraseña</span>
       </button>
     </div>
-  </app-labeled-field>
+  </app-auth-field>
 
-  @if (failure()) {
-    <p class="form-alert" role="alert">{{ failure() }}</p>
-  }
+  <div class="al-live" role="alert">
+    @if (failure()) {
+      <p class="al-alert">
+        {{ failure() }}
+        @if (taken()) {
+          <a class="al-link" authLink="/login" (click)="rememberEmail()">Entrar con él</a>
+        }
+      </p>
+    }
+  </div>
 
   <button
     type="submit"
     class="btn btn-primary w-full"
-    [disabled]="form().submitting()"
-    [attr.aria-busy]="form().submitting()"
+    [class.is-loading]="busy()"
+    [attr.aria-disabled]="busy()"
   >
-    {{ form().submitting() ? 'Creando tu cuenta…' : 'Crear mi cuenta' }}
+    {{ busy() ? 'Creando tu cuenta…' : 'Crear mi cuenta' }}
   </button>
 </form>
