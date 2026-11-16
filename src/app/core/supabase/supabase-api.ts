@@ -108,8 +108,8 @@ export class SupabaseApi extends WishlistApi {
       return 'error';
     }
     if (!data) {
-      // Account without profile (e.g. removed by the owner): end the session.
-      await sb.auth.signOut();
+      // Account without profile (e.g. removed by the owner): end the session (this device only).
+      await sb.auth.signOut({ scope: 'local' });
       this.profile.set(null);
       return 'missing';
     }
@@ -192,7 +192,9 @@ export class SupabaseApi extends WishlistApi {
 
   async signOut() {
     const sb = await this.client;
-    await sb.auth.signOut();
+    // 'local': only this device. The default ('global') revokes every session of the account, so
+    // signing out on the computer (or a test run on localhost) logged the phone out too (2026-11-15).
+    await sb.auth.signOut({ scope: 'local' });
     this.forgetSession();
   }
 

@@ -89,4 +89,14 @@ describe('SupabaseApi profile loading', () => {
     });
     expect(signOut).not.toHaveBeenCalled();
   });
+
+  // 2026-11-15: the default scope ('global') revoked every session of the account, so signing out
+  // on the computer logged the phone out too.
+  it('signing out only ends the session on this device', async () => {
+    const { api, signOut } = setup('migrated');
+    await api.signIn('yo@ejemplo.com', 'secreto');
+    await api.signOut();
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(api.profile()).toBeNull();
+  });
 });
