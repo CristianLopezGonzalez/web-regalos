@@ -1,5 +1,13 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import {
   IsActiveMatchOptions,
   NavigationEnd,
@@ -20,11 +28,12 @@ interface NavItem {
 }
 
 /**
- * Header + Navigation: the store's ivory awning. Name centred in Italiana, small capitals
- * either side. On phones the links move into a full-screen night menu.
+ * Header + Navigation: the store's ivory awning with the name centred in Italiana. The links live
+ * in a night drawer that slides in from the left, on phones and computers alike.
  */
 @Component({
   selector: 'app-site-header',
+  host: { '(document:keydown.escape)': 'menu.set(false)' },
   imports: [RouterLink, RouterLinkActive, InstallApp],
   templateUrl: './site-header.html',
   styleUrl: './site-header.css',
@@ -34,6 +43,7 @@ export class SiteHeader {
   private readonly doc = inject(DOCUMENT);
 
   protected readonly menu = signal(false);
+  private readonly closeBtn = viewChild<ElementRef<HTMLButtonElement>>('closeBtn');
 
   protected readonly left = computed<NavItem[]>(() =>
     this.session.signedIn()
@@ -56,6 +66,8 @@ export class SiteHeader {
       : [{ label: 'Entrar', link: '/login' }],
   );
 
+  protected readonly items = computed(() => [...this.left(), ...this.right()]);
+
   protected match(i: NavItem): IsActiveMatchOptions {
     return {
       paths: i.exact || i.fragment ? 'exact' : 'subset',
@@ -72,9 +84,10 @@ export class SiteHeader {
         takeUntilDestroyed(),
       )
       .subscribe(() => this.menu.set(false));
-    // Lock page scroll behind the open menu.
+    // Lock page scroll behind the open drawer and move focus into it.
     effect(() => {
       this.doc.documentElement.style.overflow = this.menu() ? 'hidden' : '';
+      this.closeBtn()?.nativeElement.focus();
     });
   }
 }

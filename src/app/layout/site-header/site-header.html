@@ -1,35 +1,5 @@
 <header class="sh">
   <nav class="sh-in" aria-label="Principal">
-    <ul class="sh-links" role="list">
-      @for (i of left(); track i.label) {
-        <li>
-          <a
-            [routerLink]="i.link"
-            [fragment]="i.fragment"
-            routerLinkActive="on"
-            [routerLinkActiveOptions]="match(i)"
-            ariaCurrentWhenActive="page"
-            >{{ i.label }}</a
-          >
-        </li>
-      }
-    </ul>
-    <a class="sh-mark" routerLink="/" lang="en" aria-label="My Christmas Wishlist, inicio"
-      >My Christmas Wishlist</a
-    >
-    <ul class="sh-links sh-links--right" role="list">
-      @for (i of right(); track i.label) {
-        <li>
-          <a
-            [routerLink]="i.link"
-            routerLinkActive="on"
-            [routerLinkActiveOptions]="match(i)"
-            ariaCurrentWhenActive="page"
-            >{{ i.label }}</a
-          >
-        </li>
-      }
-    </ul>
     <button
       type="button"
       class="sh-menu-btn"
@@ -37,30 +7,56 @@
       aria-controls="sh-menu"
       (click)="menu.set(!menu())"
     >
-      {{ menu() ? 'Cerrar' : 'Menú' }}
+      <span class="sh-burger" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="sh-menu-label">Menú</span>
     </button>
-  </nav>
-  @if (menu()) {
-    <div
-      id="sh-menu"
-      class="sh-menu"
-      animate.enter="sh-menu-in"
-      animate.leave="sh-menu-out"
-      (keydown.escape)="menu.set(false)"
+    <a class="sh-mark" routerLink="/" lang="en" aria-label="My Christmas Wishlist, inicio"
+      >My Christmas Wishlist</a
     >
-      <ul role="list">
-        @for (i of [...left(), ...right()]; track i.label) {
-          <li>
-            <a [routerLink]="i.link" [fragment]="i.fragment" (click)="menu.set(false)">{{
-              i.label
-            }}</a>
-          </li>
-        }
-      </ul>
-      <app-install-app tone="night" class="sh-menu-install" />
-      @if (session.signedIn()) {
-        <p class="sh-menu-who">Has entrado como {{ session.profile()?.displayName }}</p>
-      }
-    </div>
-  }
+  </nav>
 </header>
+
+@if (menu()) {
+  <div
+    class="sh-backdrop"
+    animate.enter="sh-fade-in"
+    animate.leave="sh-fade-out"
+    (click)="menu.set(false)"
+    aria-hidden="true"
+  ></div>
+  <aside
+    id="sh-menu"
+    class="sh-menu"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menú"
+    animate.enter="sh-menu-in"
+    animate.leave="sh-menu-out"
+  >
+    <div class="sh-menu-top">
+      <span class="sh-menu-brand" lang="en">My Christmas Wishlist</span>
+      <button #closeBtn type="button" class="sh-close" (click)="menu.set(false)">
+        Cerrar
+      </button>
+    </div>
+    <ul role="list">
+      @for (i of items(); track i.label) {
+        <li>
+          <a
+            [routerLink]="i.link"
+            [fragment]="i.fragment"
+            routerLinkActive="on"
+            [routerLinkActiveOptions]="match(i)"
+            ariaCurrentWhenActive="page"
+            (click)="menu.set(false)"
+            >{{ i.label }}</a
+          >
+        </li>
+      }
+    </ul>
+    <app-install-app tone="night" class="sh-menu-install" />
+    @if (session.signedIn()) {
+      <p class="sh-menu-who">Has entrado como {{ session.profile()?.displayName }}</p>
+    }
+  </aside>
+}
