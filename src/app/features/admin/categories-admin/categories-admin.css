@@ -1,40 +1,54 @@
+/* add first, then the list: one row per category at every width */
+.ca-new {
+  display: flex;
+  gap: 10px;
+  max-width: 560px;
+  margin-bottom: 24px;
+}
+.ca-new .input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  padding-block: 10px;
+}
+.ca-new .btn {
+  flex: none;
+  min-height: 46px;
+}
+
 .ca {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--color-line);
+  max-width: 760px;
 }
 .ca-row {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 8px 16px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 4px 12px;
   align-items: center;
-  padding: 14px 0;
+  min-height: 60px;
+  padding: 6px 0;
   border-bottom: 1px solid var(--color-line);
-}
-@media (min-width: 768px) {
-  .ca-row {
-    grid-template-columns: 28px minmax(0, 1fr) 7rem auto;
-  }
-}
-.ca-floor {
-  color: color-mix(in oklab, var(--color-gold) 70%, var(--color-chocolate));
-  font-size: 13px;
 }
 .ca-edit {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
+  min-width: 0;
 }
 .ca-edit .input {
-  min-height: 48px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  margin-left: -8px;
   border-color: transparent;
   background: transparent;
-  font: 400 17px/1.2 var(--font-serif);
+  font: 400 16px/1.2 var(--font-serif);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-burgundy);
-  padding-inline: 8px;
 }
 .ca-edit .input:hover {
   border-color: var(--color-line);
@@ -43,46 +57,51 @@
   background: var(--color-ivory);
 }
 .ca-count {
-  grid-column: 2;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-ink-soft);
+  white-space: nowrap;
 }
 .ca-actions {
-  grid-column: 2;
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-@media (min-width: 768px) {
-  .ca-count,
-  .ca-actions {
-    grid-column: auto;
-  }
 }
 .ca-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 44px;
   height: 44px;
+  padding: 0;
   border: 1px solid transparent;
   background: none;
-  font-size: 18px;
   cursor: pointer;
-  color: var(--color-chocolate);
-  transition: border-color 160ms ease;
+  color: var(--color-burgundy);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+.ca-del {
+  color: var(--color-cherry);
 }
 .ca-icon:disabled {
-  opacity: 0.3;
+  color: var(--color-chocolate);
+  opacity: 0.25;
   cursor: default;
 }
 @media (hover: hover) and (pointer: fine) {
   .ca-icon:hover:not(:disabled) {
     border-color: var(--color-line);
+    background: var(--color-ivory);
   }
 }
-.ca-new {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 16px;
-  margin-top: 40px;
-  max-width: 560px;
+/* very narrow phones: just the number */
+@media (max-width: 379.98px) {
+  .ca-count-word {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ca-icon {
+    transition: none;
+  }
 }

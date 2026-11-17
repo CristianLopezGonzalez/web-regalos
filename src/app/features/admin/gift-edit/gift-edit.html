@@ -13,11 +13,7 @@
 } @else {
   <app-admin-page-head
     [heading]="isNew() ? 'Nuevo regalo' : 'Editar regalo'"
-    [lede]="
-      isNew()
-        ? 'Aparecerá en tu lista en cuanto lo guardes.'
-        : 'Si alguien lo ha reservado, no lo sabrás: es sorpresa.'
-    "
+    [lede]="isNew() ? null : 'Si alguien lo ha reservado, no lo sabrás: es sorpresa.'"
   >
     @if (gift(); as g) {
       <a class="btn btn-ghost" [routerLink]="['/wishlist', g.id]">Ver en la wishlist</a>

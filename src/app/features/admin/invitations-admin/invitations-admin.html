@@ -1,6 +1,6 @@
 <app-admin-page-head
   heading="Invitaciones"
-  lede="Crea un enlace, cópialo y envíaselo a quien quieras por WhatsApp, email o como prefieras. Cada enlace sirve para una sola cuenta."
+  lede="Crea un enlace y envíaselo por WhatsApp, email o como prefieras. Cada enlace sirve para una sola cuenta."
 />
 
 <section class="iv-new" aria-labelledby="new-h">
@@ -78,7 +78,7 @@
           <span class="iv-who">
             {{ r.inv.emailRestriction ?? 'Cualquier email' }}
             @if (r.inv.withList) {
-              <span class="iv-kind">· con su propia lista</span>
+              <span class="iv-kind">Con su lista</span>
             }
           </span>
           <span class="iv-dates"

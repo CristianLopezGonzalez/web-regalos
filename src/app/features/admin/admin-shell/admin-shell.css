@@ -9,7 +9,7 @@
 }
 .ash-main {
   min-width: 0;
-  padding: clamp(28px, 5vw, 56px) 16px clamp(96px, 12vw, 160px);
+  padding: clamp(20px, 3vw, 40px) 16px clamp(64px, 8vw, 112px);
 }
 @media (min-width: 768px) {
   .ash-main {

@@ -1,55 +1,52 @@
 <form class="agf" [formRoot]="form">
+  <!-- photo: a column on desktop, a thumbnail + button row on phones -->
   <div class="agf-photo">
-    <p class="field-label" id="agf-photo-label">Fotografía</p>
+    <p class="field-label agf-photo-label" id="agf-photo-label">Fotografía</p>
     <app-product-image
       class="agf-preview"
       [image]="preview()"
       [alt]="form.name().value() || 'Nuevo regalo'"
-      sizes="320px"
+      sizes="240px"
     />
-    <div class="agf-photo-actions">
-      <label class="btn btn-outline btn-sm" [class.opacity-50]="processing()">
-        <input
-          class="sr-only"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          (change)="pick($event)"
-          [disabled]="processing()"
-          aria-labelledby="agf-photo-label"
-          aria-describedby="agf-photo-msg"
-        />
-        {{ processing() ? 'Preparando la foto…' : preview() ? 'Cambiar foto' : 'Elegir foto' }}
-      </label>
-      @if (preview()) {
-        <button type="button" class="btn btn-ghost" (click)="clearImage()">Quitar</button>
+    <div class="agf-photo-side">
+      <div class="agf-photo-actions">
+        <label class="btn btn-outline btn-sm" [class.opacity-50]="processing()">
+          <input
+            class="sr-only"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="pick($event)"
+            [disabled]="processing()"
+            aria-labelledby="agf-photo-label"
+            aria-describedby="agf-photo-msg"
+          />
+          {{ processing() ? 'Preparando…' : preview() ? 'Cambiar foto' : 'Elegir foto' }}
+        </label>
+        @if (preview()) {
+          <button type="button" class="btn btn-ghost" (click)="clearImage()">Quitar</button>
+        }
+      </div>
+      @if (imageError()) {
+        <p class="field-error" id="agf-photo-msg" role="alert">{{ imageError() }}</p>
+      } @else if (imageNote()) {
+        <p class="field-hint" id="agf-photo-msg" role="status">{{ imageNote() }}</p>
+      } @else {
+        <p class="field-hint" id="agf-photo-msg">JPG, PNG o WebP. Mejor sobre fondo claro.</p>
       }
     </div>
-    @if (imageError()) {
-      <p class="field-error" id="agf-photo-msg" role="alert">{{ imageError() }}</p>
-    } @else if (imageNote()) {
-      <p class="field-hint" id="agf-photo-msg" role="status">{{ imageNote() }}</p>
-    } @else {
-      <p class="field-hint" id="agf-photo-msg">
-        JPG, PNG o WebP. Se ve más nítida a partir de 800 px, mejor sobre fondo claro y liso.
-      </p>
-    }
   </div>
 
   <div class="agf-fields">
-    <app-labeled-field label="Nombre" forId="agf-name">
-      <input id="agf-name" class="input" [formField]="form.name" />
+    <app-labeled-field class="agf-name" label="Nombre" forId="agf-name">
+      <input
+        id="agf-name"
+        class="input"
+        [formField]="form.name"
+        placeholder="Por ejemplo: Zapatillas de casa"
+      />
     </app-labeled-field>
 
-    <app-labeled-field
-      label="Descripción"
-      forId="agf-desc"
-      [optional]="true"
-      hint="Una o dos frases: por qué lo quieres, talla, color…"
-    >
-      <textarea id="agf-desc" class="input" [formField]="form.description"></textarea>
-    </app-labeled-field>
-
-    <div class="grid grid-cols-[1fr_8rem] gap-4">
+    <div class="agf-price">
       <app-labeled-field label="Precio" forId="agf-price">
         <input
           id="agf-price"
@@ -58,6 +55,7 @@
           inputmode="decimal"
           step="0.01"
           [formField]="form.price"
+          placeholder="0,00"
         />
       </app-labeled-field>
       <app-labeled-field label="Moneda" forId="agf-currency">
@@ -69,12 +67,24 @@
       </app-labeled-field>
     </div>
 
-    <app-labeled-field
-      label="Enlace de compra"
-      forId="agf-url"
-      [optional]="true"
-      hint="La página de la tienda, empezando por https://"
-    >
+    <app-labeled-field class="agf-prio" label="Prioridad" forId="agf-priority">
+      <select id="agf-priority" class="input" [formField]="form.priority">
+        @for (p of priorities; track p) {
+          <option [value]="p">{{ priorityLabel[p] }}</option>
+        }
+      </select>
+    </app-labeled-field>
+
+    <app-labeled-field class="agf-cat" label="Categoría" forId="agf-cat">
+      <select id="agf-cat" class="input" [formField]="form.categoryId">
+        <option value="">Sin categoría</option>
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </app-labeled-field>
+
+    <app-labeled-field class="agf-url" label="Enlace de compra" forId="agf-url" [optional]="true">
       <input
         id="agf-url"
         class="input"
@@ -82,38 +92,31 @@
         inputmode="url"
         spellcheck="false"
         [formField]="form.purchaseUrl"
-        placeholder="https://"
+        placeholder="https://… la página de la tienda"
       />
     </app-labeled-field>
 
-    <div class="grid gap-4 sm:grid-cols-2">
-      <app-labeled-field label="Categoría" forId="agf-cat">
-        <select id="agf-cat" class="input" [formField]="form.categoryId">
-          <option value="">Sin categoría</option>
-          @for (c of categories(); track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
-          }
-        </select>
-      </app-labeled-field>
-      <app-labeled-field label="Prioridad" forId="agf-priority">
-        <select id="agf-priority" class="input" [formField]="form.priority">
-          @for (p of priorities; track p) {
-            <option [value]="p">{{ priorityLabel[p] }}</option>
-          }
-        </select>
-      </app-labeled-field>
-    </div>
+    <app-labeled-field class="agf-desc" label="Descripción" forId="agf-desc" [optional]="true">
+      <textarea
+        id="agf-desc"
+        class="input"
+        rows="3"
+        [formField]="form.description"
+        placeholder="Una o dos frases: por qué lo quieres, talla, color…"
+      ></textarea>
+    </app-labeled-field>
 
-    <label class="check">
+    <label class="check agf-fav">
       <input type="checkbox" [formField]="form.isFavorite" />
-      <span>Favorito: aparece en el escaparate de la home</span>
+      <span>Favorito <span class="agf-fav-note">· sale en la portada</span></span>
     </label>
 
     @if (failure()) {
-      <p class="form-alert" role="alert">{{ failure() }}</p>
+      <p class="form-alert agf-alert" role="alert">{{ failure() }}</p>
     }
 
-    <div class="flex flex-wrap items-center gap-4 pt-2">
+    <div class="agf-actions">
+      <ng-content />
       <button
         type="submit"
         class="btn btn-primary"
@@ -124,7 +127,6 @@
           form().submitting() ? 'Guardando…' : gift() ? 'Guardar cambios' : 'Añadir a la wishlist'
         }}
       </button>
-      <ng-content />
     </div>
   </div>
 </form>

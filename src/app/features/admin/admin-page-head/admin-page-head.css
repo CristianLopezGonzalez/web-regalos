@@ -1,22 +1,22 @@
 .aph {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   gap: 20px 32px;
-  margin-bottom: clamp(36px, 5vw, 56px);
+  margin-bottom: clamp(24px, 3vw, 36px);
 }
 h1 {
   margin: 0;
-  font: 400 clamp(40px, 5.6vw, 76px) / 0.95 var(--font-display);
+  font: 400 clamp(30px, 3.4vw, 44px) / 1 var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-burgundy);
 }
 p {
-  margin: 14px 0 0;
-  max-width: 38rem;
-  font: italic 400 17px/1.5 var(--font-serif);
+  margin: 8px 0 0;
+  max-width: 40rem;
+  font: italic 400 15px/1.5 var(--font-serif);
   color: var(--color-ink-soft);
 }
 .aph-actions {

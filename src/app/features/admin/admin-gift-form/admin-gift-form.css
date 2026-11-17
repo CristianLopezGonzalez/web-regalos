@@ -1,34 +1,58 @@
+/*
+  Built to fit one screen. Phones: a photo thumbnail row, then the fields two-up where they fit.
+  From 900px: the photo is a column on the left and the fields a two-column grid.
+*/
 .agf {
   display: grid;
-  gap: 48px;
+  gap: 20px;
 }
 @media (min-width: 900px) {
   .agf {
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: 64px;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: clamp(32px, 4vw, 56px);
     align-items: start;
   }
-  .agf-photo {
-    position: sticky;
-    top: 112px;
-  }
 }
+
+/* compact controls: this form is about fitting, labels stay readable */
+.agf :is(.input) {
+  min-height: 46px;
+  padding-block: 10px;
+}
+.agf textarea.input {
+  min-height: 0;
+  height: 84px;
+  resize: vertical;
+}
+.agf :is(app-labeled-field) {
+  gap: 6px;
+}
+
+/* ---------- photo ---------- */
 .agf-photo {
   display: grid;
-  gap: 16px;
-  align-content: start;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 8px 16px;
+  align-items: center;
+}
+.agf-photo-label {
+  grid-column: 1 / -1;
 }
 .agf-preview {
-  width: min(100%, 300px);
+  width: 88px;
   aspect-ratio: 3 / 4;
   outline: 1px solid var(--color-gold);
-  outline-offset: 6px;
-  margin: 6px 6px 8px;
+  outline-offset: 3px;
+  margin: 3px;
+}
+.agf-photo-side {
+  display: grid;
+  gap: 8px;
 }
 .agf-photo-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 .agf-photo-actions label {
@@ -38,8 +62,125 @@
   outline: 2px solid var(--color-cherry);
   outline-offset: 3px;
 }
+.agf-photo-side .field-hint,
+.agf-photo-side .field-error {
+  font-size: 13px;
+}
+@media (min-width: 900px) {
+  .agf-photo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+  .agf-preview {
+    width: calc(100% - 12px);
+    margin: 6px;
+    outline-offset: 6px;
+  }
+}
+
+/* ---------- fields ---------- */
 .agf-fields {
   display: grid;
-  gap: 28px;
-  max-width: 640px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    'name name'
+    'price price'
+    'prio prio'
+    'cat fav'
+    'url url'
+    'desc desc'
+    'alert alert'
+    'actions actions';
+  gap: 14px;
+}
+@media (min-width: 900px) {
+  .agf-fields {
+    grid-template-areas:
+      'name name'
+      'price prio'
+      'cat url'
+      'desc desc'
+      'alert alert'
+      'foot foot';
+    gap: 18px 20px;
+    max-width: 760px;
+  }
+}
+.agf-name {
+  grid-area: name;
+}
+.agf-price {
+  grid-area: price;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem;
+  gap: 8px;
+}
+.agf-prio {
+  grid-area: prio;
+}
+.agf-cat {
+  grid-area: cat;
+}
+.agf-url {
+  grid-area: url;
+}
+.agf-desc {
+  grid-area: desc;
+}
+.agf-fav {
+  grid-area: fav;
+  align-self: end;
+  min-height: 46px;
+}
+/* currency: a short select, so less room for the arrow */
+.agf-price select.input {
+  padding-inline: 12px 30px;
+  background-position: right 12px center;
+}
+.agf-fav-note {
+  color: var(--color-ink-soft);
+}
+.agf-alert {
+  grid-area: alert;
+}
+.agf-actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px 20px;
+}
+.agf-actions > * {
+  white-space: nowrap;
+}
+/* Desktop: favourite on the left and the buttons on the right share the last row. */
+@media (min-width: 900px) {
+  .agf-fav {
+    grid-area: foot;
+    justify-self: start;
+    align-self: center;
+  }
+  .agf-actions {
+    grid-area: foot;
+    justify-self: end;
+  }
+}
+/* Phones: the main button full width, the secondary link above it. */
+@media (max-width: 899.98px) {
+  .agf-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding-top: 4px;
+  }
+  .agf-actions .btn-primary {
+    width: 100%;
+  }
+  .agf-actions > :not(.btn-primary) {
+    align-self: center;
+  }
+  .agf-fav-note {
+    display: none;
+  }
 }

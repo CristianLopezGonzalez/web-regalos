@@ -1,13 +1,29 @@
 <app-admin-page-head
   heading="Categorías"
-  lede="El orden de esta lista es el orden de las plantas del directorio."
+  lede="Salen en este orden en los filtros de la wishlist. Solo se puede borrar una categoría vacía."
 />
 
 @if (cats(); as list) {
+  <form class="ca-new" [formRoot]="newCategory">
+    <label class="sr-only" for="cat-new">Nueva categoría</label>
+    <input
+      id="cat-new"
+      class="input"
+      [formField]="newCategory.name"
+      placeholder="Nueva categoría…"
+    />
+    <button
+      type="submit"
+      class="btn btn-primary btn-sm"
+      [disabled]="!newCategory.name().value().trim() || busy()"
+    >
+      Añadir
+    </button>
+  </form>
+
   <ol class="ca" role="list">
     @for (c of list; track c.id; let i = $index, first = $first, last = $last) {
       <li class="ca-row">
-        <span class="ca-floor tabular" aria-hidden="true">{{ i === 0 ? 'G' : i }}</span>
         <form class="ca-edit" (submit)="$event.preventDefault(); rename(c)">
           <label class="sr-only" [for]="'cat-' + c.id">Nombre de la categoría {{ i + 1 }}</label>
           <input
@@ -26,7 +42,9 @@
         </form>
         <span class="ca-count tabular"
           >{{ catalogue.countIn(c.id) }}
-          {{ catalogue.countIn(c.id) === 1 ? 'regalo' : 'regalos' }}</span
+          <span class="ca-count-word">{{
+            catalogue.countIn(c.id) === 1 ? 'regalo' : 'regalos'
+          }}</span></span
         >
         <div class="ca-actions">
           <button
@@ -36,7 +54,9 @@
             [disabled]="first || busy()"
             [attr.aria-label]="'Subir ' + c.name"
           >
-            ↑
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="m6 15 6-6 6 6" />
+            </svg>
           </button>
           <button
             type="button"
@@ -45,45 +65,30 @@
             [disabled]="last || busy()"
             [attr.aria-label]="'Bajar ' + c.name"
           >
-            ↓
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
           <button
             type="button"
-            class="btn btn-ghost"
+            class="ca-icon ca-del"
             (click)="remove(c)"
             [disabled]="busy() || catalogue.countIn(c.id) > 0"
+            [attr.aria-label]="'Borrar ' + c.name"
             [attr.title]="
               catalogue.countIn(c.id) > 0
                 ? 'Mueve sus regalos a otra categoría para poder borrarla'
-                : null
+                : 'Borrar'
             "
           >
-            Borrar<span class="sr-only"> {{ c.name }}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+              <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+            </svg>
           </button>
         </div>
       </li>
     }
   </ol>
-
-  <form class="ca-new" [formRoot]="newCategory">
-    <div class="field grow">
-      <label class="field-label" for="cat-new">Nueva categoría</label>
-      <input
-        id="cat-new"
-        class="input"
-        [formField]="newCategory.name"
-        placeholder="Por ejemplo: Libros"
-      />
-    </div>
-    <button
-      type="submit"
-      class="btn btn-primary btn-sm"
-      [disabled]="!newCategory.name().value().trim() || busy()"
-    >
-      Añadir
-    </button>
-  </form>
-  <p class="field-hint mt-3">Solo se puede borrar una categoría vacía.</p>
 } @else {
   <div class="skeleton h-80" aria-hidden="true"></div>
 }

@@ -1,46 +1,76 @@
+/* one row per person: initial, name + email, since when, remove */
 .fa {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--color-line);
+  max-width: 900px;
 }
-.fa li {
+.fa-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px 16px;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'initial who remove'
+    'initial since remove';
+  gap: 2px 14px;
   align-items: center;
-  padding: 16px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--color-line);
 }
-@media (min-width: 900px) {
-  .fa li {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) 11rem auto;
+@media (min-width: 768px) {
+  .fa-row {
+    grid-template-columns: 44px minmax(0, 1fr) 9rem auto;
+    grid-template-areas: 'initial who since remove';
   }
 }
-.fa-name {
-  font: 400 17px/1.2 var(--font-serif);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.fa-initial {
+  grid-area: initial;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-cream-deep);
+  border: 1px solid var(--color-gold);
+  font: 400 20px/1 var(--font-display);
   color: var(--color-burgundy);
 }
-.fa-email,
-.fa-since {
-  grid-column: 1;
-  font-size: 15px;
+.fa-who {
+  grid-area: who;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.fa-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font: 400 17px/1.25 var(--font-serif);
+  color: var(--color-burgundy);
+}
+.fa-tag {
+  padding: 4px 8px;
+  border: 1px solid rgb(184 154 101 / 0.7);
+  font: 500 10px/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+.fa-email {
+  font-size: 14px;
   color: var(--color-ink-soft);
   overflow-wrap: anywhere;
 }
-.fa li .btn {
-  grid-column: 2;
-  grid-row: 1 / span 3;
+.fa-since {
+  grid-area: since;
+  font-size: 13px;
+  color: var(--color-ink-soft);
 }
-@media (min-width: 900px) {
-  .fa-email,
-  .fa-since,
-  .fa li .btn {
-    grid-column: auto;
-    grid-row: auto;
-  }
+.fa-remove {
+  grid-area: remove;
+  color: var(--color-cherry);
 }
 .fa-empty {
   font: italic 400 17px/1.5 var(--font-serif);

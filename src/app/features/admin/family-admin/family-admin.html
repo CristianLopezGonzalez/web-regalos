@@ -12,16 +12,19 @@
 } @else if (list.value()?.length) {
   <ul class="fa" role="list">
     @for (p of list.value(); track p.id) {
-      <li>
-        <span class="fa-name">
-          {{ p.displayName }}
-          @if (p.hasList) {
-            <span class="fa-email">· con su propia lista</span>
-          }
+      <li class="fa-row">
+        <span class="fa-initial" aria-hidden="true">{{ initial(p.displayName) }}</span>
+        <span class="fa-who">
+          <span class="fa-name"
+            >{{ p.displayName }}
+            @if (p.hasList) {
+              <span class="fa-tag">Con su lista</span>
+            }
+          </span>
+          <span class="fa-email">{{ p.email }}</span>
         </span>
-        <span class="fa-email">{{ p.email }}</span>
         <span class="fa-since">Desde el {{ date(p.createdAt) }}</span>
-        <button type="button" class="btn btn-ghost" (click)="toRemove.set(p)">
+        <button type="button" class="btn btn-ghost fa-remove" (click)="toRemove.set(p)">
           Quitar acceso<span class="sr-only"> a {{ p.displayName }}</span>
         </button>
       </li>

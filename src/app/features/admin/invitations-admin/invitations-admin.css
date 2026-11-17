@@ -1,14 +1,19 @@
 h2 {
-  margin: 0 0 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-line);
-  font: 400 21px/1.1 var(--font-serif);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  margin: 0 0 16px;
+  font: 400 clamp(20px, 2.4vw, 22px) / 1.2 var(--font-serif);
   color: var(--color-burgundy);
 }
+/* the form sits in an ivory card */
 .iv-new {
-  margin-bottom: clamp(56px, 7vw, 88px);
+  margin-bottom: clamp(36px, 5vw, 56px);
+  padding: clamp(18px, 2.5vw, 28px);
+  background: var(--color-ivory);
+  border: 1px solid rgb(184 154 101 / 0.6);
+  max-width: 1000px;
+}
+.iv-form .input {
+  min-height: 46px;
+  padding-block: 10px;
 }
 .iv-form {
   display: grid;
@@ -21,16 +26,17 @@ h2 {
     align-items: start;
   }
   .iv-form .btn {
-    margin-top: 28px;
+    margin-top: 26px;
+    min-height: 46px;
   }
 }
 .iv-link {
   display: grid;
   gap: 10px;
-  margin-top: 28px;
-  padding: 20px;
+  margin-top: 24px;
+  padding: 18px;
   max-width: 720px;
-  background: var(--color-ivory);
+  background: var(--color-cream);
   border: 1px solid var(--color-gold);
 }
 .iv-link-row {
@@ -44,6 +50,8 @@ h2 {
   margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--color-line);
+  max-width: 1000px;
 }
 .iv-list li {
   display: grid;
@@ -59,7 +67,14 @@ h2 {
   }
 }
 .iv-kind {
-  font: italic 400 15px/1.4 var(--font-serif);
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid rgb(184 154 101 / 0.7);
+  font: 500 10px/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  vertical-align: 2px;
   color: var(--color-ink-soft);
 }
 .iv-who {
@@ -84,6 +99,9 @@ h2 {
 }
 .iv-pending {
   color: var(--color-burgundy);
+}
+.iv-list .btn-ghost {
+  color: var(--color-cherry);
 }
 .iv-empty {
   font: italic 400 17px/1.5 var(--font-serif);

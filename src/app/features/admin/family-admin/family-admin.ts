@@ -1,7 +1,7 @@
 import { Component, inject, resource, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { errorMessage } from '@app/core/api/error-message';
-import { formatDate } from '@app/core/format/date-format';
+import { formatShortDate } from '@app/core/format/date-format';
 import { Profile } from '@app/core/models/profile';
 import { Toasts } from '@app/core/toast/toasts';
 import { WishlistApi } from '@app/core/api/wishlist-api';
@@ -24,7 +24,10 @@ export class FamilyAdmin {
   protected readonly busy = signal(false);
 
   protected date(iso: string) {
-    return formatDate(iso);
+    return formatShortDate(iso);
+  }
+  protected initial(name: string) {
+    return name.trim().charAt(0).toUpperCase();
   }
   protected errorText(e: unknown) {
     return errorMessage(e);
