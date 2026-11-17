@@ -1,0 +1,30 @@
+<section class="gs" [attr.aria-label]="heading()">
+  <h2 class="gs-title">
+    {{ heading() }} <span class="gs-count tabular" aria-hidden="true">{{ gifts().length }}</span>
+  </h2>
+  <ul class="gs-row" role="list">
+    @for (g of gifts(); track g.id; let i = $index) {
+      <li class="gs-item">
+        <a class="gs-card" [routerLink]="['/wishlist', g.id]">
+          <app-product-image
+            class="gs-window"
+            [image]="g.image"
+            [alt]="g.name"
+            [dim]="g.isReserved"
+            [eager]="i < eagerCount()"
+            sizes="(max-width: 767px) 160px, 240px"
+          />
+          <span class="gs-shelf" aria-hidden="true"></span>
+          <span class="gs-name">{{ g.name }}</span>
+          @if (g.isReserved) {
+            <span class="gs-state caps">{{
+              mine().has(g.id) ? 'Lo has reservado tú' : 'Reservado'
+            }}</span>
+          } @else {
+            <app-price class="gs-price" [value]="g.price" [currency]="g.currency" />
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</section>

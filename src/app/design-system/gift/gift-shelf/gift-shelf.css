@@ -1,0 +1,106 @@
+.gs-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font: italic 400 clamp(21px, 2.4vw, 26px) / 1.2 var(--font-serif);
+  color: var(--color-burgundy);
+}
+.gs-count {
+  font: 500 12px/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  font-style: normal;
+  color: var(--color-ink-soft);
+}
+
+/* Phones: one row you swipe, cards snap to the left edge, the next one peeks in. */
+.gs-row {
+  display: flex;
+  gap: 16px;
+  margin: 16px -16px 0;
+  padding: 0 16px 4px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
+}
+.gs-row::-webkit-scrollbar {
+  display: none;
+}
+.gs-item {
+  flex: 0 0 150px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+/* From tablets up: a plain grid, nothing hidden off to the side. */
+@media (min-width: 768px) {
+  .gs-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 32px 24px;
+    margin: 18px 0 0;
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+.gs-card {
+  display: block;
+  text-decoration: none;
+  color: var(--color-chocolate);
+}
+.gs-window {
+  aspect-ratio: 5 / 6;
+  border: 1px solid var(--color-gold);
+  /* the photo fills the window below the arch's curve */
+  --pi-inset: 22% 8% 6%;
+  --pi-x: 8%;
+  --pi-h: 72%;
+  --pi-fit: cover;
+}
+/* the gold shelf the window stands on */
+.gs-shelf {
+  display: block;
+  height: 6px;
+  background: linear-gradient(#c9ad78, var(--color-gold));
+  box-shadow: 0 6px 10px -6px rgb(51 36 33 / 0.5);
+}
+.gs-name {
+  display: -webkit-box;
+  margin-top: 12px;
+  font: 400 clamp(15px, 1.4vw, 17px) / 1.3 var(--font-serif);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.gs-price {
+  display: block;
+  margin-top: 4px;
+  font: 400 17px/1.3 var(--font-serif);
+  color: var(--color-chocolate);
+}
+.gs-state {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--color-ink-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gs-card:hover .gs-name {
+    color: var(--color-cherry);
+  }
+  .gs-card .gs-window {
+    transition: transform 400ms var(--ease-premium);
+  }
+  .gs-card:hover .gs-window {
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-card .gs-window {
+    transition: none;
+  }
+}
