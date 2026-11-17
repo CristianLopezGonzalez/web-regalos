@@ -6,11 +6,15 @@ import { Modal } from '@app/design-system/feedback/modal/modal';
 import { LabeledField } from '@app/design-system/forms/labeled-field/labeled-field';
 import { PlansStore } from '../plans-store';
 
-/** Add or edit someone we give presents to: a free name and an optional budget. */
+/**
+ * Add or edit someone we give presents to: a free name and an optional budget (quick amounts or
+ * any other). When editing, they can also be taken off the list (with their presents).
+ */
 @Component({
   selector: 'app-plan-person-dialog',
   imports: [Modal, FormField, FormRoot, LabeledField],
   templateUrl: './plan-person-dialog.html',
+  styleUrl: './plan-person-dialog.css',
 })
 export class PlanPersonDialog {
   private readonly store = inject(PlansStore);
@@ -20,6 +24,11 @@ export class PlanPersonDialog {
   readonly person = input<PlanPerson | null>(null);
 
   readonly saved = output<PlanPerson>();
+  readonly deleted = output<void>();
+
+  protected readonly quick = [50, 100, 150, 200];
+  protected readonly confirming = signal(false);
+  protected readonly deleting = signal(false);
 
   protected readonly form = form(
     signal<{ name: string; budget: number | null }>({ name: '', budget: null }),
@@ -41,9 +50,33 @@ export class PlanPersonDialog {
       const p = untracked(this.person);
       untracked(() => {
         this.failure.set(null);
+        this.confirming.set(false);
         this.form().reset({ name: p?.name ?? '', budget: p?.budget ?? null });
       });
     });
+  }
+
+  /** A quick amount; pressing the chosen one again clears it. */
+  protected setBudget(amount: number) {
+    const now = this.form.budget().value();
+    this.form.budget().value.set(now === amount ? null : amount);
+  }
+
+  protected async remove() {
+    const p = this.person();
+    if (!p) return;
+    this.deleting.set(true);
+    this.failure.set(null);
+    try {
+      await this.store.deletePerson(p.id);
+      this.open.set(false);
+      this.deleted.emit();
+    } catch (e) {
+      this.failure.set(errorMessage(e));
+    } finally {
+      this.deleting.set(false);
+      this.confirming.set(false);
+    }
   }
 
   private async save() {

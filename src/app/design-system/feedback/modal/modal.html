@@ -1,6 +1,8 @@
 <dialog
   #dlg
   class="md"
+  [class.md--wide]="wide()"
+  [class.md--sheet]="sheet()"
   [attr.aria-labelledby]="titleId"
   (cancel)="$event.preventDefault(); requestClose()"
   (click)="onBackdrop($event)"

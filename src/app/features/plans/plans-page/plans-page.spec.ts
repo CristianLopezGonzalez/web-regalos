@@ -1,49 +1,59 @@
-import { Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { FakePlansApi, provideFakePlansApi } from '../fake-plans-api';
-import { PlanPersonPage } from '../plan-person-page/plan-person-page';
+import { FakePlansApi, planGift, provideFakePlansApi } from '../fake-plans-api';
 import { PlansStore } from '../plans-store';
 import { PlansPage } from './plans-page';
 
 const text = (el: Element | null) => (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
 
-async function render<T>(component: Type<T>, inputs: Record<string, unknown> = {}) {
+async function render(fake = new FakePlansApi()) {
   TestBed.configureTestingModule({
-    providers: [provideRouter([]), provideFakePlansApi(new FakePlansApi())],
+    providers: [provideRouter([]), provideFakePlansApi(fake)],
   });
   const store = TestBed.inject(PlansStore);
   TestBed.tick();
   await store.load();
-  const fixture = TestBed.createComponent(component);
-  for (const [k, v] of Object.entries(inputs)) fixture.componentRef.setInput(k, v);
+  const fixture = TestBed.createComponent(PlansPage);
   await fixture.whenStable();
-  return fixture.nativeElement as HTMLElement;
+  return { el: fixture.nativeElement as HTMLElement, fixture, fake };
 }
 
-describe('Nuestros regalos pages', () => {
-  it('overview: private to the two of us, accounts and one card per person', async () => {
-    const el = await render(PlansPage);
-    expect(text(el.querySelector('.pl-private'))).toBe('Solo Ángela y tú');
-    expect(text(el.querySelector('.pl-settle'))).toBe('Ángela te debe 30 €');
-    const card = text(el.querySelector('.pl-card'));
-    expect(card).toContain('Papá');
-    expect(card).toContain('85 € / 150 €');
-    expect(card).toContain('Tú 55 € · Ángela 30 €');
+describe('Nuestros regalos: the board', () => {
+  it('private to the two of us, with the accounts on top', async () => {
+    const { el } = await render();
+    expect(text(el.querySelector('.pb-private'))).toBe('Solo Ángela y tú');
+    expect(text(el.querySelector('.pb-settle'))).toBe('Ángela te debe 30 €');
   });
 
-  it('person page: who puts what and who paid, per gift', async () => {
-    const el = await render(PlanPersonPage, { personId: 'papa' });
-    expect(text(el.querySelector('h1'))).toBe('Papá');
-    const row = text(el.querySelector('.pp-row'));
-    expect(row).toContain('Camiseta de la Real Sociedad');
-    expect(row).toContain('Ángela: 30 €');
-    expect(row).toContain('Tú: 55 €');
-    expect(row).toContain('Lo pagaste tú · Ángela te debe 30 €');
+  it('puts each present in the column of its status, with who puts what', async () => {
+    const fake = new FakePlansApi();
+    fake.gifts = [
+      planGift(),
+      planGift({
+        id: 'g-libro',
+        name: 'Libro',
+        status: 'idea',
+        price: 25,
+        shares: { angela: 12.5, cristian: 12.5 },
+        paidBy: null,
+      }),
+    ];
+    const { el } = await render(fake);
+    const cols = [...el.querySelectorAll('.pb-col')];
+    expect(cols.map((c) => c.querySelectorAll('.pb-card').length)).toEqual([1, 1, 0]);
+    const bought = text(cols[1].querySelector('.pb-card'));
+    expect(bought).toContain('Camiseta de la Real Sociedad');
+    expect(bought).toContain('Tú 55 € · Ángela 30 €');
+    expect(bought).toContain('Lo pagaste tú');
   });
 
-  it('person page: an unknown person is "No encontrado"', async () => {
-    const el = await render(PlanPersonPage, { personId: 'nadie' });
-    expect(text(el.querySelector('h1'))).toBe('No encontrado');
+  it('the card button moves a present on to the next column', async () => {
+    const fake = new FakePlansApi();
+    fake.gifts = [planGift({ status: 'idea', paidBy: null })];
+    const { el, fixture } = await render(fake);
+    el.querySelector<HTMLButtonElement>('.pb-card-next')!.click();
+    await fixture.whenStable();
+    const cols = [...el.querySelectorAll('.pb-col')];
+    expect(cols.map((c) => c.querySelectorAll('.pb-card').length)).toEqual([0, 1, 0]);
   });
 });

@@ -1,0 +1,86 @@
+<div class="pgd">
+  <app-product-image
+    class="pgd-photo"
+    [image]="gift().image"
+    [alt]="gift().name"
+    sizes="(max-width: 639px) 80px, 220px"
+  />
+
+  <div class="pgd-info">
+    <p class="pgd-for caps">
+      <span class="pgd-dot" aria-hidden="true">{{ (person()?.name ?? '·').charAt(0) }}</span>
+      Para {{ person()?.name }}
+    </p>
+    <p class="pgd-price tabular">{{ money(gift().price) }}</p>
+    @if (gift().purchaseUrl) {
+      <a
+        class="pgd-shop"
+        [href]="gift().purchaseUrl"
+        target="_blank"
+        rel="noopener noreferrer external"
+        >Ver en la tienda <span aria-hidden="true">↗</span
+        ><span class="sr-only">(se abre en otra pestaña)</span></a
+      >
+    }
+  </div>
+
+  @if (gift().note) {
+    <p class="pgd-note">{{ gift().note }}</p>
+  }
+
+  <!-- where it is: press a step to move it -->
+  <div class="pgd-track" role="group" aria-label="Estado">
+    <span class="pgd-line" aria-hidden="true"
+      ><span [style.width.%]="stepIndex() * 50"></span
+    ></span>
+    @for (s of steps; track s; let i = $index) {
+      <button
+        type="button"
+        class="pgd-step"
+        [class.done]="i < stepIndex()"
+        [class.now]="i === stepIndex()"
+        [attr.aria-pressed]="i === stepIndex()"
+        (click)="setStatus(s)"
+      >
+        <span class="pgd-step-dot" aria-hidden="true">{{ i < stepIndex() ? '✓' : i + 1 }}</span>
+        {{ stepLabel[s] }}
+      </button>
+    }
+  </div>
+
+  <!-- who puts what -->
+  <div class="pgd-split">
+    <div class="pgd-bar" aria-hidden="true"><span [style.width.%]="myPct()"></span></div>
+    <p class="pgd-split-line">
+      <span
+        >Tú pones <strong>{{ money(mine()) }}</strong></span
+      >
+      <span
+        >{{ otherName() }} pone <strong>{{ money(theirs()) }}</strong></span
+      >
+    </p>
+    <p class="pgd-paid">{{ paidLine() }}</p>
+  </div>
+
+  <div class="pgd-foot">
+    @if (confirming()) {
+      <p class="pgd-confirm" role="alert">¿Borrar este regalo? No se puede deshacer.</p>
+      <button
+        type="button"
+        class="btn btn-ghost"
+        (click)="confirming.set(false)"
+        [disabled]="busy()"
+      >
+        No
+      </button>
+      <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">
+        {{ busy() ? 'Borrando…' : 'Sí, borrar' }}
+      </button>
+    } @else {
+      <button type="button" class="btn btn-ghost pgd-delete" (click)="confirming.set(true)">
+        Borrar
+      </button>
+      <button type="button" class="btn btn-outline pgd-edit" (click)="edit.emit()">Editar</button>
+    }
+  </div>
+</div>

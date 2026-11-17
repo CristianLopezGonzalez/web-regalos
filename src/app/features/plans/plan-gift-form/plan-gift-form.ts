@@ -5,8 +5,10 @@ import {
   effect,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import {
   FormField,
@@ -45,8 +47,10 @@ import {
 const CURRENCY_SYMBOL: Record<Currency, string> = { EUR: '€', USD: '$', GBP: '£' };
 
 /**
- * Create / edit a present we plan to give: what it is, how much each of us puts in and who paid
- * at the shop. The photo is resized in the browser (480/960/1600, WebP or JPEG on Safari).
+ * Create / edit a present we plan to give: for whom, what it is, how much each of us puts in
+ * (two amounts you type, always adding up to the price) and who paid at the shop.
+ * The photo is resized in the browser (480/960/1600, WebP or JPEG on Safari).
+ * Lives inside a dialog: the footer (Cancelar + submit) is part of the form.
  */
 @Component({
   selector: 'app-plan-gift-form',
@@ -59,13 +63,25 @@ export class PlanGiftForm implements OnDestroy {
   private readonly store = inject(PlansStore);
 
   readonly gift = input<PlanGift | null>(null);
-  readonly personId = input.required<string>();
+  /** Who the new present is for (preselected); the person can still be changed in the form. */
+  readonly personId = input<string | null>(null);
   /** The signed-in planner. */
   readonly me = input.required<string>();
   /** The other planner (Ángela for Cristian). */
   readonly other = input.required<Planner>();
 
   readonly saved = output<PlanGift>();
+  readonly cancel = output<void>();
+
+  protected readonly people = computed(() => this.store.people() ?? []);
+  /** For whom: the gift's person when editing, else the preselected one, else the first. */
+  protected readonly chosenPerson = linkedSignal(
+    () => this.gift()?.personId ?? this.personId() ?? this.people()[0]?.id ?? '',
+  );
+  protected readonly chosenInitial = computed(() => {
+    const p = this.people().find((x) => x.id === this.chosenPerson());
+    return p ? p.name.trim().charAt(0).toLocaleUpperCase('es') : '·';
+  });
 
   protected readonly currencies = CURRENCIES;
   protected readonly statuses = PLAN_STATUSES;
@@ -116,41 +132,49 @@ export class PlanGiftForm implements OnDestroy {
   protected readonly sharesOk = computed(() =>
     sharesMatch(this.shares(), this.form.price().value() ?? 0),
   );
-  /** "30 € + 55 € = 85 €" */
-  protected readonly sumLine = computed(() => {
-    const price = round2(this.form.price().value() ?? 0);
-    const a = this.money(this.otherShare());
-    const b = this.money(this.myShare());
-    return this.sharesOk()
-      ? `${a} + ${b} = ${this.money(price)}, el precio completo`
-      : `${a} + ${b} no suma ${this.money(price)}`;
-  });
   protected readonly symbol = computed(() => CURRENCY_SYMBOL[this.form.currency().value()]);
 
   protected readonly presets = computed<{ value: SplitPreset; label: string }[]>(() => [
     { value: 'half', label: 'A medias' },
     { value: 'me', label: 'Todo yo' },
     { value: 'other', label: `Todo ${this.other().name}` },
-    { value: 'custom', label: 'Otra cantidad' },
   ]);
   protected readonly payers = computed<{ value: PaidByChoice; label: string }[]>(() => [
-    { value: 'me', label: 'Yo' },
+    { value: 'me', label: 'Tú' },
     { value: 'other', label: this.other().name },
-    { value: 'none', label: 'Aún nadie' },
   ]);
-  protected readonly payerHint = computed(() => {
-    const paid = this.form.paidBy().value();
-    if (paid === 'none')
-      return 'Cuando alguien lo pague, la app os dirá quién le debe cuánto a quién.';
-    if (paid === 'me')
-      return this.otherShare() > 0
-        ? `Así, ${this.other().name} te debe ${this.money(this.otherShare())} por este regalo.`
-        : 'Lo pagas todo tú: no hay nada que devolver.';
-    return this.myShare() > 0
-      ? `Así, le debes ${this.money(this.myShare())} a ${this.other().name} por este regalo.`
-      : `Lo paga todo ${this.other().name}: no hay nada que devolver.`;
-  });
+  protected readonly meInitial = computed(() =>
+    this.initial(this.store.planners().find((p) => p.id === this.me())?.name ?? 'Tú'),
+  );
+  protected readonly otherInitial = computed(() => this.initial(this.other().name));
+  /** Why a typed split doesn't work (it always adds up, so only "more than the price" is left). */
+  protected readonly splitError = computed(() =>
+    this.myShare() < 0
+      ? 'No puedes poner más que el precio.'
+      : `${this.other().name} no puede poner más que el precio.`,
+  );
+  /** Link and note: open on phones only when there is something in them. */
+  protected readonly moreOpen = linkedSignal(
+    () => !!(this.gift()?.purchaseUrl || this.gift()?.note),
+  );
 
+  /** Who paid only makes sense once it has been bought. */
+  protected readonly payerEnabled = computed(() => this.form.status().value() !== 'idea');
+
+  /** What is being typed in an amount box (so formatting doesn't fight the caret). */
+  protected readonly drafts = signal<{ mine?: string; other?: string }>({});
+  /** In a typed split, what YOU put stays put when the price changes; the other gets the rest. */
+  private readonly myFixed = signal<number | null>(null);
+  protected readonly mineText = computed(() => this.drafts().mine ?? this.plain(this.myShare()));
+  protected readonly otherText = computed(
+    () => this.drafts().other ?? this.plain(this.otherShare()),
+  );
+  /** Width of your part on the two-colour bar. */
+  protected readonly myPct = computed(() => {
+    const price = this.form.price().value() ?? 0;
+    if (!(price > 0)) return 50;
+    return Math.min(100, Math.max(0, Math.round((this.myShare() / price) * 100)));
+  });
   protected readonly failure = signal<string | null>(null);
   protected readonly processing = signal(false);
   protected readonly imageError = signal<string | null>(null);
@@ -169,8 +193,64 @@ export class PlanGiftForm implements OnDestroy {
     // Editing: load the gift (again after each save) and start untouched.
     effect(() => {
       const g = this.gift();
-      if (g) this.form().reset(planGiftToForm(g, this.me(), this.other().id));
+      if (!g) return;
+      untracked(() => {
+        const v = planGiftToForm(g, this.me(), this.other().id);
+        this.form().reset(v);
+        this.myFixed.set(v.preset === 'custom' ? (g.shares[this.me()] ?? 0) : null);
+        this.drafts.set({});
+      });
     });
+    // A typed split keeps YOUR part when the price changes (capped at the price).
+    effect(() => {
+      const price = round2(this.form.price().value() ?? 0);
+      untracked(() => {
+        const mine = this.myFixed();
+        if (this.form.preset().value() !== 'custom' || mine === null) return;
+        const other = round2(Math.max(0, price - Math.min(mine, price)));
+        if (this.form.otherAmount().value() !== other) this.form.otherAmount().value.set(other);
+      });
+    });
+  }
+
+  private initial(name: string) {
+    return name.trim().charAt(0).toLocaleUpperCase('es') || '·';
+  }
+
+  /** 27.5 -> "27,5" (what goes in an amount box). */
+  private plain(n: number) {
+    return String(round2(n)).replace('.', ',');
+  }
+
+  private parseAmount(text: string) {
+    const n = parseFloat(text.replace(/\s/g, '').replace(',', '.'));
+    return Number.isFinite(n) ? round2(n) : 0;
+  }
+
+  /** Typing what YOU put: the other one puts the rest of the price. */
+  protected typeMine(text: string) {
+    this.drafts.set({ mine: text });
+    const price = round2(this.form.price().value() ?? 0);
+    const mine = this.parseAmount(text);
+    this.myFixed.set(mine);
+    this.form.preset().value.set('custom');
+    this.form.otherAmount().value.set(round2(price - mine));
+    this.form.otherAmount().markAsTouched();
+  }
+
+  /** Typing what the OTHER puts: you put the rest of the price. */
+  protected typeOther(text: string) {
+    this.drafts.set({ other: text });
+    const price = round2(this.form.price().value() ?? 0);
+    const other = this.parseAmount(text);
+    this.myFixed.set(round2(price - other));
+    this.form.preset().value.set('custom');
+    this.form.otherAmount().value.set(other);
+    this.form.otherAmount().markAsTouched();
+  }
+
+  protected endTyping() {
+    this.drafts.set({});
   }
 
   protected money(n: number) {
@@ -178,8 +258,8 @@ export class PlanGiftForm implements OnDestroy {
   }
 
   protected setPreset(preset: SplitPreset) {
-    // Switching to "Otra cantidad" starts from the current split, not from empty.
-    if (preset === 'custom') this.form.otherAmount().value.set(this.otherShare());
+    this.myFixed.set(null);
+    this.drafts.set({});
     this.form.preset().value.set(preset);
   }
 
@@ -187,8 +267,11 @@ export class PlanGiftForm implements OnDestroy {
     this.form.paidBy().value.set(value);
   }
 
+  /** Bought or wrapped: someone paid (you, unless you say otherwise). An idea: nobody yet. */
   protected setStatus(value: PlanStatus) {
     this.form.status().value.set(value);
+    if (value === 'idea') this.form.paidBy().value.set('none');
+    else if (this.form.paidBy().value() === 'none') this.form.paidBy().value.set('me');
   }
 
   protected async pick(e: Event) {
@@ -231,7 +314,12 @@ export class PlanGiftForm implements OnDestroy {
 
   private async save() {
     this.failure.set(null);
-    const input = formToPlanInput(this.form().value(), this.personId(), this.me(), this.other().id);
+    const input = formToPlanInput(
+      this.form().value(),
+      this.chosenPerson(),
+      this.me(),
+      this.other().id,
+    );
     try {
       const g = this.gift();
       const img = this.newImage();

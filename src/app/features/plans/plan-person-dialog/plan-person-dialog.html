@@ -1,33 +1,79 @@
 <app-modal
-  [heading]="person() ? 'Editar a ' + person()!.name : 'Añadir persona'"
+  [heading]="person() ? 'Editar a ' + person()!.name : 'Nueva persona'"
   [(open)]="open"
-  [busy]="form().submitting()"
+  [busy]="form().submitting() || deleting()"
+  [sheet]="true"
 >
-  <form id="plan-person-form" class="grid gap-6" [formRoot]="form">
+  <form id="plan-person-form" class="ppd" [formRoot]="form">
     <app-labeled-field
       label="Nombre"
       forId="pp-name"
-      hint="Como la llamáis en casa: Mamá, Abuela, Tío Javier… Tenga o no cuenta en la app."
+      hint="Como la llamáis en casa. No hace falta que tenga cuenta en la app."
     >
-      <input id="pp-name" class="input" [formField]="form.name" autocomplete="off" />
+      <input
+        id="pp-name"
+        class="input"
+        [formField]="form.name"
+        autocomplete="off"
+        placeholder="Mamá, Abuela, Tío Javier…"
+      />
     </app-labeled-field>
+
     <app-labeled-field
       label="Presupuesto"
       forId="pp-budget"
       [optional]="true"
-      hint="Lo que queréis gastar en total en sus regalos, en euros."
+      hint="Lo que queréis gastar en total en sus regalos."
     >
-      <input
-        id="pp-budget"
-        class="input tabular"
-        type="number"
-        inputmode="decimal"
-        step="1"
-        [formField]="form.budget"
-      />
+      <div class="ppd-quick" role="group" aria-label="Presupuestos rápidos">
+        @for (a of quick; track a) {
+          <button
+            type="button"
+            class="ppd-chip"
+            [class.on]="form.budget().value() === a"
+            [attr.aria-pressed]="form.budget().value() === a"
+            (click)="setBudget(a)"
+          >
+            {{ a }} €
+          </button>
+        }
+      </div>
+      <span class="ppd-money">
+        <input
+          id="pp-budget"
+          class="input tabular"
+          type="number"
+          inputmode="decimal"
+          step="1"
+          [formField]="form.budget"
+          placeholder="Otra cantidad"
+        />
+        <span aria-hidden="true">€</span>
+      </span>
     </app-labeled-field>
+
     @if (failure()) {
       <p class="form-alert" role="alert">{{ failure() }}</p>
+    }
+
+    @if (person(); as p) {
+      <div class="ppd-danger">
+        @if (confirming()) {
+          <p class="m-0" role="alert">
+            Se borrarán también los regalos que teníais pensados para {{ p.name }}.
+          </p>
+          <div class="ppd-danger-actions">
+            <button type="button" class="btn btn-ghost" (click)="confirming.set(false)">No</button>
+            <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="deleting()">
+              {{ deleting() ? 'Quitando…' : 'Sí, quitar' }}
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="ppd-remove" (click)="confirming.set(true)">
+            Quitar a {{ p.name }} de la lista
+          </button>
+        }
+      </div>
     }
   </form>
   <ng-container actions>
@@ -46,7 +92,7 @@
       [disabled]="form().submitting()"
       [attr.aria-busy]="form().submitting()"
     >
-      {{ form().submitting() ? 'Guardando…' : person() ? 'Guardar' : 'Añadir' }}
+      {{ form().submitting() ? 'Guardando…' : person() ? 'Guardar' : 'Añadir persona' }}
     </button>
   </ng-container>
 </app-modal>

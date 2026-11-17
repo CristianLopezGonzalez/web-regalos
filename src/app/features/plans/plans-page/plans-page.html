@@ -1,130 +1,289 @@
-<div class="wrap pl">
-  <header class="pl-head">
-    <div class="pl-intro">
-      <p class="pl-private">
-        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-          <rect
-            x="3"
-            y="7"
-            width="10"
-            height="7"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.3"
-          />
-          <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.3" />
+<div class="wrap pb">
+  <header class="pb-head">
+    <div>
+      <p class="pb-private">
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          aria-hidden="true"
+        >
+          <rect x="3" y="7" width="10" height="7" />
+          <path d="M5 7V5a3 3 0 0 1 6 0v2" />
         </svg>
         Solo {{ otherName() }} y tú
       </p>
       <h1>Nuestros regalos</h1>
-      <p class="pl-lede">
-        Lo que vamos a regalar a la familia este año. Nadie más lo ve: ni ellos, ni nadie con cuenta
-        en la wishlist.
-      </p>
     </div>
-    <button type="button" class="btn btn-primary" (click)="adding.set(true)">Añadir persona</button>
+    <div class="pb-head-actions">
+      <button type="button" class="btn btn-outline btn-sm" (click)="addPerson()">
+        Añadir persona
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary btn-sm pb-add"
+        (click)="open('new')"
+        [disabled]="!store.people()?.length"
+      >
+        + Añadir regalo
+      </button>
+    </div>
   </header>
 
   @if (store.error()) {
-    <div class="pl-error" role="alert">
+    <div class="pb-error" role="alert">
       <p>{{ errorText() }}</p>
       <button type="button" class="btn btn-outline btn-sm" (click)="store.load(true)">
         Reintentar
       </button>
     </div>
   } @else if (!store.loaded()) {
-    <div class="pl-skel skeleton" aria-busy="true" aria-label="Cargando nuestros regalos"></div>
+    <div class="pb-skel skeleton" aria-busy="true" aria-label="Cargando nuestros regalos"></div>
+  } @else if (!store.people()?.length) {
+    <div class="pb-empty">
+      <p>
+        Todavía no hay nadie en la lista. Empieza por la primera persona a la que queréis regalar.
+      </p>
+      <button type="button" class="btn btn-primary" (click)="addPerson()">Añadir persona</button>
+    </div>
   } @else {
-    <dl class="pl-stats">
-      <div>
-        <dt>Personas</dt>
-        <dd class="tabular">{{ store.stats().people }}</dd>
-        <p>familia y amigos</p>
-      </div>
-      <div>
-        <dt>Ideas</dt>
-        <dd class="tabular">{{ store.stats().ideas }}</dd>
-        <p>entre los dos</p>
-      </div>
-      <div>
-        <dt>Comprados</dt>
-        <dd class="tabular">{{ store.stats().bought }}</dd>
-        <p>
-          de {{ store.stats().ideas }} · {{ store.stats().wrapped }}
-          {{ store.stats().wrapped === 1 ? 'ya envuelto' : 'ya envueltos' }}
-        </p>
-      </div>
-      <div>
-        <dt>Gastado</dt>
-        <dd class="tabular">{{ money(store.stats().spent) }}</dd>
-        <p>
+    <!-- one summary strip -->
+    <section class="pb-sum" aria-label="Resumen">
+      <div class="pb-sum-cell">
+        <p class="pb-sum-label">
+          <span>Gastado</span>
           @if (store.stats().budgets > 0) {
-            de {{ money(store.stats().budgets) }} previstos
-          } @else {
-            en lo ya comprado
+            <span>{{ money(store.stats().budgets) }} previstos</span>
           }
         </p>
+        <p class="pb-sum-big tabular">{{ money(store.stats().spent) }}</p>
+        @if (store.stats().budgets > 0) {
+          <span class="pb-bar" aria-hidden="true"><span [style.width.%]="spentPct()"></span></span>
+        }
       </div>
-    </dl>
-
-    <section class="pl-accounts" aria-labelledby="pl-accounts-h">
-      <div class="pl-accounts-main">
-        <h2 id="pl-accounts-h">Las cuentas</h2>
-        <p class="pl-settle" aria-live="polite">{{ store.settlementText() }}</p>
-        <p class="pl-accounts-note">
-          Lo que cada uno pone en los regalos, menos lo que ha pagado en las tiendas. Se recalcula
-          solo.
-        </p>
+      <div class="pb-sum-cell">
+        <p class="pb-sum-label"><span>Regalos</span></p>
+        <p class="pb-sum-big tabular">{{ store.stats().bought }} de {{ store.stats().ideas }}</p>
+        <p class="pb-sum-note">comprados o envueltos</p>
       </div>
-      <div class="pl-accounts-col">
-        <p class="pl-accounts-label">Tú pones</p>
-        <p class="pl-accounts-amount tabular">{{ money(myPuts()) }}</p>
-        <p class="pl-accounts-paid">Has pagado {{ money(myPaid()) }} en tiendas</p>
-      </div>
-      <div class="pl-accounts-col">
-        <p class="pl-accounts-label">{{ otherName() }} pone</p>
-        <p class="pl-accounts-amount tabular">{{ money(otherPuts()) }}</p>
-        <p class="pl-accounts-paid">Ha pagado {{ money(otherPaid()) }} en tiendas</p>
-      </div>
+      <button type="button" class="pb-sum-cell pb-accounts" (click)="open('accounts')">
+        <span class="pb-sum-label"><span>Las cuentas</span></span>
+        <span class="pb-settle" aria-live="polite">{{ store.settlementText() }}</span>
+        <span class="pb-accounts-more"
+          >Ver detalle
+          <svg
+            width="16"
+            height="10"
+            viewBox="0 0 16 10"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            aria-hidden="true"
+          >
+            <path d="M0 5h15M11 1l4 4-4 4" /></svg
+        ></span>
+      </button>
     </section>
 
-    <h2 class="pl-h2">La familia</h2>
-    <ul class="pl-people" role="list">
-      @for (c of cards(); track c.person.id) {
-        <li>
-          <a class="pl-card" [routerLink]="['/plans', c.person.id]">
-            <span class="pl-card-who">
-              <span class="pl-avatar" aria-hidden="true">{{ c.initial }}</span>
-              <span class="pl-card-names">
-                <span class="pl-card-name">{{ c.person.name }}</span>
-                <span class="pl-card-sum">{{ c.summary }}</span>
-              </span>
-            </span>
-            <span class="pl-card-progress">
-              <span class="pl-bar" aria-hidden="true"
-                ><span class="pl-bar-fill" [style.width]="c.progress"></span
-              ></span>
-              <span class="pl-card-line">
-                <span>{{ c.bought }}<span class="sr-only">, </span></span
-                ><span class="tabular">{{ c.money }}</span>
-              </span>
-              @if (c.split) {
-                <span class="pl-card-line">{{ c.split }}</span>
-              }
-            </span>
-            <span class="pl-card-next">{{ c.next }}</span>
-          </a>
-        </li>
-      }
-      <li>
-        <button type="button" class="pl-add" (click)="adding.set(true)">
-          <span class="pl-add-plus" aria-hidden="true">+</span>
-          <span class="pl-add-label">Añadir persona</span>
-          <span class="pl-add-hint">Tenga o no cuenta en la app</span>
+    <!-- whose presents: chips from tablets up, a select on phones -->
+    <div class="pb-filter">
+      <ul class="pb-chips" role="list" aria-label="Filtrar por persona">
+        @for (c of chips(); track c.id) {
+          <li>
+            <button
+              type="button"
+              class="pb-chip"
+              [class.on]="filter() === c.id"
+              [attr.aria-pressed]="filter() === c.id"
+              (click)="setFilter(c.id)"
+            >
+              {{ c.label }} <span class="tabular">{{ c.count }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+      <label class="pb-select">
+        <span class="sr-only">Filtrar por persona</span>
+        <select class="input" (change)="setFilter($any($event.target).value || null)">
+          @for (c of chips(); track c.id) {
+            <option [value]="c.id ?? ''" [selected]="filter() === c.id">
+              {{ c.label }} · {{ c.count }}
+            </option>
+          }
+        </select>
+      </label>
+      @if (filterPerson(); as p) {
+        <button type="button" class="pb-edit-person" (click)="editPerson()">
+          Editar {{ p.name }}
         </button>
-      </li>
-    </ul>
+      }
+    </div>
+
+    <!-- phones: the columns become tabs -->
+    <div class="pb-tabs" role="tablist" aria-label="Estado">
+      @for (col of columns(); track col.status) {
+        <button
+          type="button"
+          role="tab"
+          class="pb-tab"
+          [class.on]="tab() === col.status"
+          [attr.aria-selected]="tab() === col.status"
+          (click)="tab.set(col.status)"
+        >
+          {{ col.title }} · {{ col.cards.length }}
+        </button>
+      }
+    </div>
+
+    <!-- the board -->
+    <div class="pb-board">
+      @for (col of columns(); track col.status) {
+        <section
+          class="pb-col"
+          [class.pb-col--off]="tab() !== col.status"
+          [attr.aria-labelledby]="'pb-col-' + col.status"
+        >
+          <h2 class="pb-col-title" [id]="'pb-col-' + col.status">
+            <span class="pb-col-dot pb-col-dot--{{ col.status }}" aria-hidden="true"></span>
+            {{ col.title }} <span class="pb-col-count tabular">{{ col.cards.length }}</span>
+          </h2>
+          <ul class="pb-cards" role="list">
+            @for (c of col.cards; track c.id) {
+              <li class="pb-card">
+                @if (c.image) {
+                  <app-product-image
+                    class="pb-card-photo"
+                    shape="plain"
+                    [image]="c.image"
+                    [alt]="''"
+                    sizes="56px"
+                  />
+                }
+                <div class="pb-card-top">
+                  <span class="pb-card-who caps"
+                    ><span class="pb-card-initial" aria-hidden="true">{{ c.initial }}</span
+                    >{{ c.person }}</span
+                  >
+                  <span class="pb-card-price tabular">{{ c.price }}</span>
+                </div>
+                <button type="button" class="pb-card-open" (click)="openDetail(c.id)">
+                  {{ c.name }}<span class="sr-only">, para {{ c.person }}: ver detalle</span>
+                </button>
+                <p class="pb-card-split">{{ c.split }}</p>
+                <div class="pb-card-foot">
+                  <span class="pb-card-paid">{{ c.paid }}</span>
+                  @if (c.next; as n) {
+                    <button type="button" class="pb-card-next" (click)="advance(c.id)">
+                      {{ n.label }} <span aria-hidden="true">→</span
+                      ><span class="sr-only">: mover {{ c.name }} a {{ n.label }}</span>
+                    </button>
+                  }
+                </div>
+              </li>
+            } @empty {
+              <li class="pb-col-empty">Nada por aquí todavía.</li>
+            }
+          </ul>
+          @if (col.status === 'idea') {
+            <button type="button" class="pb-new-idea" (click)="open('new')">+ Nueva idea</button>
+          }
+        </section>
+      }
+    </div>
   }
 </div>
 
-<app-plan-person-dialog [(open)]="adding" (saved)="onAdded($event)" />
+<!-- phones: always within reach -->
+@if (store.people()?.length) {
+  <button type="button" class="btn btn-primary pb-fab" (click)="open('new')">
+    + Añadir regalo
+  </button>
+}
+
+<!-- ---------------------------------------------------------------- dialogs -->
+@if (store.meId() && store.other(); as other) {
+  <app-modal
+    heading="Nuevo regalo"
+    [open]="isOpen('new')"
+    (openChange)="!$event && closeDialog()"
+    [wide]="true"
+    [sheet]="true"
+  >
+    @if (isOpen('new')) {
+      <app-plan-gift-form
+        [personId]="filter()"
+        [me]="store.meId()!"
+        [other]="other"
+        (saved)="onSaved($event)"
+        (cancel)="closeDialog()"
+      />
+    }
+  </app-modal>
+
+  <app-modal
+    heading="Editar regalo"
+    [open]="isOpen('edit')"
+    (openChange)="!$event && closeDialog()"
+    [wide]="true"
+    [sheet]="true"
+  >
+    @if (isOpen('edit') && dialogGift(); as g) {
+      <app-plan-gift-form
+        [gift]="g"
+        [me]="store.meId()!"
+        [other]="other"
+        (saved)="onSaved($event)"
+        (cancel)="openDetail(g.id)"
+      />
+    }
+  </app-modal>
+}
+
+<app-modal
+  [heading]="dialogGift()?.name ?? lastGiftName()"
+  [open]="isOpen('detail')"
+  (openChange)="!$event && closeDialog()"
+  [wide]="true"
+  [sheet]="true"
+>
+  @if (isOpen('detail') && dialogGift(); as g) {
+    <app-plan-gift-detail [gift]="g" (edit)="openEdit()" (deleted)="closeDialog()" />
+  }
+</app-modal>
+
+<app-modal
+  heading="Las cuentas"
+  [open]="isOpen('accounts')"
+  (openChange)="!$event && closeDialog()"
+  [sheet]="true"
+>
+  <p class="pb-acc-settle">{{ store.settlementText() }}</p>
+  <dl class="pb-acc">
+    <div>
+      <dt>Tú pones</dt>
+      <dd class="tabular">{{ money(myPuts()) }}</dd>
+      <dd class="pb-acc-paid">Has pagado {{ money(myPaid()) }} en tiendas</dd>
+    </div>
+    <div>
+      <dt>{{ otherName() }} pone</dt>
+      <dd class="tabular">{{ money(otherPuts()) }}</dd>
+      <dd class="pb-acc-paid">Ha pagado {{ money(otherPaid()) }} en tiendas</dd>
+    </div>
+  </dl>
+  <p class="pb-acc-note">
+    Lo que cada uno pone en los regalos, menos lo que ha pagado en las tiendas. Se recalcula solo.
+  </p>
+  <ng-container actions>
+    <button type="button" class="btn btn-outline" (click)="closeDialog()">Cerrar</button>
+  </ng-container>
+</app-modal>
+
+<app-plan-person-dialog
+  [(open)]="personOpen"
+  [person]="personEditing()"
+  (saved)="onPersonSaved($event)"
+  (deleted)="onPersonDeleted()"
+/>

@@ -1,0 +1,71 @@
+.ppd {
+  display: grid;
+  gap: 22px;
+}
+.ppd .input {
+  min-height: 46px;
+  padding-block: 10px;
+}
+.ppd-quick {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.ppd-chip {
+  min-height: 42px;
+  border: 1px solid rgb(184 154 101 / 0.6);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font: 500 14px/1 var(--font-sans);
+  color: var(--color-chocolate);
+}
+.ppd-chip.on {
+  background: var(--color-burgundy);
+  border-color: var(--color-burgundy);
+  color: var(--color-ivory);
+}
+.ppd-money {
+  position: relative;
+  display: block;
+}
+.ppd-money .input {
+  padding-right: 40px;
+}
+.ppd-money > span {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--color-ink-soft);
+}
+.ppd-danger {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-line);
+}
+.ppd-danger-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.ppd-remove {
+  justify-self: start;
+  min-height: 40px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: 500 11px/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-cherry);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ppd-chip:not(.on):hover {
+    background: var(--color-cream-deep);
+  }
+}

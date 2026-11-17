@@ -14,6 +14,10 @@ export class Modal {
   readonly open = model(false);
   /** Block closing (e.g. while a request is in flight). */
   readonly busy = input(false);
+  /** Wider panel (forms with two columns). */
+  readonly wide = input(false);
+  /** On phones, a sheet that rises from the bottom instead of a centred box. */
+  readonly sheet = input(false);
 
   readonly closed = output<void>();
 
