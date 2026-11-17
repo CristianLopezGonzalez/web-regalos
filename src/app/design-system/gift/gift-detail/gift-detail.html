@@ -94,34 +94,36 @@
           Es tu carta. Para que sea sorpresa, no verás si alguien ha reservado este deseo.
         </p>
         <div class="gd-buttons">
-          @if (gift().purchaseUrl) {
+          @for (s of shops(); track s.url + $index) {
             <a
               class="btn btn-outline gd-shop"
-              [href]="gift().purchaseUrl"
+              [href]="s.url"
               target="_blank"
               rel="noopener noreferrer external"
             >
-              Ver en la tienda <span class="gd-shop-arrow" aria-hidden="true">↗</span
+              {{ s.label }} <span class="gd-shop-arrow" aria-hidden="true">↗</span
               ><span class="sr-only">(se abre en otra pestaña)</span>
             </a>
           }
           <a class="btn btn-primary" [routerLink]="['/admin/gifts', gift().id]">Editar regalo</a>
         </div>
-        <app-more-shops class="gd-more-shops" [urls]="gift().extraUrls" />
       } @else {
         <app-reserve-button class="gd-reserve" [gift]="gift()" />
-        @if (gift().purchaseUrl) {
-          <a
-            class="btn btn-outline gd-shop"
-            [href]="gift().purchaseUrl"
-            target="_blank"
-            rel="noopener noreferrer external"
-          >
-            Ver en la tienda <span class="gd-shop-arrow" aria-hidden="true">↗</span
-            ><span class="sr-only">(se abre en otra pestaña)</span>
-          </a>
+        @if (shops().length) {
+          <div class="gd-buttons">
+            @for (s of shops(); track s.url + $index) {
+              <a
+                class="btn btn-outline gd-shop"
+                [href]="s.url"
+                target="_blank"
+                rel="noopener noreferrer external"
+              >
+                {{ s.label }} <span class="gd-shop-arrow" aria-hidden="true">↗</span
+                ><span class="sr-only">(se abre en otra pestaña)</span>
+              </a>
+            }
+          </div>
         }
-        <app-more-shops class="gd-more-shops" [urls]="gift().extraUrls" />
       }
     </div>
   </div>
