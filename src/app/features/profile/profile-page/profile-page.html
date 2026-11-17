@@ -49,6 +49,14 @@
               {{ nameForm().submitting() ? 'Guardando…' : 'Guardar nombre' }}
             </button>
             <button type="button" class="btn btn-ghost" (click)="signOut()">Cerrar sesión</button>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              (click)="signOutEverywhere()"
+              [disabled]="busy()"
+            >
+              Cerrar sesión en todos los dispositivos
+            </button>
           </div>
         </form>
         <app-install-app class="pf-install" />

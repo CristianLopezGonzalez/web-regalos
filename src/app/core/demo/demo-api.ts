@@ -320,7 +320,7 @@ export class DemoApi extends WishlistApi {
     return 'signed-in' as const;
   }
 
-  async signOut() {
+  async signOut(_everywhere = false) {
     await wait(150);
     writeStore('session', SESSION_KEY, null);
     this.profile.set(null);
@@ -554,6 +554,8 @@ export class DemoApi extends WishlistApi {
     await wait(350);
     const s = await this.load();
     this.owner(s);
+    // Same rules as the database: email required, 7 days at most.
+    if (!email?.trim()) throw new ApiError('EMAIL_REQUIRED');
     const token = randomToken();
     s.invitations.push({
       id: uid(),
@@ -561,7 +563,7 @@ export class DemoApi extends WishlistApi {
       role: 'family',
       withList,
       emailRestriction: email?.trim().toLowerCase() || null,
-      expiresAt: new Date(Date.now() + Math.min(Math.max(days, 1), 60) * 86400000).toISOString(),
+      expiresAt: new Date(Date.now() + Math.min(Math.max(days, 1), 7) * 86400000).toISOString(),
       usedAt: null,
       revokedAt: null,
       createdAt: now(),

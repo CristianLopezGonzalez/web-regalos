@@ -14,6 +14,8 @@ export type ApiErrorCode =
   | 'CATEGORY_NOT_EMPTY'
   | 'PLAN_SHARES_MISMATCH'
   | 'PLAN_SHARES_INVALID'
+  | 'EMAIL_REQUIRED'
+  | 'RESERVATION_LIMIT'
   | 'NETWORK'
   | 'UNKNOWN';
 

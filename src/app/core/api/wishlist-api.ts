@@ -39,7 +39,8 @@ export abstract class WishlistApi {
     token: string,
     email?: string,
   ): Promise<'valid' | 'invalid' | 'email_mismatch'>;
-  abstract signOut(): Promise<void>;
+  /** everywhere: also ends the sessions on every other device (lost phone, shared computer). */
+  abstract signOut(everywhere?: boolean): Promise<void>;
   abstract updateDisplayName(name: string): Promise<void>;
   abstract requestPasswordReset(email: string): Promise<void>;
   /** Signs in from the recovery email's one-time token (works on any device). False if invalid or expired. */

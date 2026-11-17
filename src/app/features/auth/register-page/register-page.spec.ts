@@ -11,6 +11,12 @@ describe('inviteTokenFrom (pasting an invitation link)', () => {
     );
   });
 
+  it('takes the token from the fragment of a new-style link', () => {
+    expect(inviteTokenFrom('https://web-regalos.vercel.app/register#invite=abcDEF-12345')).toBe(
+      'abcDEF-12345',
+    );
+  });
+
   it('accepts a bare token and rejects anything else', () => {
     expect(inviteTokenFrom('demo-invitacion-navidad')).toBe('demo-invitacion-navidad');
     expect(inviteTokenFrom('')).toBeNull();

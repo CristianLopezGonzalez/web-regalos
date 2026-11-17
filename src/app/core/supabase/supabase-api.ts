@@ -190,11 +190,13 @@ export class SupabaseApi extends WishlistApi {
     return 'confirm-email' as const;
   }
 
-  async signOut() {
+  async signOut(everywhere = false) {
     const sb = await this.client;
-    // 'local': only this device. The default ('global') revokes every session of the account, so
+    // 'local' by default: only this device. 'global' revokes every session of the account, so
     // signing out on the computer (or a test run on localhost) logged the phone out too (2026-11-15).
-    await sb.auth.signOut({ scope: 'local' });
+    // The profile offers 'global' as its own button, for a lost or shared device.
+    const { error } = await sb.auth.signOut({ scope: everywhere ? 'global' : 'local' });
+    if (error && everywhere) throw toApiError(error);
     this.forgetSession();
   }
 

@@ -10,8 +10,9 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormField, form, validate } from '@angular/forms/signals';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError } from '@app/core/api/api-error';
 import { Toasts } from '@app/core/toast/toasts';
 import { WishlistApi } from '@app/core/api/wishlist-api';
@@ -25,11 +26,14 @@ type InviteState = 'checking' | 'valid' | 'invalid' | 'missing' | 'offline' | 'c
 
 const TOKEN = /^[A-Za-z0-9-]{8,128}$/;
 
-/** The token from a pasted invitation link (…/register?invite=…) or a bare token; null if none. */
+/**
+ * The token from a pasted invitation link (…/register#invite=…, or the older …/register?invite=…)
+ * or a bare token; null if none.
+ */
 export function inviteTokenFrom(raw: string): string | null {
   const s = raw.trim();
   if (!s) return null;
-  const m = s.match(/[?&]invite=([^&#\s]+)/);
+  const m = s.match(/[?&#]invite=([^&#\s]+)/);
   const token = m ? decodeURIComponent(m[1]) : s;
   return TOKEN.test(token) ? token : null;
 }
@@ -74,7 +78,10 @@ const VIEWS: Record<InviteState, View> = {
   },
 };
 
-/** /register?invite=<token>. Without a valid invitation there is no sign-up form at all. */
+/**
+ * /register#invite=<token> (the fragment never reaches the server or its logs; ?invite= from older
+ * links still works). Without a valid invitation there is no sign-up form at all.
+ */
 @Component({
   selector: 'app-register-page',
   imports: [AuthLayout, RegisterForm, AuthLink, AuthField, FormField],
@@ -87,7 +94,16 @@ export class RegisterPage {
   private readonly stage = inject(AuthStage);
   private readonly injector = inject(Injector);
 
+  /** ?invite= (older links). */
   readonly invite = input<string | null>(null);
+  private readonly fragment = toSignal(inject(ActivatedRoute).fragment, { initialValue: null });
+  /** #invite= first, then ?invite=. */
+  protected readonly token = computed(
+    () =>
+      new URLSearchParams(this.fragment() ?? '').get('invite')?.trim() ||
+      this.invite()?.trim() ||
+      null,
+  );
 
   protected readonly state = signal<InviteState>('checking');
   protected readonly view = computed(() => VIEWS[this.state()]);
@@ -112,7 +128,7 @@ export class RegisterPage {
   constructor() {
     let seq = 0;
     effect(async () => {
-      const token = this.invite()?.trim();
+      const token = this.token();
       this.retries();
       const mine = ++seq;
       if (!token) return this.state.set('missing');
@@ -155,7 +171,7 @@ export class RegisterPage {
     const token = inviteTokenFrom(this.paste.link().value());
     if (!token) return this.paste.link().focusBoundControl();
     const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/register'], { queryParams: { invite: token } }),
+      this.router.createUrlTree(['/register'], { fragment: `invite=${token}` }),
     );
     this.stage.go(() => this.router.navigateByUrl(url));
   }

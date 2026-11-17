@@ -93,6 +93,20 @@ export class ProfilePage {
     void this.router.navigateByUrl('/');
   }
 
+  /** Ends every session of the account (a lost phone, a shared computer). */
+  protected async signOutEverywhere() {
+    this.busy.set(true);
+    try {
+      await this.api.signOut(true);
+      this.toasts.show('Has cerrado sesión en todos tus dispositivos.');
+      void this.router.navigateByUrl('/');
+    } catch (e) {
+      this.toasts.error(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
   protected async resetDemo() {
     if (this.api instanceof DemoApi) {
       await this.api.signOut();

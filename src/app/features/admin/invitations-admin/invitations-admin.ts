@@ -1,5 +1,5 @@
 import { Component, computed, inject, resource, signal } from '@angular/core';
-import { FormField, FormRoot, form } from '@angular/forms/signals';
+import { FormField, FormRoot, form, validate } from '@angular/forms/signals';
 import { errorMessage } from '@app/core/api/error-message';
 import { formatShortDate } from '@app/core/format/date-format';
 import { Invitation, InvitationState, invitationState } from '@app/core/models/invitation';
@@ -13,9 +13,10 @@ import { AdminPageHead } from '../admin-page-head/admin-page-head';
 interface NewInvitation {
   email: string;
   kind: 'family' | 'list';
-  days: '7' | '14' | '30';
+  /** The database caps it at 7 days: a forwarded link stops working soon. */
+  days: '3' | '7';
 }
-const NEW_INVITATION: NewInvitation = { email: '', kind: 'family', days: '14' };
+const NEW_INVITATION: NewInvitation = { email: '', kind: 'family', days: '7' };
 
 const STATE_LABEL: Record<InvitationState, string> = {
   pending: 'Pendiente',
@@ -42,7 +43,13 @@ export class InvitationsAdmin {
 
   protected readonly form = form(
     signal({ ...NEW_INVITATION }),
-    (p) => emailAddress(p.email, 'Este email no parece completo.'),
+    (p) => {
+      // Required: with "Confirm email" off, the email on the invitation is what proves who signs up.
+      validate(p.email, ({ value }) =>
+        value().trim() ? undefined : { kind: 'required', message: 'Escribe su email.' },
+      );
+      emailAddress(p.email, 'Este email no parece completo.');
+    },
     { submission: { action: () => this.create() } },
   );
   protected readonly kindHint = computed(() =>
@@ -70,12 +77,9 @@ export class InvitationsAdmin {
     this.copied.set(false);
     const { email, kind, days } = this.form().value();
     try {
-      const token = await this.api.createInvitation(
-        email.trim() || null,
-        Number(days),
-        kind === 'list',
-      );
-      this.link.set(`${location.origin}/register?invite=${encodeURIComponent(token)}`);
+      const token = await this.api.createInvitation(email.trim(), Number(days), kind === 'list');
+      // In the fragment (#), not the query: it never reaches the server or its logs.
+      this.link.set(`${location.origin}/register#invite=${encodeURIComponent(token)}`);
       // Ready for the next one; keeps the chosen expiry.
       this.form().reset({ ...NEW_INVITATION, days });
       this.list.reload();

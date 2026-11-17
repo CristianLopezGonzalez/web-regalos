@@ -15,7 +15,7 @@
     @case ('valid') {
       <div class="al-enter">
         <app-register-form
-          [token]="invite()!"
+          [token]="token()!"
           (registered)="done($event)"
           (invitationGone)="invitationGone()"
         />

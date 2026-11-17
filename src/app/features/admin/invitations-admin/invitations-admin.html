@@ -9,8 +9,7 @@
     <app-labeled-field
       label="Para el email"
       forId="iv-email"
-      [optional]="true"
-      hint="Si lo indicas, solo se podrá usar con ese email."
+      hint="El enlace solo servirá para crear una cuenta con este email."
     >
       <input
         id="iv-email"
@@ -30,9 +29,8 @@
     </app-labeled-field>
     <app-labeled-field label="Caduca en" forId="iv-days">
       <select id="iv-days" class="input" [formField]="form.days">
+        <option value="3">3 días</option>
         <option value="7">7 días</option>
-        <option value="14">14 días</option>
-        <option value="30">30 días</option>
       </select>
     </app-labeled-field>
     <button type="submit" class="btn btn-primary" [disabled]="form().submitting()">

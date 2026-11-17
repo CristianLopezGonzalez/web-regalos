@@ -14,6 +14,9 @@ const CODES: ApiErrorCode[] = [
   // Raised by the plan_gifts check trigger (shares must belong to planners and add up to the price).
   'PLAN_SHARES_MISMATCH',
   'PLAN_SHARES_INVALID',
+  // create_invitation (email obligatorio) y reserve_gift (tope de reservas por persona).
+  'EMAIL_REQUIRED',
+  'RESERVATION_LIMIT',
 ];
 
 /** Turns Supabase / PostgREST / network errors into the app's error codes. */

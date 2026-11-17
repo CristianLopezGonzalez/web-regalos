@@ -16,6 +16,9 @@ const MESSAGES: Partial<Record<ApiErrorCode, string>> = {
     'Esta invitación es para otro email. Usa el email al que te la enviaron.',
   PLAN_SHARES_MISMATCH: 'Lo que pone cada uno tiene que sumar el precio del regalo.',
   PLAN_SHARES_INVALID: 'El reparto no es válido: revisa las cantidades.',
+  EMAIL_REQUIRED: 'Escribe el email de la persona: la invitación solo servirá con ese email.',
+  RESERVATION_LIMIT:
+    'Ya tienes 20 regalos reservados. Cancela alguno en tu perfil antes de reservar otro.',
   CATEGORY_NOT_EMPTY: 'Esta categoría tiene regalos. Muévelos a otra antes de borrarla.',
   NETWORK: 'No hay conexión. Comprueba tu red e inténtalo otra vez.',
 };
