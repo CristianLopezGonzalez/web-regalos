@@ -1,6 +1,15 @@
 .gp {
   padding-block: 24px clamp(96px, 12vw, 160px);
 }
+/* The letter is narrower than the site: the "back" link lines up with its left edge. */
+.gp.wrap {
+  width: min(100% - 32px, 1040px);
+}
+@media (max-width: 479.98px) {
+  .gp.wrap {
+    width: min(100% - 24px, 1040px);
+  }
+}
 .gp-back {
   display: inline-flex;
   align-items: center;
@@ -18,22 +27,26 @@
     color: var(--color-cherry);
   }
 }
-/* Same geometry as app-gift-detail, so nothing jumps when the gift arrives. */
+/* Same geometry as app-gift-detail (the letter), so nothing jumps when the gift arrives. */
 .gp-skel {
-  --gp-window-w: max(280px, calc((100svh - 210px) * 0.8));
   display: grid;
-  gap: 48px;
-}
-.gp-skel-window {
-  width: min(100%, var(--gp-window-w));
+  gap: 44px;
+  max-width: 1040px;
   margin-inline: auto;
-  aspect-ratio: 4 / 5;
-  border-radius: 999px 999px 0 0;
+  padding: 50px clamp(20px, 6vw, 72px) 40px;
+  background: var(--color-ivory);
+  border: 1px solid rgb(184 154 101 / 0.6);
 }
-@media (min-width: 900px) {
+.gp-skel-photo {
+  width: min(100%, 300px);
+  margin-inline: auto;
+  aspect-ratio: 4 / 5.6;
+}
+@media (min-width: 840px) {
   .gp-skel {
-    grid-template-columns: min(58%, var(--gp-window-w)) minmax(0, 36rem);
-    gap: clamp(48px, 7vw, 112px);
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    gap: clamp(40px, 6vw, 72px);
+    padding-top: 66px;
   }
 }
 .gp-missing {

@@ -1,89 +1,150 @@
+/* The night panel. Mobile/tablet first: a band with a scrollable row of tabs. */
 :host {
   display: block;
   min-width: 0; /* let the tab row scroll instead of widening the grid */
+  background: var(--color-night);
+  color: var(--color-parchment);
+}
+.as {
+  padding: 20px 16px 0;
+}
+@media (min-width: 768px) {
+  .as {
+    padding-inline: 5vw;
+  }
+}
+.as-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
 }
 .as-title {
-  display: none;
-  margin: 0 0 20px;
-  font: 400 21px/1.1 var(--font-serif);
-  letter-spacing: 0.1em;
+  margin: 0;
+  font: 400 26px/1 var(--font-display);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-burgundy);
+  color: var(--color-ivory);
+}
+.as-sub {
+  margin: 0;
+  font: italic 400 15px/1.4 var(--font-serif);
+  color: var(--color-brass);
 }
 ol {
   display: flex;
-  gap: 24px;
-  margin: 0;
-  padding: 0;
+  gap: 4px;
+  margin: 10px -16px 0;
+  padding: 0 16px;
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
-  border-bottom: 1px solid var(--color-line);
+  overscroll-behavior-x: contain;
 }
-a {
+ol::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 768px) {
+  ol {
+    margin-inline: -5vw;
+    padding-inline: 5vw;
+  }
+}
+li a {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-height: 52px;
+  padding: 0 12px;
   text-decoration: none;
-  color: var(--color-ink-soft);
+  color: var(--color-parchment);
   font: 500 12px/1 var(--font-sans);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: color 200ms ease;
+  transition:
+    color 200ms ease,
+    background-color 200ms ease;
 }
-a.on {
-  color: var(--color-burgundy);
-  box-shadow: inset 0 -2px var(--color-burgundy);
+li a.on {
+  color: var(--color-ivory);
+  box-shadow: inset 0 -2px var(--color-brass);
 }
-.as-floor {
-  display: none;
-  width: 26px;
-  color: var(--color-gold);
-  color: color-mix(in oklab, var(--color-gold) 70%, var(--color-chocolate));
+li a.on .as-icon {
+  color: var(--color-brass);
+}
+.as-icon {
+  flex: none;
+}
+/* the site's cherry focus ring is too dark to see on night */
+a:focus-visible {
+  outline-color: var(--color-brass);
+  outline-offset: -2px;
 }
 .as-back {
   display: none;
 }
 @media (hover: hover) and (pointer: fine) {
-  a:hover {
-    color: var(--color-cherry);
+  li a:hover,
+  .as-back:hover {
+    color: var(--color-ivory);
   }
 }
+
+/* Desktop: a full-height column, its contents follow the scroll. */
 @media (min-width: 1024px) {
   .as {
     position: sticky;
-    top: 112px;
+    top: 64px;
+    padding: 40px 32px;
   }
-  .as-title,
-  .as-floor {
+  .as-head {
     display: block;
+  }
+  .as-title {
+    font-size: 34px;
+  }
+  .as-sub {
+    margin-top: 10px;
   }
   ol {
     display: grid;
-    gap: 0;
-    border: 0;
-    border-top: 1px solid var(--color-line);
+    gap: 2px;
+    margin: 28px 0 0;
+    padding: 0;
+    overflow: visible;
   }
   li a {
-    border-bottom: 1px solid var(--color-line);
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid transparent;
   }
-  a.on {
-    box-shadow: inset 2px 0 var(--color-burgundy);
-    padding-left: 14px;
+  li a.on {
+    box-shadow: none;
+    background: rgb(232 207 156 / 0.12);
+    border-color: rgb(232 207 156 / 0.5);
   }
-  a {
-    transition:
-      color 200ms ease,
-      padding-left 240ms var(--ease-out-strong);
+  @media (hover: hover) and (pointer: fine) {
+    li a:not(.on):hover {
+      background: rgb(232 207 156 / 0.06);
+    }
   }
   .as-back {
-    display: flex;
-    margin-top: 24px;
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    white-space: normal;
-    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    margin-top: 32px;
+    padding: 0 14px;
+    font: 500 12px/1 var(--font-sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-brass);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  li a {
+    transition: none;
   }
 }

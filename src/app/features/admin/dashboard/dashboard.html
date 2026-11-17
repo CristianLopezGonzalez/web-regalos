@@ -1,27 +1,102 @@
-<app-admin-page-head
-  heading="Resumen"
-  lede="Lo que te reserven es sorpresa: aquí no verás qué está reservado de tu lista ni quién lo ha hecho."
->
+<app-admin-page-head heading="Resumen">
   <a class="btn btn-primary btn-sm" routerLink="/admin/gifts/new">Añadir regalo</a>
 </app-admin-page-head>
 
-<dl class="db-stats">
+<!-- the till: three figures in brass on a night strip -->
+<dl class="db-till">
   <div>
-    <dt>Tus deseos</dt>
+    <dt>deseos</dt>
     <dd class="tabular">{{ loaded() ? stats().total : '–' }}</dd>
   </div>
+  <span class="db-till-sep" aria-hidden="true"></span>
   <div>
-    <dt>Favoritos</dt>
+    <dt>favoritos</dt>
     <dd class="tabular">{{ loaded() ? stats().favorites : '–' }}</dd>
   </div>
+  <span class="db-till-sep" aria-hidden="true"></span>
   <div>
-    <dt>Para completar</dt>
-    <dd class="tabular">{{ loaded() ? stats().todo : '–' }}</dd>
+    <dt>sin enlace de compra</dt>
+    <dd class="tabular">{{ loaded() ? stats().noLink : '–' }}</dd>
   </div>
 </dl>
+<p class="db-lede">
+  Lo que te reserven es sorpresa: aquí no verás qué está reservado de tu lista ni quién lo ha
+  hecho.
+</p>
 
-<div class="db-cols">
-  @if (session.isOwner()) {
+<!-- pending links: fix them right here -->
+<section class="db-section" aria-labelledby="link-h">
+  <div class="db-section-head">
+    <h2 id="link-h">Les falta el enlace de compra</h2>
+    @if (loaded() && noLink().length) {
+      <p class="db-hint">Pégalo aquí y listo, sin abrir cada regalo.</p>
+    }
+  </div>
+  @if (!loaded()) {
+    <div class="skeleton h-40" aria-hidden="true"></div>
+  } @else if (noLink().length) {
+    <ul class="db-links-list" role="list">
+      @for (g of noLink(); track g.id) {
+        <li class="db-link-row">
+          <app-product-image
+            class="db-thumb"
+            aria-hidden="true"
+            [image]="g.image"
+            [alt]="g.name"
+            sizes="48px"
+          />
+          <a class="db-name" [routerLink]="['/admin/gifts', g.id]">{{ g.name }}</a>
+          <form class="db-link-form" (submit)="$event.preventDefault(); saveLink(g)" novalidate>
+            <label class="sr-only" [for]="'url-' + g.id">Enlace de compra de {{ g.name }}</label>
+            <input
+              class="input"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              [id]="'url-' + g.id"
+              placeholder="Pega el enlace de la tienda"
+              [value]="drafts()[g.id] ?? ''"
+              (input)="setDraft(g.id, $any($event.target).value)"
+              [attr.aria-invalid]="errors()[g.id] ? 'true' : null"
+              [attr.aria-describedby]="errors()[g.id] ? 'url-err-' + g.id : null"
+              [disabled]="saving() === g.id"
+            />
+            <button
+              type="submit"
+              class="btn btn-outline btn-sm"
+              [disabled]="saving() === g.id"
+              [attr.aria-busy]="saving() === g.id"
+            >
+              {{ saving() === g.id ? 'Guardando…' : 'Guardar' }}
+            </button>
+            @if (errors()[g.id]; as err) {
+              <p class="field-error db-link-error" [id]="'url-err-' + g.id">{{ err }}</p>
+            }
+          </form>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="db-empty">Todos tus regalos tienen enlace de compra.</p>
+  }
+</section>
+
+@if (loaded() && otherTodo().length) {
+  <section class="db-section" aria-labelledby="todo-h">
+    <h2 id="todo-h">También para completar</h2>
+    <ul class="db-list" role="list">
+      @for (t of otherTodo(); track t.gift.id + t.reason) {
+        <li>
+          <a [routerLink]="['/admin/gifts', t.gift.id]" class="db-name">{{ t.gift.name }}</a>
+          <span class="db-reason">{{ t.reason }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+@if (session.isOwner()) {
+  <div class="db-cols">
     <section aria-labelledby="res-h">
       <h2 id="res-h">Reservados en otras listas</h2>
       @if (!loaded()) {
@@ -44,33 +119,16 @@
         <p class="db-empty">En las otras listas no hay nada reservado todavía.</p>
       }
     </section>
-  }
 
-  <section aria-labelledby="todo-h">
-    <h2 id="todo-h">Para completar</h2>
-    @if (!loaded()) {
-      <div class="skeleton h-40" aria-hidden="true"></div>
-    } @else if (todo().length) {
-      <ul class="db-list" role="list">
-        @for (t of todo(); track t.gift.id + t.reason) {
-          <li>
-            <a [routerLink]="['/admin/gifts', t.gift.id]" class="db-name">{{ t.gift.name }}</a>
-            <span class="db-reason">{{ t.reason }}</span>
-          </li>
-        }
-      </ul>
-    } @else {
-      <p class="db-empty">Todos los regalos tienen foto, enlace y categoría.</p>
-    }
-    @if (session.isOwner()) {
-      <p class="db-links">
-        <a routerLink="/admin/invitations">Invitar a alguien</a>
-        <span class="diamond" aria-hidden="true"></span>
-        <a routerLink="/admin/categories">Ordenar categorías</a>
-      </p>
-    }
-  </section>
-</div>
+    <section aria-labelledby="inv-h">
+      <h2 id="inv-h">Invitar a alguien</h2>
+      <div class="db-invite">
+        <p>Crea un enlace de invitación y pégalo tú en WhatsApp o donde quieras.</p>
+        <a class="btn btn-outline btn-sm" routerLink="/admin/invitations">Crear invitación</a>
+      </div>
+    </section>
+  </div>
+}
 
 <app-modal
   heading="¿Liberar este regalo?"

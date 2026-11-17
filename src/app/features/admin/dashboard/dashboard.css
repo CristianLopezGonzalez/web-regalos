@@ -1,64 +1,161 @@
-.db-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0 0 clamp(56px, 7vw, 96px);
-  border-block: 1px solid var(--color-line);
+/* ---------- the till: night strip, figures in brass ---------- */
+.db-till {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 32px;
+  margin: 0;
+  padding: 20px clamp(20px, 3vw, 32px);
+  background: var(--color-night);
+  color: var(--color-parchment);
+  border: 1px solid var(--color-gold);
+  outline: 1px solid rgb(232 207 156 / 0.25);
+  outline-offset: -7px;
 }
-.db-stats > div {
-  padding: clamp(20px, 3vw, 36px) clamp(8px, 2vw, 28px);
-  text-align: center;
+.db-till > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
-.db-stats > div + div {
-  border-left: 1px solid var(--color-line);
+/* number before its word, while the markup keeps <dt> first */
+.db-till dd {
+  order: -1;
+  margin: 0;
+  font: 400 clamp(30px, 4vw, 36px) / 1 var(--font-serif);
+  color: var(--color-brass);
 }
-dt {
-  font: 500 11px/1.2 var(--font-sans);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-ink-soft);
+.db-till dt {
+  font: italic 400 17px/1.2 var(--font-serif);
 }
-dd {
-  margin: 10px 0 0;
-  font: 400 clamp(48px, 8vw, 104px) / 1 var(--font-display);
-  color: var(--color-burgundy);
+.db-till-sep {
+  width: 6px;
+  height: 6px;
+  background: var(--color-gold);
+  rotate: 45deg;
 }
-.db-cols {
-  display: grid;
-  gap: 64px;
-}
-@media (min-width: 1100px) {
-  .db-cols {
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
+/* Phones: the three figures stack, so the diamonds between them go. */
+@media (max-width: 559.98px) {
+  .db-till {
+    display: grid;
+    gap: 12px;
+  }
+  .db-till-sep {
+    display: none;
   }
 }
+.db-lede {
+  margin: 14px 0 0;
+  max-width: 44rem;
+  font: italic 400 15px/1.5 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+
+/* ---------- sections ---------- */
+.db-section {
+  margin-top: clamp(40px, 6vw, 56px);
+}
+.db-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+}
 h2 {
-  margin: 0 0 8px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-line);
-  font: 400 21px/1.1 var(--font-serif);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  margin: 0;
+  font: 400 clamp(20px, 2.4vw, 24px) / 1.2 var(--font-serif);
   color: var(--color-burgundy);
 }
+.db-cols h2,
+#todo-h {
+  margin-bottom: 12px;
+}
+.db-hint {
+  margin: 0;
+  font: italic 400 15px/1.4 var(--font-serif);
+  color: var(--color-ink-soft);
+}
+
+/* ---------- rows without a purchase link ---------- */
+.db-links-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-line);
+}
+/* Phones: photo + name on one line, the link field full width below. */
+.db-link-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.db-thumb {
+  width: 48px;
+  height: 60px;
+  outline: 1px solid var(--color-gold);
+  outline-offset: -1px;
+  --pi-inset: 18% 8% 6%;
+  --pi-x: 8%;
+  --pi-h: 76%;
+  --pi-fit: contain;
+}
+.db-link-form {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.db-link-form .input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  min-height: 44px;
+}
+.db-link-form .btn {
+  flex: none;
+  min-height: 44px;
+}
+.db-link-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+/* Tablets and up: everything on one line. */
+@media (min-width: 768px) {
+  .db-link-row {
+    grid-template-columns: 48px minmax(8rem, 14rem) minmax(0, 1fr);
+    gap: 12px 20px;
+  }
+  .db-link-form {
+    grid-column: auto;
+  }
+}
+
+/* ---------- plain lists ---------- */
 .db-list {
   margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--color-line);
 }
 .db-list li {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 16px;
-  min-height: 60px;
+  min-height: 56px;
   padding: 8px 0;
   border-bottom: 1px solid var(--color-line);
 }
 .db-name {
   flex: 1 1 12rem;
+  min-width: 0;
   font-size: 17px;
+  line-height: 1.35;
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 @media (hover: hover) and (pointer: fine) {
   .db-name:hover {
@@ -71,23 +168,36 @@ h2 {
   color: var(--color-ink-soft);
 }
 .db-empty {
-  margin: 16px 0 0;
-  font: italic 400 17px/1.5 var(--font-serif);
+  margin: 0;
+  padding: 16px 0;
+  border-block: 1px solid var(--color-line);
+  font: italic 400 16px/1.5 var(--font-serif);
   color: var(--color-ink-soft);
 }
-.db-links {
+
+/* ---------- two columns: other lists + invite ---------- */
+.db-cols {
+  display: grid;
+  gap: 40px;
+  margin-top: clamp(40px, 6vw, 56px);
+}
+@media (min-width: 1200px) {
+  .db-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+  }
+}
+.db-invite {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
-  margin: 28px 0 0;
+  gap: 12px 16px;
+  padding: 16px 0;
+  border-block: 1px solid var(--color-line);
 }
-.db-links a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font: 500 12px/1 var(--font-sans);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  text-underline-offset: 6px;
+.db-invite p {
+  flex: 1 1 14rem;
+  margin: 0;
+  font: italic 400 16px/1.5 var(--font-serif);
+  color: var(--color-ink-soft);
 }

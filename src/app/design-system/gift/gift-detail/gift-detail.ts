@@ -9,7 +9,10 @@ import { ProductImage } from '../product-image/product-image';
 import { ReservationBadge } from '../reservation-badge/reservation-badge';
 import { ReserveButton } from '../reserve-button/reserve-button';
 
-/** One gift, staged: a large arched window on the left, the label card on the right. */
+/**
+ * One gift, told as a letter to the Three Kings: the photo taped on as a polaroid, the priority
+ * as a wax seal, and a tear-off stub at the foot with what you can do (edit it, or reserve it).
+ */
 @Component({
   selector: 'app-gift-detail',
   imports: [RouterLink, ProductImage, PriceLabel, ReservationBadge, ReserveButton],
@@ -31,6 +34,8 @@ export class GiftDetail {
     const l = this.catalogue.list(this.gift().forId);
     return l ? (l.id === this.catalogue.meId() ? 'Tu lista' : `Lista de ${l.name}`) : 'Wishlist';
   });
+  /** The letter is signed by whoever wished for it. */
+  protected readonly signature = computed(() => this.catalogue.list(this.gift().forId)?.name ?? '');
   protected readonly rank = computed(() => PRIORITY_RANK[this.gift().priority]);
   protected readonly priorityLabel = computed(() => PRIORITY_LABEL[this.gift().priority]);
 }

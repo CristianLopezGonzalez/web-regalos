@@ -1,12 +1,29 @@
+/*
+  The back room: a night panel + the page. Phones and tablets: the panel is a band on top with
+  a scrollable row of tabs. From 1024px: a full-height column on the left.
+*/
 .ash {
   display: grid;
-  gap: 40px;
-  padding-block: clamp(32px, 5vw, 72px) clamp(96px, 12vw, 160px);
+  grid-template-columns: minmax(0, 1fr);
+  min-height: calc(100svh - 64px);
+}
+.ash-main {
+  min-width: 0;
+  padding: clamp(28px, 5vw, 56px) 16px clamp(96px, 12vw, 160px);
+}
+@media (min-width: 768px) {
+  .ash-main {
+    padding-inline: 5vw;
+  }
 }
 @media (min-width: 1024px) {
   .ash {
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: clamp(48px, 6vw, 96px);
-    align-items: start;
+    grid-template-columns: 280px minmax(0, 1fr);
   }
+  .ash-main {
+    padding-inline: clamp(40px, 4vw, 64px);
+  }
+}
+.ash-inner {
+  max-width: 1000px;
 }
