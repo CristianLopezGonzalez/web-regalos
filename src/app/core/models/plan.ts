@@ -39,6 +39,8 @@ export interface PlanGift {
   price: number;
   currency: Currency;
   purchaseUrl: string | null;
+  /** Up to three more shop links besides purchaseUrl. */
+  extraUrls: string[];
   note: string;
   image: GiftImage | null;
   status: PlanStatus;
@@ -60,6 +62,8 @@ export interface PlanGiftInput {
   price: number;
   currency: Currency;
   purchaseUrl: string | null;
+  /** Up to three more shop links besides purchaseUrl. */
+  extraUrls: string[];
   note: string;
   status: PlanStatus;
   shares: PlanShares;

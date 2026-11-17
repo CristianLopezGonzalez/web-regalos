@@ -1,0 +1,13 @@
+@if (links().length) {
+  <p class="ms">
+    {{ links().length === 1 ? 'También en' : 'También en:' }}
+    @for (l of links(); track $index; let last = $last) {
+      <a [href]="l.url" target="_blank" rel="noopener noreferrer external"
+        >{{ l.name }}<span class="sr-only"> (se abre en otra pestaña)</span></a
+      >
+      @if (!last) {
+        <span aria-hidden="true"> · </span>
+      }
+    }
+  </p>
+}

@@ -125,6 +125,12 @@
 .agf-url {
   grid-area: url;
 }
+/* The main link and, below it, "+ Añadir otro enlace". */
+.agf-links {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
 .agf-desc {
   grid-area: desc;
 }

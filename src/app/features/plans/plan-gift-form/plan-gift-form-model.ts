@@ -1,5 +1,6 @@
 import { Currency } from '@app/core/models/gift';
 import { PlanGift, PlanGiftInput, PlanShares, PlanStatus } from '@app/core/models/plan';
+import { cleanUrls } from '@app/features/admin/admin-gift-form/gift-form-model';
 import { SplitPreset, presetOf, round2, splitShares } from '../plan-math';
 
 /** Who paid at the shop, as the form shows it (relative to the signed-in planner). */
@@ -15,6 +16,7 @@ export interface PlanGiftFormModel {
   otherAmount: number | null;
   paidBy: PaidByChoice;
   purchaseUrl: string;
+  extraUrls: string[];
   note: string;
   status: PlanStatus;
 }
@@ -27,6 +29,7 @@ export const emptyPlanGiftForm = (): PlanGiftFormModel => ({
   otherAmount: null,
   paidBy: 'none',
   purchaseUrl: '',
+  extraUrls: [],
   note: '',
   status: 'idea',
 });
@@ -40,6 +43,7 @@ export function planGiftToForm(g: PlanGift, me: string, other: string): PlanGift
     otherAmount: g.shares[other] ?? 0,
     paidBy: g.paidBy === me ? 'me' : g.paidBy === other ? 'other' : 'none',
     purchaseUrl: g.purchaseUrl ?? '',
+    extraUrls: [...g.extraUrls],
     note: g.note,
     status: g.status,
   };
@@ -68,6 +72,7 @@ export function formToPlanInput(
     price: round2(v.price ?? 0),
     currency: v.currency,
     purchaseUrl: v.purchaseUrl.trim() || null,
+    extraUrls: cleanUrls(v.extraUrls),
     note: v.note.trim(),
     status: v.status,
     shares: formShares(v, me, other),

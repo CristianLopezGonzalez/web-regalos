@@ -11,6 +11,7 @@ const gift = (over: Partial<PlanGift>): PlanGift => ({
   price: 0,
   currency: 'EUR',
   purchaseUrl: null,
+  extraUrls: [],
   note: '',
   image: null,
   status: 'idea',

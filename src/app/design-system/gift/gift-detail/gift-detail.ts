@@ -4,6 +4,7 @@ import { Catalogue } from '@app/core/catalogue/catalogue';
 import { Category } from '@app/core/models/category';
 import { Gift, PRIORITY_LABEL, PRIORITY_RANK } from '@app/core/models/gift';
 import { Session } from '@app/core/auth/session';
+import { MoreShops } from '../more-shops/more-shops';
 import { PriceLabel } from '../price-label/price-label';
 import { ProductImage } from '../product-image/product-image';
 import { ReservationBadge } from '../reservation-badge/reservation-badge';
@@ -15,7 +16,7 @@ import { ReserveButton } from '../reserve-button/reserve-button';
  */
 @Component({
   selector: 'app-gift-detail',
-  imports: [RouterLink, ProductImage, PriceLabel, ReservationBadge, ReserveButton],
+  imports: [RouterLink, ProductImage, PriceLabel, ReservationBadge, ReserveButton, MoreShops],
   host: { class: 'block' },
   templateUrl: './gift-detail.html',
   styleUrl: './gift-detail.css',

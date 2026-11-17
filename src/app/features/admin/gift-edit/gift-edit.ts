@@ -36,10 +36,19 @@ export class GiftEdit {
   protected readonly deleteOpen = signal(false);
   protected readonly busy = signal(false);
 
+  /**
+   * New gift: the form empties itself (AdminGiftForm) and stays here for the next one. Moving to
+   * "Editar regalo" of the gift just created made people type the next wish over it (2026-11-17).
+   * Edited gift: back to the list.
+   */
   protected onSaved(g: Gift) {
     this.catalogue.upsert(g);
-    this.toasts.success(this.isNew() ? 'Regalo añadido a tu lista.' : 'Cambios guardados.');
-    if (this.isNew()) void this.router.navigate(['/admin/gifts', g.id], { replaceUrl: true });
+    if (this.isNew()) {
+      this.toasts.success(`«${g.name}» añadido a tu lista. Ya puedes añadir otro.`);
+      return;
+    }
+    this.toasts.success('Cambios guardados.');
+    void this.router.navigateByUrl('/admin/gifts');
   }
 
   protected async remove() {

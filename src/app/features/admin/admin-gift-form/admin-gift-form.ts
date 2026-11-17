@@ -4,17 +4,28 @@ import {
   computed,
   effect,
   inject,
+  untracked,
   input,
   output,
   signal,
 } from '@angular/core';
-import { FormField, FormRoot, form, max, maxLength, min, required } from '@angular/forms/signals';
+import {
+  FormField,
+  FormRoot,
+  applyEach,
+  form,
+  max,
+  maxLength,
+  min,
+  required,
+} from '@angular/forms/signals';
 import { errorMessage } from '@app/core/api/error-message';
 import { WishlistApi } from '@app/core/api/wishlist-api';
 import { checkImageFile, resizeImage } from '@app/core/image/image-resize';
 import { Category } from '@app/core/models/category';
 import { CURRENCIES, Gift, PRIORITY_LABEL, Priority } from '@app/core/models/gift';
 import { LabeledField } from '@app/design-system/forms/labeled-field/labeled-field';
+import { ExtraLinksField } from '@app/design-system/forms/extra-links-field/extra-links-field';
 import { httpsUrl } from '@app/design-system/forms/validators';
 import { ProductImage } from '@app/design-system/gift/product-image/product-image';
 import { emptyGiftForm, formToGiftInput, giftToForm } from './gift-form-model';
@@ -22,7 +33,7 @@ import { emptyGiftForm, formToGiftInput, giftToForm } from './gift-form-model';
 /** Create / edit a gift. The photo is resized in the browser to 480, 960 and 1600 px WebP. */
 @Component({
   selector: 'app-admin-gift-form',
-  imports: [FormField, FormRoot, LabeledField, ProductImage],
+  imports: [FormField, FormRoot, LabeledField, ProductImage, ExtraLinksField],
   host: { class: 'block' },
   templateUrl: './admin-gift-form.html',
   styleUrl: './admin-gift-form.css',
@@ -49,6 +60,7 @@ export class AdminGiftForm implements OnDestroy {
       min(p.price, 0, { message: 'El precio no puede ser negativo.' });
       max(p.price, 99999999, { message: 'Revisa el precio: es demasiado alto.' });
       httpsUrl(p.purchaseUrl);
+      applyEach(p.extraUrls, (u) => httpsUrl(u));
     },
     {
       submission: {
@@ -74,10 +86,22 @@ export class AdminGiftForm implements OnDestroy {
   });
 
   constructor() {
-    // Editing: load the gift (again after each save) and start untouched.
+    // Editing: load the gift (again after each save) and start untouched. Another gift (or none)
+    // also drops a photo picked but not saved, so it can never land on the wrong gift.
+    let shownId: string | null = null;
     effect(() => {
       const g = this.gift();
       if (g) this.form().reset(giftToForm(g));
+      const id = g?.id ?? null;
+      if (id !== shownId) {
+        shownId = id;
+        untracked(() => {
+          this.newImage.set(null);
+          this.setObjectUrl(null);
+          this.imageNote.set(null);
+          this.imageError.set(null);
+        });
+      }
     });
   }
 
@@ -130,6 +154,13 @@ export class AdminGiftForm implements OnDestroy {
         : await this.api.createGift(input, img === 'remove' ? null : img);
       this.newImage.set(null);
       this.setObjectUrl(null);
+      this.imageNote.set(null);
+      if (!g) {
+        // A new gift: blank form, ready for the next one.
+        this.form().reset(emptyGiftForm());
+        this.form.name().focusBoundControl();
+        scrollTo({ top: 0, behavior: 'smooth' });
+      }
       this.saved.emit(result);
     } catch (e) {
       this.failure.set(errorMessage(e));

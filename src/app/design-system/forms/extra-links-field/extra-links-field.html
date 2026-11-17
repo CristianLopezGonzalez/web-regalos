@@ -1,0 +1,26 @@
+@for (link of field(); track link; let i = $index) {
+  <div class="xl-row">
+    <app-labeled-field class="xl-field" [label]="'Otro enlace'" [forId]="idPrefix() + '-' + i">
+      <input
+        [id]="idPrefix() + '-' + i"
+        class="input"
+        type="url"
+        inputmode="url"
+        spellcheck="false"
+        [formField]="link"
+        placeholder="https://… otra tienda"
+      />
+    </app-labeled-field>
+    <button
+      type="button"
+      class="btn btn-ghost xl-remove"
+      (click)="remove(i)"
+      [attr.aria-label]="'Quitar este enlace (' + (i + 1) + ')'"
+    >
+      <span aria-hidden="true">✕</span>
+    </button>
+  </div>
+}
+@if (field()().value().length < max) {
+  <button type="button" class="xl-add" (click)="add()">+ Añadir otro enlace</button>
+}

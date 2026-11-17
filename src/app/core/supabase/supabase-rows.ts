@@ -31,7 +31,7 @@ export const CATEGORY_COLUMNS = 'id, name, slug, sort_order';
 export const INVITATION_COLUMNS =
   'id, with_list, email_restriction, expires_at, used_at, revoked_at, created_at';
 export const GIFT_COLUMNS =
-  'id, name, description, price, currency, image_path, purchase_url, category_id, priority, is_favorite, created_at, updated_at, recipient_id, gift_status(is_reserved)';
+  'id, name, description, price, currency, image_path, purchase_url, extra_urls, category_id, priority, is_favorite, created_at, updated_at, recipient_id, gift_status(is_reserved)';
 
 interface ProfileRow {
   id: string;
@@ -68,6 +68,8 @@ export interface GiftRow {
   currency: string;
   image_path: string | null;
   purchase_url: string | null;
+  /** Missing only if the database predates 20261117010000_extra_links. */
+  extra_urls?: string[] | null;
   category_id: string | null;
   priority: Priority;
   is_favorite: boolean;
@@ -113,6 +115,7 @@ export const toGift = (r: GiftRow, image: GiftImage | null): Gift => ({
   currency: r.currency as Currency,
   image,
   purchaseUrl: r.purchase_url,
+  extraUrls: r.extra_urls ?? [],
   categoryId: r.category_id,
   priority: r.priority,
   isFavorite: r.is_favorite,
@@ -129,6 +132,7 @@ export const giftInputRow = (input: GiftInput) => ({
   price: input.price,
   currency: input.currency,
   purchase_url: input.purchaseUrl,
+  extra_urls: input.extraUrls,
   category_id: input.categoryId,
   priority: input.priority,
   is_favorite: input.isFavorite,
@@ -138,7 +142,7 @@ export const giftInputRow = (input: GiftInput) => ({
 
 export const PLAN_PERSON_COLUMNS = 'id, name, budget, created_at';
 export const PLAN_GIFT_COLUMNS =
-  'id, person_id, name, price, currency, purchase_url, note, image_path, status, shares, paid_by, created_at, updated_at';
+  'id, person_id, name, price, currency, purchase_url, extra_urls, note, image_path, status, shares, paid_by, created_at, updated_at';
 
 export interface PlanPersonRow {
   id: string;
@@ -155,6 +159,8 @@ export interface PlanGiftRow {
   price: number | string;
   currency: string;
   purchase_url: string | null;
+  /** Missing only if the database predates 20261117010000_extra_links. */
+  extra_urls?: string[] | null;
   note: string | null;
   image_path: string | null;
   status: string;
@@ -182,6 +188,7 @@ export const toPlanGift = (r: PlanGiftRow, image: GiftImage | null): PlanGift =>
   price: Number(r.price),
   currency: r.currency as Currency,
   purchaseUrl: r.purchase_url,
+  extraUrls: r.extra_urls ?? [],
   note: r.note ?? '',
   image,
   status: (PLAN_STATUSES as string[]).includes(r.status) ? (r.status as PlanStatus) : 'idea',
@@ -203,6 +210,7 @@ export const planGiftInputRow = (input: PlanGiftInput) => ({
   price: input.price,
   currency: input.currency,
   purchase_url: input.purchaseUrl,
+  extra_urls: input.extraUrls,
   note: input.note,
   status: input.status,
   shares: input.shares,

@@ -17,6 +17,7 @@ const gift = (id: string, over: Partial<Gift> = {}): Gift => ({
   currency: 'EUR',
   image: null,
   purchaseUrl: null,
+  extraUrls: [],
   categoryId: null,
   priority: 'medium',
   isFavorite: false,

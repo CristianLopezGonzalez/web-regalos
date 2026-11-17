@@ -10,9 +10,10 @@ import { PlansStore } from '../plans-store';
  * One planned present, inside a dialog: for whom, price, note, where it is (a three-step track
  * you can press), who puts what and who paid. Footer: delete (asks first) and edit.
  */
+import { MoreShops } from '@app/design-system/gift/more-shops/more-shops';
 @Component({
   selector: 'app-plan-gift-detail',
-  imports: [ProductImage],
+  imports: [ProductImage, MoreShops],
   host: { class: 'block' },
   templateUrl: './plan-gift-detail.html',
   styleUrl: './plan-gift-detail.css',

@@ -84,17 +84,20 @@
       </select>
     </app-labeled-field>
 
-    <app-labeled-field class="agf-url" label="Enlace de compra" forId="agf-url" [optional]="true">
-      <input
-        id="agf-url"
-        class="input"
-        type="url"
-        inputmode="url"
-        spellcheck="false"
-        [formField]="form.purchaseUrl"
-        placeholder="https://… la página de la tienda"
-      />
-    </app-labeled-field>
+    <div class="agf-url agf-links">
+      <app-labeled-field label="Enlace de compra" forId="agf-url" [optional]="true">
+        <input
+          id="agf-url"
+          class="input"
+          type="url"
+          inputmode="url"
+          spellcheck="false"
+          [formField]="form.purchaseUrl"
+          placeholder="https://… la página de la tienda"
+        />
+      </app-labeled-field>
+      <app-extra-links-field [field]="form.extraUrls" idPrefix="agf-url-x" />
+    </div>
 
     <app-labeled-field class="agf-desc" label="Descripción" forId="agf-desc" [optional]="true">
       <textarea

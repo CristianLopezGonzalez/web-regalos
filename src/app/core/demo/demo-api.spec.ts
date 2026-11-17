@@ -65,6 +65,7 @@ describe('"Nuestros regalos": only the two planners (demo mirrors the plan_* pol
     price: 85,
     currency: 'EUR',
     purchaseUrl: null,
+    extraUrls: [],
     note: '',
     status: 'idea',
     shares: { 'u-partner': 30, 'u-owner': 55 },

@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.ms {
+  margin: 0;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.ms a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}

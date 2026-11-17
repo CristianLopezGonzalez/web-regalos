@@ -21,6 +21,15 @@ describe('gift form model', () => {
     });
   });
 
+  it('keeps only the extra links that were filled in, trimmed', () => {
+    const input = formToGiftInput({
+      ...emptyGiftForm(),
+      name: 'Zapatillas',
+      extraUrls: [' https://a.example/x ', '', '   ', 'https://b.example/y'],
+    });
+    expect(input.extraUrls).toEqual(['https://a.example/x', 'https://b.example/y']);
+  });
+
   it('an empty price is stored as 0', () => {
     expect(formToGiftInput(emptyGiftForm()).price).toBe(0);
   });

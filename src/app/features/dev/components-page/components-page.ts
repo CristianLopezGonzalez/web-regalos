@@ -32,6 +32,7 @@ const sample = (
       }
     : null,
   purchaseUrl: null,
+  extraUrls: [],
   categoryId: 'c-belleza',
   priority: 'medium',
   isFavorite: false,

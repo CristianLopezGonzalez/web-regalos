@@ -19,6 +19,7 @@ import {
   min,
   required,
   validate,
+  applyEach,
 } from '@angular/forms/signals';
 import { errorMessage } from '@app/core/api/error-message';
 import { formatPrice } from '@app/core/format/price-format';
@@ -32,6 +33,7 @@ import {
   Planner,
 } from '@app/core/models/plan';
 import { LabeledField } from '@app/design-system/forms/labeled-field/labeled-field';
+import { ExtraLinksField } from '@app/design-system/forms/extra-links-field/extra-links-field';
 import { httpsUrl } from '@app/design-system/forms/validators';
 import { ProductImage } from '@app/design-system/gift/product-image/product-image';
 import { SplitPreset, round2, sharesMatch } from '../plan-math';
@@ -54,7 +56,7 @@ const CURRENCY_SYMBOL: Record<Currency, string> = { EUR: '€', USD: '$', GBP: '
  */
 @Component({
   selector: 'app-plan-gift-form',
-  imports: [FormField, FormRoot, LabeledField, ProductImage],
+  imports: [FormField, FormRoot, LabeledField, ProductImage, ExtraLinksField],
   host: { class: 'block' },
   templateUrl: './plan-gift-form.html',
   styleUrl: './plan-gift-form.css',
@@ -97,6 +99,7 @@ export class PlanGiftForm implements OnDestroy {
       max(p.price, 99999999, { message: 'Revisa el precio: es demasiado alto.' });
       maxLength(p.note, 2000, { message: 'Usa como mucho 2000 caracteres.' });
       httpsUrl(p.purchaseUrl);
+      applyEach(p.extraUrls, (u) => httpsUrl(u));
       // "Otra cantidad": what the other one puts must fit in the price; the rest is mine.
       validate(p.otherAmount, ({ value, valueOf }) => {
         if (valueOf(p.preset) !== 'custom') return undefined;
@@ -155,7 +158,7 @@ export class PlanGiftForm implements OnDestroy {
   );
   /** Link and note: open on phones only when there is something in them. */
   protected readonly moreOpen = linkedSignal(
-    () => !!(this.gift()?.purchaseUrl || this.gift()?.note),
+    () => !!(this.gift()?.purchaseUrl || this.gift()?.extraUrls.length || this.gift()?.note),
   );
 
   /** Who paid only makes sense once it has been bought. */

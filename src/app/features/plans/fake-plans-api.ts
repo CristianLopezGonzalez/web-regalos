@@ -29,6 +29,7 @@ export function planGift(over: Partial<PlanGift> = {}): PlanGift {
     price: 85,
     currency: 'EUR',
     purchaseUrl: null,
+    extraUrls: [],
     note: 'Talla L',
     image: null,
     status: 'bought',

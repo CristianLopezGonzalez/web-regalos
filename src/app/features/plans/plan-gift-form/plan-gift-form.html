@@ -228,6 +228,7 @@
         [formField]="form.purchaseUrl"
         placeholder="https://…"
       />
+      <app-extra-links-field class="pgf-more-links" [field]="form.extraUrls" idPrefix="pgf-url-x" />
     </app-labeled-field>
     <app-labeled-field label="Nota" forId="pgf-note" [optional]="true">
       <input

@@ -20,6 +20,8 @@ export interface Gift {
   currency: Currency;
   image: GiftImage | null;
   purchaseUrl: string | null;
+  /** Up to three more shop links besides purchaseUrl. */
+  extraUrls: string[];
   categoryId: string | null;
   priority: Priority;
   isFavorite: boolean;
@@ -37,6 +39,8 @@ export interface GiftInput {
   price: number;
   currency: Currency;
   purchaseUrl: string | null;
+  /** Up to three more shop links besides purchaseUrl. */
+  extraUrls: string[];
   categoryId: string | null;
   priority: Priority;
   isFavorite: boolean;
